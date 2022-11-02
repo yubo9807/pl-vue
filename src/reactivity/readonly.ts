@@ -1,7 +1,11 @@
 import { AnyObj } from "../utils/type";
-import { ReactiveFlags, rawMap } from './reactive';
+import { ReactiveFlags } from './reactive';
 
-
+/**
+ * 将对象转为只读
+ * @param target 
+ * @returns 
+ */
 export function readonly(target: AnyObj) {
 
   Reflect.defineProperty(target, ReactiveFlags.IS_READONLY, {
@@ -11,6 +15,8 @@ export function readonly(target: AnyObj) {
   return new Proxy(target, {
 
     get(target, key) {
+      if (key === ReactiveFlags.RAW) return target;  // 返回原始值
+
       return Reflect.get(target, key);
     },
 

@@ -1,10 +1,10 @@
 (() => {
   // src/utils/judge.ts
-  function isType(o2) {
-    return Object.prototype.toString.call(o2).slice(8, -1).toLowerCase();
+  function isType(o) {
+    return Object.prototype.toString.call(o).slice(8, -1).toLowerCase();
   }
-  function isObject(o2) {
-    return ["object", "array"].includes(isType(o2));
+  function isObject(o) {
+    return ["object", "array"].includes(isType(o));
   }
   function hasOwn(target, key) {
     return Object.prototype.hasOwnProperty.call(target, key);
@@ -45,38 +45,15 @@
     });
   }
 
-  // src/reactivity/readonly.ts
-  function readonly(target) {
-    Reflect.defineProperty(target, ReactiveFlags.IS_READONLY, {
-      value: true
-    });
-    return new Proxy(target, {
-      get(target2, key) {
-        return Reflect.get(target2, key);
-      },
-      set(target2, key, value) {
-        const oldValue = Reflect.get(target2, key);
-        console.warn(`Set operation on key '${key.toString()}' failed: target is readonly.`, { [key.toString()]: oldValue });
-        return oldValue;
-      },
-      deleteProperty(target2, key) {
-        const oldValue = Reflect.get(target2, key);
-        console.warn(`Delete operation on key '${key.toString()}' failed: target is readonly.`, { [key.toString()]: oldValue });
-        return oldValue;
-      }
-    });
-  }
-
   // src/index.ts
-  var obj = reactive({
+  var obj = {
     a: 1,
     b: {
       c: 3,
       d: 4
     }
-  });
-  var o = readonly({ a: 1 });
-  var b = reactive(o);
+  };
+  var b = reactive(obj);
   b.a = 123;
-  console.log(b);
+  delete obj.b;
 })();

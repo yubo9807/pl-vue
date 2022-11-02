@@ -6,10 +6,11 @@ export const ReactiveFlags = {
   IS_READONLY: Symbol('__v_isReadonly'),
 }
 
-export const rawMap = new WeakMap();
-
-
-
+/**
+ * 将数据变为响应式数据（深度）
+ * @param target 
+ * @returns 
+ */
 export function reactive(target: AnyObj) {
 
   return new Proxy(target, {
@@ -63,6 +64,11 @@ export function reactive(target: AnyObj) {
 }
 
 
+/**
+ * 响应式代理对象转普通对象
+ * @param proxy 
+ * @returns 
+ */
 export function toRaw(proxy: AnyObj) {
   return proxy[ReactiveFlags.RAW];
 }
