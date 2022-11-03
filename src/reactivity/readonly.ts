@@ -34,3 +34,12 @@ export function readonly(target: AnyObj) {
 
   })
 }
+
+/**
+ * 检测是否为 readonly 对象
+ * @param proxy 
+ * @returns 
+ */
+export function isReadonly(proxy: AnyObj) {
+  return proxy && readonly(proxy)[ReactiveFlags.IS_READONLY];
+}

@@ -1,15 +1,17 @@
-import { isReactive, reactive, toRaw } from "./reactivity/reactive";
+import { isReactive, markRaw, reactive, toRaw } from "./reactivity/reactive";
 import { ref, toRef, toRefs, unref } from "./reactivity/ref";
 import { readonly } from "./reactivity/readonly";
 import { computed } from "./reactivity/computed";
 
-const obj = reactive({
+const obj = {
   a: 1,
   b: {
     c: 3,
     d: 4,
   }
-});
+};
+// markRaw(obj);
+const o = reactive(obj);
 
 // const b = reactive(obj)
 // b.a = 123
@@ -20,10 +22,10 @@ const obj = reactive({
 const a = ref(1);
 a.value
 a.value = 123
-console.log(isReactive(obj))
+console.log(a);
 
 const c = computed(() => a.value);
-// console.log(c)
+console.log(c)
 
 // const aRef = toRef(obj, 'a');
 // aRef.value = 123

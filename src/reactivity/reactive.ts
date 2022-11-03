@@ -1,5 +1,8 @@
 import { hasOwn, isObject, isType } from "../utils/judge";
 import { AnyObj } from "../utils/type";
+import { isReadonly } from "./readonly";
+
+const rawMap = new WeakMap();
 
 export const ReactiveFlags = {
   RAW:         Symbol('__v_raw'),
@@ -12,6 +15,9 @@ export const ReactiveFlags = {
  * @returns 
  */
 export function reactive(target: AnyObj) {
+
+  if (!isObject(target)) return target;
+  if (rawMap.get(target)) return target;
 
   return new Proxy(target, {
 
@@ -81,5 +87,20 @@ export function toRaw(reactive: AnyObj) {
   return isReactive(reactive) ? reactive[ReactiveFlags.RAW] : reactive;
 }
 
+/**
+ * 检测是否为响应式对象
+ * @param proxy 
+ */
+export function isProxy(proxy: AnyObj) {
+  return isReactive(proxy) || isReadonly(proxy);
+}
 
-
+/**
+ * 标记该对象将不能设置为代理对象
+ * @param obj 
+ * @returns 
+ */
+export function markRaw(obj: AnyObj) {
+  if (isObject(obj)) rawMap.set(obj, true);
+  return obj;
+}

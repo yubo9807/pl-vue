@@ -1,21 +1,26 @@
 (() => {
   // src/utils/judge.ts
-  function isType(o) {
-    return Object.prototype.toString.call(o).slice(8, -1).toLowerCase();
+  function isType(o2) {
+    return Object.prototype.toString.call(o2).slice(8, -1).toLowerCase();
   }
-  function isObject(o) {
-    return ["object", "array"].includes(isType(o));
+  function isObject(o2) {
+    return ["object", "array"].includes(isType(o2));
   }
   function hasOwn(target, key) {
     return Object.prototype.hasOwnProperty.call(target, key);
   }
 
   // src/reactivity/reactive.ts
+  var rawMap = /* @__PURE__ */ new WeakMap();
   var ReactiveFlags = {
     RAW: Symbol("__v_raw"),
     IS_READONLY: Symbol("__v_isReadonly")
   };
   function reactive(target) {
+    if (!isObject(target))
+      return target;
+    if (rawMap.get(target))
+      return target;
     return new Proxy(target, {
       get(target2, key, receiver) {
         if (key === ReactiveFlags.RAW)
@@ -43,9 +48,6 @@
         return result;
       }
     });
-  }
-  function isReactive(reactive2) {
-    return !!reactive2[ReactiveFlags.RAW];
   }
 
   // src/reactivity/ref.ts
@@ -117,16 +119,18 @@
   }
 
   // src/index.ts
-  var obj = reactive({
+  var obj = {
     a: 1,
     b: {
       c: 3,
       d: 4
     }
-  });
+  };
+  var o = reactive(obj);
   var a = ref(1);
   a.value;
   a.value = 123;
-  console.log(isReactive(obj));
+  console.log(a);
   var c = computed(() => a.value);
+  console.log(c);
 })();
