@@ -5,9 +5,14 @@ import { isObject } from "../utils/judge";
 const map = new WeakMap();
 
 class ComputedRefImpl {
-  computed:       ReactiveEffect
-  _setter:        Function
 
+  __v_isReadonly = true
+  __v_isRef      = true
+  _cacheable     = true
+  _dirty         = true
+
+  computed: ReactiveEffect
+  _setter:  Function
 
   constructor(getter: Function, setter: Function) {
     this.computed = new ReactiveEffect(getter);

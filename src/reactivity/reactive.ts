@@ -36,7 +36,7 @@ export function reactive(target: AnyObj) {
       }
 
       if (result && oldValue !== value) {
-        console.log(`update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`);
+        console.log(`%c update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`, 'color: orange');
         // 更新操作 ...
       }
 
@@ -52,7 +52,7 @@ export function reactive(target: AnyObj) {
       const result = Reflect.deleteProperty(target, key);
 
       if (hasKey && result) {
-        console.log(`delete ${isType(target)}[${key.toString()}]`);
+        console.log(`%c delete ${isType(target)}[${key.toString()}]`, 'color: red');
         // 更新操作 ...
       }
 

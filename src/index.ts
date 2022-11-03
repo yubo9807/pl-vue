@@ -15,14 +15,15 @@ const obj = {
 // b.a = 123
 // delete obj.b
 
+// console.log(c)
+
 const a = ref(1);
-// a.value
-// a.value = 2
+a.value
+a.value = 123
+console.log(a)
 
-const c = computed(() => obj.a);
-console.log(c)
-
-console.log(computed(() => a))
+const c = computed(() => a.value);
+// console.log(c)
 
 // const aRef = toRef(obj, 'a');
 // aRef.value = 123

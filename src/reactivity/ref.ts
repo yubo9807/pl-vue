@@ -1,5 +1,34 @@
+import { isObject } from "../utils/judge";
 import { AnyObj, Key } from "../utils/type";
 import { reactive } from "./reactive";
+
+class RefImpl {
+
+  __v_isRef:     boolean
+  __v_isShallow: boolean
+  _rawValue:     any
+  _value:        any
+
+  constructor(value: any) {
+    this.__v_isRef     = true;
+    this.__v_isShallow = false;
+    this._rawValue     = value;
+    this._value        = isObject(value) ? reactive(value) : reactive({ value });
+  }
+
+
+  get value() {
+    return isObject(this._rawValue) ? this._value : this._value.value;
+  }
+
+  set value(newValue) {
+    this._rawValue = newValue;
+
+    if (isObject(newValue)) this._value = newValue;
+    else this._value.value = newValue;
+  }
+
+}
 
 /**
  * 原始值转为响应式数据
@@ -7,7 +36,7 @@ import { reactive } from "./reactive";
  * @returns 
  */
 export function ref(value: any) {
-  return reactive({ value });
+  return new RefImpl(value);
 }
 
 
@@ -23,16 +52,10 @@ class ObjectRefImpl {
     this._object       = target;
   }
 
-  /**
-   * 获取
-   */
   get value() {
     return this._object[this._key];
   }
 
-  /**
-   * 赋值
-   */
   set value(value) {
     this._object[this._key] = value;
   }

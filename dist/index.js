@@ -30,7 +30,7 @@
           return oldValue;
         }
         if (result && oldValue !== value) {
-          console.log(`update ${isType(target2)}[${key.toString()}]: ${oldValue} --> ${value}`);
+          console.log(`%c update ${isType(target2)}[${key.toString()}]: ${oldValue} --> ${value}`, "color: orange");
         }
         return result;
       },
@@ -38,7 +38,7 @@
         const hasKey = hasOwn(target2, key);
         const result = Reflect.deleteProperty(target2, key);
         if (hasKey && result) {
-          console.log(`delete ${isType(target2)}[${key.toString()}]`);
+          console.log(`%c delete ${isType(target2)}[${key.toString()}]`, "color: red");
         }
         return result;
       }
@@ -46,8 +46,30 @@
   }
 
   // src/reactivity/ref.ts
+  var RefImpl = class {
+    __v_isRef;
+    __v_isShallow;
+    _rawValue;
+    _value;
+    constructor(value) {
+      this.__v_isRef = true;
+      this.__v_isShallow = false;
+      this._rawValue = value;
+      this._value = isObject(value) ? reactive(value) : reactive({ value });
+    }
+    get value() {
+      return isObject(this._rawValue) ? this._value : this._value.value;
+    }
+    set value(newValue) {
+      this._rawValue = newValue;
+      if (isObject(newValue))
+        this._value = newValue;
+      else
+        this._value.value = newValue;
+    }
+  };
   function ref(value) {
-    return reactive({ value });
+    return new RefImpl(value);
   }
 
   // src/reactivity/effect.ts
@@ -61,6 +83,10 @@
   // src/reactivity/computed.ts
   var map = /* @__PURE__ */ new WeakMap();
   var ComputedRefImpl = class {
+    __v_isReadonly = true;
+    __v_isRef = true;
+    _cacheable = true;
+    _dirty = true;
     computed;
     _setter;
     constructor(getter, setter) {
@@ -90,15 +116,9 @@
   }
 
   // src/index.ts
-  var obj = {
-    a: 1,
-    b: {
-      c: 3,
-      d: 4
-    }
-  };
   var a = ref(1);
-  var c = computed(() => obj.a);
-  console.log(c);
-  console.log(computed(() => a));
+  a.value;
+  a.value = 123;
+  console.log(a);
+  var c = computed(() => a.value);
 })();
