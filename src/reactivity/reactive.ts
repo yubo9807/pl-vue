@@ -63,12 +63,23 @@ export function reactive(target: AnyObj) {
 
 }
 
-
 /**
- * 响应式代理对象转普通对象
- * @param proxy 
+ * 判断是否为 reactive 对象
+ * @param reactive 
  * @returns 
  */
-export function toRaw(proxy: AnyObj) {
-  return proxy[ReactiveFlags.RAW];
+export function isReactive(reactive: unknown) {
+  return !!reactive[ReactiveFlags.RAW];
 }
+
+/**
+ * reactive 对象转普通对象
+ * @param reactive 
+ * @returns 
+ */
+export function toRaw(reactive: AnyObj) {
+  return isReactive(reactive) ? reactive[ReactiveFlags.RAW] : reactive;
+}
+
+
+

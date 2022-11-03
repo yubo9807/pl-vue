@@ -44,16 +44,17 @@
       }
     });
   }
+  function isReactive(reactive2) {
+    return !!reactive2[ReactiveFlags.RAW];
+  }
 
   // src/reactivity/ref.ts
   var RefImpl = class {
-    __v_isRef;
-    __v_isShallow;
+    __v_isRef = true;
+    __v_isShallow = false;
     _rawValue;
     _value;
     constructor(value) {
-      this.__v_isRef = true;
-      this.__v_isShallow = false;
       this._rawValue = value;
       this._value = isObject(value) ? reactive(value) : reactive({ value });
     }
@@ -116,9 +117,16 @@
   }
 
   // src/index.ts
+  var obj = reactive({
+    a: 1,
+    b: {
+      c: 3,
+      d: 4
+    }
+  });
   var a = ref(1);
   a.value;
   a.value = 123;
-  console.log(a);
+  console.log(isReactive(obj));
   var c = computed(() => a.value);
 })();

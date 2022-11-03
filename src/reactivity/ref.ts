@@ -4,16 +4,15 @@ import { reactive } from "./reactive";
 
 class RefImpl {
 
-  __v_isRef:     boolean
-  __v_isShallow: boolean
-  _rawValue:     any
-  _value:        any
+  __v_isRef     = true
+  __v_isShallow = false
+
+  _rawValue: any
+  _value:    any
 
   constructor(value: any) {
-    this.__v_isRef     = true;
-    this.__v_isShallow = false;
-    this._rawValue     = value;
-    this._value        = isObject(value) ? reactive(value) : reactive({ value });
+    this._rawValue = value;
+    this._value    = isObject(value) ? reactive(value) : reactive({ value });
   }
 
 
@@ -39,14 +38,32 @@ export function ref(value: any) {
   return new RefImpl(value);
 }
 
+/**
+ * 判断对象是否为 ref
+ * @note vue 实现这个函数有点low，随便定义一个对象就可以判断
+ * @param ref
+ */
+export function isRef(ref: RefImpl) {
+  return ref.__v_isRef
+}
+
+/**
+ * 返回 ref 内部值
+ * @param ref 
+ * @returns 
+ */
+export function unref(ref: RefImpl) {
+  return isRef(ref) ? ref.value : ref;
+}
 
 class ObjectRefImpl {
-  __v_isRef:     boolean
+
+  __v_isRef = true
+
   _defaultValue: any
   _key:          Key
   _object:       AnyObj
   constructor(target: AnyObj, key: Key, defaultValue = void 0) {
-    this.__v_isRef     = true;
     this._defaultValue = defaultValue;
     this._key          = key;
     this._object       = target;
