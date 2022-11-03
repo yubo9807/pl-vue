@@ -11,16 +11,18 @@ const obj = {
   }
 };
 
-const b = reactive(obj)
-b.a = 123
-delete obj.b
+// const b = reactive(obj)
+// b.a = 123
+// delete obj.b
 
-// const a = ref(1);
+const a = ref(1);
 // a.value
 // a.value = 2
 
-// const c = computed(() => 111);
-// c.value = 123
+const c = computed(() => obj.a);
+console.log(c)
+
+console.log(computed(() => a))
 
 // const aRef = toRef(obj, 'a');
 // aRef.value = 123

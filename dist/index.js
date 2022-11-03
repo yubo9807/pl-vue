@@ -45,6 +45,50 @@
     });
   }
 
+  // src/reactivity/ref.ts
+  function ref(value) {
+    return reactive({ value });
+  }
+
+  // src/reactivity/effect.ts
+  var ReactiveEffect = class {
+    fn;
+    constructor(fn) {
+      this.fn = fn;
+    }
+  };
+
+  // src/reactivity/computed.ts
+  var map = /* @__PURE__ */ new WeakMap();
+  var ComputedRefImpl = class {
+    computed;
+    _setter;
+    constructor(getter, setter) {
+      this.computed = new ReactiveEffect(getter);
+      this._setter = setter;
+      map.set(getter, ref(getter()));
+    }
+    get value() {
+      return this.computed.fn();
+    }
+    set value(val) {
+      const oldValue = this.computed.fn();
+      if (!isObject(oldValue)) {
+        console.warn(`Write operation failed: computed value is readonly`);
+        return;
+      }
+      map.get(this.computed.fn).value = val;
+      this._setter(val);
+    }
+  };
+  function computed(option) {
+    if (typeof option === "function") {
+      return new ComputedRefImpl(option, function set(val) {
+      });
+    }
+    return new ComputedRefImpl(option.get, option.set);
+  }
+
   // src/index.ts
   var obj = {
     a: 1,
@@ -53,7 +97,8 @@
       d: 4
     }
   };
-  var b = reactive(obj);
-  b.a = 123;
-  delete obj.b;
+  var a = ref(1);
+  var c = computed(() => obj.a);
+  console.log(c);
+  console.log(computed(() => a));
 })();
