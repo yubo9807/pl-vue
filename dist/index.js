@@ -51,8 +51,9 @@
   }
 
   // src/reactivity/ref.ts
+  var ISREF = "__v_isRef";
   var RefImpl = class {
-    __v_isRef = true;
+    [ISREF] = true;
     __v_isShallow = false;
     _rawValue;
     _value;
@@ -74,6 +75,9 @@
   function ref(value) {
     return new RefImpl(value);
   }
+  function isRef(ref3) {
+    return ref3 && ref3[ISREF];
+  }
 
   // src/reactivity/effect.ts
   var ReactiveEffect = class {
@@ -84,10 +88,9 @@
   };
 
   // src/reactivity/computed.ts
-  var map = /* @__PURE__ */ new WeakMap();
   var ComputedRefImpl = class {
     __v_isReadonly = true;
-    __v_isRef = true;
+    [ISREF] = true;
     _cacheable = true;
     _dirty = true;
     computed;
@@ -95,25 +98,17 @@
     constructor(getter, setter) {
       this.computed = new ReactiveEffect(getter);
       this._setter = setter;
-      map.set(getter, ref(getter()));
     }
     get value() {
       return this.computed.fn();
     }
     set value(val) {
-      const oldValue = this.computed.fn();
-      if (!isObject(oldValue)) {
-        console.warn(`Write operation failed: computed value is readonly`);
-        return;
-      }
-      map.get(this.computed.fn).value = val;
-      this._setter(val);
+      this._setter ? this._setter(val) : console.warn(`Write operation failed: computed value is readonly`);
     }
   };
   function computed(option) {
     if (typeof option === "function") {
-      return new ComputedRefImpl(option, function set(val) {
-      });
+      return new ComputedRefImpl(option);
     }
     return new ComputedRefImpl(option.get, option.set);
   }
@@ -128,9 +123,7 @@
   };
   var o = reactive(obj);
   var a = ref(1);
-  a.value;
-  a.value = 123;
-  console.log(a);
-  var c = computed(() => a.value);
-  console.log(c);
+  var c = computed(() => a.value + 123);
+  c.value = 1;
+  console.log(isRef(c));
 })();

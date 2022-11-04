@@ -1,5 +1,5 @@
 import { isReactive, markRaw, reactive, toRaw } from "./reactivity/reactive";
-import { ref, toRef, toRefs, unref } from "./reactivity/ref";
+import { isRef, ref, toRef, toRefs, unref } from "./reactivity/ref";
 import { readonly } from "./reactivity/readonly";
 import { computed } from "./reactivity/computed";
 
@@ -20,12 +20,12 @@ const o = reactive(obj);
 // console.log(c)
 
 const a = ref(1);
-a.value
-a.value = 123
-console.log(a);
+// a.value
+// console.log(a);
 
-const c = computed(() => a.value);
-console.log(c)
+const c = computed(() => a.value + 123);
+c.value = 1
+console.log(isRef(c))
 
 // const aRef = toRef(obj, 'a');
 // aRef.value = 123

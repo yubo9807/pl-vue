@@ -2,9 +2,11 @@ import { isObject } from "../utils/judge";
 import { AnyObj, Key } from "../utils/type";
 import { reactive } from "./reactive";
 
+export const ISREF = '__v_isRef'
+
 class RefImpl {
 
-  __v_isRef     = true
+  [ISREF]       = true
   __v_isShallow = false
 
   _rawValue: any
@@ -43,8 +45,8 @@ export function ref(value: any) {
  * @note vue 实现这个函数有点low，随便定义一个对象就可以判断
  * @param ref
  */
-export function isRef(ref: RefImpl) {
-  return ref.__v_isRef
+export function isRef(ref: unknown) {
+  return ref && ref[ISREF];
 }
 
 /**

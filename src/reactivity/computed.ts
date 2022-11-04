@@ -1,24 +1,19 @@
-import { ref } from "./ref";
+import { ISREF, ref } from "./ref";
 import { ReactiveEffect } from './effect'
-import { isObject } from "../utils/judge";
-
-const map = new WeakMap();
 
 class ComputedRefImpl {
 
-  __v_isReadonly = true
-  __v_isRef      = true
-  _cacheable     = true
-  _dirty         = true
+  __v_isReadonly = true;
+  [ISREF]        = true;
+  _cacheable     = true;
+  _dirty         = true;
 
   computed: ReactiveEffect
   _setter:  Function
 
-  constructor(getter: Function, setter: Function) {
+  constructor(getter: Function, setter?: Function) {
     this.computed = new ReactiveEffect(getter);
     this._setter  = setter;
-
-    map.set(getter, ref(getter()));
   }
 
   get value() {
@@ -26,14 +21,7 @@ class ComputedRefImpl {
   }
 
   set value(val) {
-    const oldValue = this.computed.fn();
-    if (!isObject(oldValue)) {
-      console.warn(`Write operation failed: computed value is readonly`);
-      return;
-    }
-
-    map.get(this.computed.fn).value = val;
-    this._setter(val);
+    this._setter ? this._setter(val) : console.warn(`Write operation failed: computed value is readonly`);
   }
 
 }
@@ -50,7 +38,7 @@ type ComputedOption = Function | {
  */
 export function computed(option: ComputedOption) {
   if (typeof option === 'function') {
-    return new ComputedRefImpl(option, function set(val) {});
+    return new ComputedRefImpl(option);
   }
 
   return new ComputedRefImpl(option.get, option.set);

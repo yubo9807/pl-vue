@@ -11,7 +11,7 @@ function ref(value) {
 }
 ```
 
-4. computed 基于 ref 套壳computed = ref，不过在配置对象的情况下会产生一个回调函数 set。
+4. computed 在获取 value 时执行 getter 获取对应的值，设置 value 时执行 setter 函数。
 
 ## vue3 中存在的问题
 
