@@ -1,7 +1,18 @@
-import { func } from "../observer";
 import { hasOwn, isObject, isType } from "../utils/judge";
 import { AnyObj } from "../utils/type";
 import { isReadonly } from "./readonly";
+
+let func = null; 
+
+/**
+ * 绑定响应式对象
+ * @param fn 将响应式对象写在 fn 内，该对象重新赋值时会自行触发 fn()
+ */
+export function binding(fn: Function) {
+  func = fn;
+  fn();
+  func = null;
+}
 
 const rawMap = new WeakMap();
 

@@ -1,8 +1,7 @@
-import { isReactive, markRaw, reactive, toRaw } from "./reactivity/reactive";
+import { isReactive, markRaw, reactive, toRaw, binding } from "./reactivity/reactive";
 import { isRef, ref, toRef, toRefs, unref } from "./reactivity/ref";
 import { readonly } from "./reactivity/readonly";
 import { computed } from "./reactivity/computed";
-import { autoRun } from "./observer";
 
 const obj = {
   a: 1,
@@ -32,12 +31,11 @@ const value = document.getElementById('value');
 const btn = document.getElementById('btn');
 
 
-autoRun(() => {
-  value.innerText = o.a;
+binding(() => {
+  value.innerText = a.value;
 })
 
 btn.onclick = () => {
-  o.a *= 2;
   a.value ++;
 }
 // const aRef = toRef(obj, 'a');

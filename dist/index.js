@@ -1,12 +1,4 @@
 (() => {
-  // src/observer/index.ts
-  var func = null;
-  function autoRun(fn) {
-    func = fn;
-    fn();
-    func = null;
-  }
-
   // src/utils/judge.ts
   function isType(o2) {
     return Object.prototype.toString.call(o2).slice(8, -1).toLowerCase();
@@ -19,6 +11,12 @@
   }
 
   // src/reactivity/reactive.ts
+  var func = null;
+  function binding(fn) {
+    func = fn;
+    fn();
+    func = null;
+  }
   var rawMap = /* @__PURE__ */ new WeakMap();
   var ReactiveFlags = {
     RAW: Symbol("__v_raw"),
@@ -98,11 +96,10 @@
   var a = ref(1);
   var value = document.getElementById("value");
   var btn = document.getElementById("btn");
-  autoRun(() => {
-    value.innerText = o.a;
+  binding(() => {
+    value.innerText = a.value;
   });
   btn.onclick = () => {
-    o.a *= 2;
     a.value++;
   };
 })();
