@@ -1,3 +1,4 @@
+import { func } from "../observer";
 import { hasOwn, isObject, isType } from "../utils/judge";
 import { AnyObj } from "../utils/type";
 import { isReadonly } from "./readonly";
@@ -19,11 +20,16 @@ export function reactive(target: AnyObj) {
   if (!isObject(target)) return target;
   if (rawMap.get(target)) return target;
 
+  const funcs: Function[] = [];
+
   return new Proxy(target, {
 
     // 获取
     get(target, key, receiver) {
       if (key === ReactiveFlags.RAW) return target;  // 返回原始值
+
+      // 依赖收集
+      func && funcs.push(func);
 
       const result = Reflect.get(target, key, receiver);
       return isObject(result) ? reactive(result) : result;
@@ -42,8 +48,10 @@ export function reactive(target: AnyObj) {
       }
 
       if (result && oldValue !== value) {
-        console.log(`%c update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`, 'color: orange');
-        // 更新操作 ...
+        // console.log(`%c update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`, 'color: orange');
+
+        // 派发更新
+        funcs.forEach(fn => fn());
       }
 
       return result;

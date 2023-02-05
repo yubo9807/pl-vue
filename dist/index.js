@@ -1,4 +1,12 @@
 (() => {
+  // src/observer/index.ts
+  var func = null;
+  function autoRun(fn) {
+    func = fn;
+    fn();
+    func = null;
+  }
+
   // src/utils/judge.ts
   function isType(o2) {
     return Object.prototype.toString.call(o2).slice(8, -1).toLowerCase();
@@ -21,21 +29,23 @@
       return target;
     if (rawMap.get(target))
       return target;
+    const funcs = [];
     return new Proxy(target, {
       get(target2, key, receiver) {
         if (key === ReactiveFlags.RAW)
           return target2;
+        func && funcs.push(func);
         const result = Reflect.get(target2, key, receiver);
         return isObject(result) ? reactive(result) : result;
       },
-      set(target2, key, value, receiver) {
+      set(target2, key, value2, receiver) {
         const oldValue = Reflect.get(target2, key, receiver);
-        const result = Reflect.set(target2, key, value, receiver);
+        const result = Reflect.set(target2, key, value2, receiver);
         if (target2[ReactiveFlags.IS_READONLY]) {
           return oldValue;
         }
-        if (result && oldValue !== value) {
-          console.log(`%c update ${isType(target2)}[${key.toString()}]: ${oldValue} --> ${value}`, "color: orange");
+        if (result && oldValue !== value2) {
+          funcs.forEach((fn) => fn());
         }
         return result;
       },
@@ -57,9 +67,9 @@
     __v_isShallow = false;
     _rawValue;
     _value;
-    constructor(value) {
-      this._rawValue = value;
-      this._value = isObject(value) ? reactive(value) : reactive({ value });
+    constructor(value2) {
+      this._rawValue = value2;
+      this._value = isObject(value2) ? reactive(value2) : reactive({ value: value2 });
     }
     get value() {
       return isObject(this._rawValue) ? this._value : this._value.value;
@@ -72,45 +82,8 @@
         this._value.value = newValue;
     }
   };
-  function ref(value) {
-    return new RefImpl(value);
-  }
-  function isRef(ref3) {
-    return ref3 && ref3[ISREF];
-  }
-
-  // src/reactivity/effect.ts
-  var ReactiveEffect = class {
-    fn;
-    constructor(fn) {
-      this.fn = fn;
-    }
-  };
-
-  // src/reactivity/computed.ts
-  var ComputedRefImpl = class {
-    __v_isReadonly = true;
-    [ISREF] = true;
-    _cacheable = true;
-    _dirty = true;
-    computed;
-    _setter;
-    constructor(getter, setter) {
-      this.computed = new ReactiveEffect(getter);
-      this._setter = setter;
-    }
-    get value() {
-      return this.computed.fn();
-    }
-    set value(val) {
-      this._setter ? this._setter(val) : console.warn(`Write operation failed: computed value is readonly`);
-    }
-  };
-  function computed(option) {
-    if (typeof option === "function") {
-      return new ComputedRefImpl(option);
-    }
-    return new ComputedRefImpl(option.get, option.set);
+  function ref(value2) {
+    return new RefImpl(value2);
   }
 
   // src/index.ts
@@ -123,7 +96,13 @@
   };
   var o = reactive(obj);
   var a = ref(1);
-  var c = computed(() => a.value + 123);
-  c.value = 1;
-  console.log(isRef(c));
+  var value = document.getElementById("value");
+  var btn = document.getElementById("btn");
+  autoRun(() => {
+    value.innerText = o.a;
+  });
+  btn.onclick = () => {
+    o.a *= 2;
+    a.value++;
+  };
 })();
