@@ -83,6 +83,33 @@
   function ref(value2) {
     return new RefImpl(value2);
   }
+  var CustomRefImpl = class extends RefImpl {
+    _get;
+    _set;
+    constructor(callback) {
+      let isRef2 = false;
+      const { get, set } = callback(
+        () => isRef2 = true,
+        () => this.setValue()
+      );
+      super(get());
+      this.__v_isRef = isRef2;
+      this._get = get;
+      this._set = set;
+    }
+    get value() {
+      return this.__v_isRef ? super.value : this._get();
+    }
+    set value(val) {
+      this._set(val);
+    }
+    setValue() {
+      super.value = this._get();
+    }
+  };
+  function customRef(callback) {
+    return new CustomRefImpl(callback);
+  }
 
   // src/index.ts
   var obj = {
@@ -102,4 +129,31 @@
   btn.onclick = () => {
     a.value++;
   };
+  var input = document.getElementById("input");
+  var c = debounceRef("");
+  binding(() => {
+    input.value = c.value;
+    value.innerText = c.value;
+  });
+  input.oninput = (e) => {
+    c.value = e.target.value;
+  };
+  function debounceRef(value2, delay = 300) {
+    let timer = null;
+    return customRef((track, trigger) => {
+      return {
+        get() {
+          track();
+          return value2;
+        },
+        set(val) {
+          clearTimeout(timer);
+          timer = setTimeout(() => {
+            value2 = val;
+            trigger();
+          }, delay);
+        }
+      };
+    });
+  }
 })();

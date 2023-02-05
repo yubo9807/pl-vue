@@ -104,3 +104,49 @@ export function toRefs(target: AnyObj) {
   }
   return obj;
 }
+
+
+
+type CustomRefCallback = (track: Function, trigger: Function) => ({ get: Function, set: Function})
+
+class CustomRefImpl extends RefImpl {
+  _get: Function
+  _set: Function
+  constructor(callback: CustomRefCallback) {
+    let isRef = false;
+    const { get, set } = callback(
+      () => isRef = true,
+      () => this.setValue(),
+    );
+
+    super(get());
+    this.__v_isRef = isRef;
+    this._get = get;
+    this._set = set;
+  }
+
+  get value() {
+    return this.__v_isRef ? super.value : this._get();
+  }
+
+  // 方法重写，将 val 指给 set 函数
+  set value(val) {
+    this._set(val);
+  }
+
+  /**
+   * 设置 value
+   */
+  setValue() {
+    super.value = this._get();
+  }
+}
+
+/**
+ * 自定义 Ref
+ * @param callback 
+ * @returns 
+ */
+export function customRef(callback: CustomRefCallback) {
+  return new CustomRefImpl(callback);
+}

@@ -1,5 +1,5 @@
 import { isReactive, markRaw, reactive, toRaw, binding } from "./reactivity/reactive";
-import { isRef, ref, toRef, toRefs, unref } from "./reactivity/ref";
+import { customRef, isRef, ref, toRef, toRefs, unref } from "./reactivity/ref";
 import { readonly } from "./reactivity/readonly";
 import { computed } from "./reactivity/computed";
 
@@ -37,6 +37,35 @@ binding(() => {
 
 btn.onclick = () => {
   a.value ++;
+}
+
+const input: any = document.getElementById('input');
+const c = debounceRef('');
+binding(() => {
+  input.value     = c.value;
+  value.innerText = c.value;
+});
+input.oninput = e => {
+  c.value = e.target.value
+}
+
+function debounceRef(value, delay = 300) {
+  let timer = null;
+  return customRef((track, trigger) => {
+    return {
+      get() {
+        track();
+        return value;
+      },
+      set(val) {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          value = val;
+          trigger();
+        }, delay)
+      }
+    }
+  })
 }
 // const aRef = toRef(obj, 'a');
 // aRef.value = 123
