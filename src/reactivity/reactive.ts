@@ -77,8 +77,10 @@ export function reactive(target: AnyObj) {
       const result = Reflect.deleteProperty(target, key);
 
       if (hasKey && result) {
-        console.log(`%c delete ${isType(target)}[${key.toString()}]`, 'color: red');
-        // 更新操作 ...
+        // console.log(`%c delete ${isType(target)}[${key.toString()}]`, 'color: red');
+
+        // 派发更新
+        funcs.forEach(fn => fn());
       }
 
       return result;
