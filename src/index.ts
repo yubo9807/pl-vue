@@ -13,60 +13,49 @@ const obj = {
 // markRaw(obj);
 const o = reactive(obj);
 
-// const b = reactive(obj)
-// b.a = 123
-// delete obj.b
 
-// console.log(c)
-const a = ref(1);
-
-// a.value
-// console.log(a);
-
-// const c = computed(() => a.value + 123);
-// c.value = 1
-// console.log(isRef(c))
 
 const value = document.getElementById('value');
 const btn = document.getElementById('btn');
 
 
-binding(() => {
-  value.innerText = a.value;
-})
+const a = ref(1);
+const d = computed(() => a.value);
+binding(() => value.innerText = d.value);
 
 btn.onclick = () => {
   a.value ++;
 }
 
-const input: any = document.getElementById('input');
-const c = debounceRef('');
-binding(() => {
-  input.value     = c.value;
-  value.innerText = c.value;
-});
-input.oninput = e => {
-  c.value = e.target.value
-}
+// const input: any = document.getElementById('input');
+// const c = debounceRef('');
+// binding(() => {
+//   input.value     = c.value;
+//   value.innerText = c.value;
+// });
+// input.oninput = e => {
+//   c.value = e.target.value
+// }
 
-function debounceRef(value, delay = 300) {
-  let timer = null;
-  return customRef((track, trigger) => {
-    return {
-      get() {
-        track();
-        return value;
-      },
-      set(val) {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          value = val;
-          trigger();
-        }, delay)
-      }
-    }
-  })
-}
+// function debounceRef(value, delay = 300) {
+//   let timer = null;
+//   return customRef((track, trigger) => ({
+//     get() {
+//       track();
+//       return value;
+//     },
+//     set(val) {
+//       clearTimeout(timer);
+//       timer = setTimeout(() => {
+//         value = val;
+//         trigger();
+//       }, delay)
+//     }
+//   }))
+// }
+
+
+
 // const aRef = toRef(obj, 'a');
 // aRef.value = 123
 // obj.a = 456

@@ -21,7 +21,7 @@ export function isType(o: any): Type {
  * @param o
  */
 export function isObject(o: any) {
-  return ['object', 'array'].includes(isType(o));
+  return typeof o === 'object';
 }
 
 /**

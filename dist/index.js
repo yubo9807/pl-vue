@@ -1,10 +1,7 @@
 (() => {
   // src/utils/judge.ts
-  function isType(o2) {
-    return Object.prototype.toString.call(o2).slice(8, -1).toLowerCase();
-  }
   function isObject(o2) {
-    return ["object", "array"].includes(isType(o2));
+    return typeof o2 === "object";
   }
   function hasOwn(target, key) {
     return Object.prototype.hasOwnProperty.call(target, key);
@@ -51,7 +48,7 @@
         const hasKey = hasOwn(target2, key);
         const result = Reflect.deleteProperty(target2, key);
         if (hasKey && result) {
-          console.log(`%c delete ${isType(target2)}[${key.toString()}]`, "color: red");
+          funcs.forEach((fn) => fn());
         }
         return result;
       }
@@ -83,32 +80,39 @@
   function ref(value2) {
     return new RefImpl(value2);
   }
-  var CustomRefImpl = class extends RefImpl {
-    _get;
-    _set;
-    constructor(callback) {
-      let isRef2 = false;
-      const { get, set } = callback(
-        () => isRef2 = true,
-        () => this.setValue()
-      );
-      super(get());
-      this.__v_isRef = isRef2;
-      this._get = get;
-      this._set = set;
-    }
-    get value() {
-      return this.__v_isRef ? super.value : this._get();
-    }
-    set value(val) {
-      this._set(val);
-    }
-    setValue() {
-      super.value = this._get();
+
+  // src/reactivity/effect.ts
+  var ReactiveEffect = class {
+    fn;
+    constructor(fn) {
+      this.fn = fn;
     }
   };
-  function customRef(callback) {
-    return new CustomRefImpl(callback);
+
+  // src/reactivity/computed.ts
+  var ComputedRefImpl = class {
+    __v_isReadonly = true;
+    [ISREF] = true;
+    _cacheable = true;
+    _dirty = true;
+    computed;
+    _setter;
+    constructor(getter, setter) {
+      this.computed = new ReactiveEffect(getter);
+      this._setter = setter;
+    }
+    get value() {
+      return this.computed.fn();
+    }
+    set value(val) {
+      this._setter ? this._setter(val) : console.warn(`Write operation failed: computed value is readonly`);
+    }
+  };
+  function computed(option) {
+    if (typeof option === "function") {
+      return new ComputedRefImpl(option);
+    }
+    return new ComputedRefImpl(option.get, option.set);
   }
 
   // src/index.ts
@@ -120,40 +124,12 @@
     }
   };
   var o = reactive(obj);
-  var a = ref(1);
   var value = document.getElementById("value");
   var btn = document.getElementById("btn");
-  binding(() => {
-    value.innerText = a.value;
-  });
+  var a = ref(1);
+  var d = computed(() => a.value);
+  binding(() => value.innerText = d.value);
   btn.onclick = () => {
     a.value++;
   };
-  var input = document.getElementById("input");
-  var c = debounceRef("");
-  binding(() => {
-    input.value = c.value;
-    value.innerText = c.value;
-  });
-  input.oninput = (e) => {
-    c.value = e.target.value;
-  };
-  function debounceRef(value2, delay = 300) {
-    let timer = null;
-    return customRef((track, trigger) => {
-      return {
-        get() {
-          track();
-          return value2;
-        },
-        set(val) {
-          clearTimeout(timer);
-          timer = setTimeout(() => {
-            value2 = val;
-            trigger();
-          }, delay);
-        }
-      };
-    });
-  }
 })();
