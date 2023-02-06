@@ -1,8 +1,9 @@
-import { hasOwn, isObject, isType } from "../utils/judge";
+import { hasOwn, isObject } from "../utils/judge";
 import { AnyObj } from "../utils/type";
 import { isReadonly } from "./readonly";
 
-let func = null; 
+let func = null;
+const funcsMap: WeakMap<object, Function[]> = new WeakMap();
 
 /**
  * 绑定响应式对象
@@ -31,8 +32,6 @@ export function reactive(target: AnyObj) {
   if (!isObject(target)) return target;
   if (rawMap.get(target)) return target;
 
-  const funcs: Function[] = [];
-
   return new Proxy(target, {
 
     // 获取
@@ -40,7 +39,9 @@ export function reactive(target: AnyObj) {
       if (key === ReactiveFlags.RAW) return target;  // 返回原始值
 
       // 依赖收集
+      const funcs = funcsMap.get(target) || [];
       func && funcs.push(func);
+      funcsMap.set(target, funcs);
 
       const result = Reflect.get(target, key, receiver);
       return isObject(result) ? reactive(result) : result;
@@ -62,7 +63,8 @@ export function reactive(target: AnyObj) {
         // console.log(`%c update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`, 'color: orange');
 
         // 派发更新
-        funcs.forEach(fn => fn());
+        const funcs = funcsMap.get(target);
+        funcs && funcs.forEach(fn => fn());
       }
 
       return result;
@@ -80,7 +82,8 @@ export function reactive(target: AnyObj) {
         // console.log(`%c delete ${isType(target)}[${key.toString()}]`, 'color: red');
 
         // 派发更新
-        funcs.forEach(fn => fn());
+        const funcs = funcsMap.get(target);
+        funcs && funcs.forEach(fn => fn());
       }
 
       return result;

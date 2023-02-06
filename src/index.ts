@@ -7,7 +7,9 @@ const obj = {
   a: 1,
   b: {
     c: 3,
-    d: 4,
+    d: {
+      e: 5
+    },
   }
 };
 // markRaw(obj);

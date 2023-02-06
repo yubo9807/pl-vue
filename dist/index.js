@@ -9,6 +9,7 @@
 
   // src/reactivity/reactive.ts
   var func = null;
+  var funcsMap = /* @__PURE__ */ new WeakMap();
   function binding(fn) {
     func = fn;
     fn();
@@ -24,12 +25,13 @@
       return target;
     if (rawMap.get(target))
       return target;
-    const funcs = [];
     return new Proxy(target, {
       get(target2, key, receiver) {
         if (key === ReactiveFlags.RAW)
           return target2;
+        const funcs = funcsMap.get(target2) || [];
         func && funcs.push(func);
+        funcsMap.set(target2, funcs);
         const result = Reflect.get(target2, key, receiver);
         return isObject(result) ? reactive(result) : result;
       },
@@ -40,7 +42,8 @@
           return oldValue;
         }
         if (result && oldValue !== value2) {
-          funcs.forEach((fn) => fn());
+          const funcs = funcsMap.get(target2);
+          funcs && funcs.forEach((fn) => fn());
         }
         return result;
       },
@@ -48,7 +51,8 @@
         const hasKey = hasOwn(target2, key);
         const result = Reflect.deleteProperty(target2, key);
         if (hasKey && result) {
-          funcs.forEach((fn) => fn());
+          const funcs = funcsMap.get(target2);
+          funcs && funcs.forEach((fn) => fn());
         }
         return result;
       }
@@ -120,7 +124,9 @@
     a: 1,
     b: {
       c: 3,
-      d: 4
+      d: {
+        e: 5
+      }
     }
   };
   var o = reactive(obj);
