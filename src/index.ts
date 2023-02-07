@@ -1,4 +1,4 @@
-import { isReactive, markRaw, reactive, toRaw, binding } from "./reactivity/reactive";
+import { isReactive, markRaw, reactive, toRaw, binding, isProxy } from "./reactivity/reactive";
 import { customRef, isRef, ref, toRef, toRefs, unref } from "./reactivity/ref";
 import { readonly } from "./reactivity/readonly";
 import { computed } from "./reactivity/computed";
@@ -55,6 +55,7 @@ btn.onclick = () => {
 //     }
 //   }))
 // }
+
 
 
 

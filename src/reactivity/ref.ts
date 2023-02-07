@@ -2,7 +2,7 @@ import { isObject } from "../utils/judge";
 import { AnyObj, Key } from "../utils/type";
 import { reactive } from "./reactive";
 
-export const ISREF = '__v_isRef'
+export const ISREF = '__v_isRef';
 
 class RefImpl {
 
@@ -31,12 +31,13 @@ class RefImpl {
 
 }
 
+type Ref<T> = { value: T }
 /**
  * 原始值转为响应式数据
  * @param value 
  * @returns 
  */
-export function ref(value: any) {
+export function ref<T>(value: T): Ref<T> {
   return new RefImpl(value);
 }
 
@@ -63,8 +64,8 @@ class ObjectRefImpl {
   __v_isRef = true
 
   _defaultValue: any
-  _key:          Key
-  _object:       AnyObj
+  _key:    Key
+  _object: AnyObj
   constructor(target: AnyObj, key: Key, defaultValue = void 0) {
     this._defaultValue = defaultValue;
     this._key          = key;

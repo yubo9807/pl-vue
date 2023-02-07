@@ -27,7 +27,7 @@ export const ReactiveFlags = {
  * @param target 
  * @returns 
  */
-export function reactive(target: AnyObj) {
+export function reactive<T extends AnyObj>(target: T): T {
 
   if (!isObject(target)) return target;
   if (rawMap.get(target)) return target;
@@ -98,7 +98,7 @@ export function reactive(target: AnyObj) {
  * @param reactive 
  * @returns 
  */
-export function isReactive(reactive: unknown) {
+export function isReactive<T extends AnyObj>(reactive: T): boolean {
   return !!reactive[ReactiveFlags.RAW];
 }
 
@@ -107,7 +107,7 @@ export function isReactive(reactive: unknown) {
  * @param reactive 
  * @returns 
  */
-export function toRaw(reactive: AnyObj) {
+export function toRaw<T extends AnyObj>(reactive: T): T {
   return isReactive(reactive) ? reactive[ReactiveFlags.RAW] : reactive;
 }
 
@@ -115,7 +115,7 @@ export function toRaw(reactive: AnyObj) {
  * 检测是否为响应式对象
  * @param proxy 
  */
-export function isProxy(proxy: AnyObj) {
+export function isProxy<T extends AnyObj>(proxy: T): boolean {
   return isReactive(proxy) || isReadonly(proxy);
 }
 
@@ -124,7 +124,7 @@ export function isProxy(proxy: AnyObj) {
  * @param obj 
  * @returns 
  */
-export function markRaw(obj: AnyObj) {
+export function markRaw<T extends AnyObj>(obj: T): T {
   if (isObject(obj)) rawMap.set(obj, true);
   return obj;
 }
