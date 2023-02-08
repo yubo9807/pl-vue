@@ -26,15 +26,12 @@ const a = ref(1);
 const d = computed(() => a.value);
 binding(() => value.innerText = d.value);
 
-const unWatch = watch(() => a.value, (value, oldValue) => {
+watch(a, (value, oldValue) => {
   console.log(value, oldValue)
 }, { immediate: true })
 
 btn.onclick = () => {
   a.value ++;
-  if (a.value >= 5) {
-    unWatch();
-  }
 }
 
 

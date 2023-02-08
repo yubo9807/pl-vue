@@ -58,6 +58,9 @@
       }
     });
   }
+  function isReactive(reactive2) {
+    return !!reactive2[ReactiveFlags.RAW];
+  }
 
   // src/reactivity/ref.ts
   var ISREF = "__v_isRef";
@@ -83,6 +86,9 @@
   };
   function ref(value2) {
     return new RefImpl(value2);
+  }
+  function isRef(ref3) {
+    return ref3 && ref3[ISREF];
   }
 
   // src/reactivity/effect.ts
@@ -121,11 +127,23 @@
 
   // src/watch.ts
   function watch(source, cb, option = {}) {
-    let oldValue = source();
+    let oldValue = null;
+    if (typeof source === "function") {
+      oldValue = source();
+    } else {
+      if (!isRef(source) && !isReactive(source))
+        return () => {
+        };
+      oldValue = isRef(source) ? source.value : source;
+    }
     option.immediate && cb(oldValue, oldValue);
     let cleanup = false;
     binding(() => {
-      const value2 = source();
+      let value2 = null;
+      if (typeof source === "function")
+        value2 = source();
+      else
+        value2 = isRef(source) ? source.value : value2;
       if (oldValue !== value2 && !cleanup) {
         cb(value2, oldValue);
       }
@@ -152,13 +170,10 @@
   var a = ref(1);
   var d = computed(() => a.value);
   binding(() => value.innerText = d.value);
-  var unWatch = watch(() => a.value, (value2, oldValue) => {
+  watch(a, (value2, oldValue) => {
     console.log(value2, oldValue);
   }, { immediate: true });
   btn.onclick = () => {
     a.value++;
-    if (a.value >= 5) {
-      unWatch();
-    }
   };
 })();
