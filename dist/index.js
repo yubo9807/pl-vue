@@ -119,6 +119,23 @@
     return new ComputedRefImpl(option.get, option.set);
   }
 
+  // src/watch.ts
+  function watch(source, cb, option = {}) {
+    let oldValue = source();
+    option.immediate && cb(oldValue, oldValue);
+    let cleanup = false;
+    binding(() => {
+      const value2 = source();
+      if (oldValue !== value2 && !cleanup) {
+        cb(value2, oldValue);
+      }
+      oldValue = value2;
+    });
+    return () => {
+      cleanup = true;
+    };
+  }
+
   // src/index.ts
   var obj = {
     a: 1,
@@ -135,7 +152,13 @@
   var a = ref(1);
   var d = computed(() => a.value);
   binding(() => value.innerText = d.value);
+  var unWatch = watch(() => a.value, (value2, oldValue) => {
+    console.log(value2, oldValue);
+  }, { immediate: true });
   btn.onclick = () => {
     a.value++;
+    if (a.value >= 5) {
+      unWatch();
+    }
   };
 })();
