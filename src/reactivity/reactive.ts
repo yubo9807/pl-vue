@@ -29,8 +29,7 @@ export const ReactiveFlags = {
  */
 export function reactive<T extends AnyObj>(target: T): T {
 
-  if (!isObject(target)) return target;
-  if (rawMap.get(target)) return target;
+  if (!isObject(target) || rawMap.get(target)) return target;
 
   return new Proxy(target, {
 

@@ -2,9 +2,9 @@
 
 export class ReactiveEffect {
 
-  fn:     Function
+  fn: Function
   constructor(fn: Function) {
-    this.fn     = fn
+    this.fn = fn
   }
 
 }

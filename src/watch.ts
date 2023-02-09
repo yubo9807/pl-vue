@@ -11,9 +11,9 @@ type Cb = <T>(newValue: T, oldValue: T) => void
 
 /**
  * 侦听器
- * @param source 
- * @param cb
- * @param option 
+ * @param source  响应式数据
+ * @param cb      回调函数
+ * @param option  配置参数 (.deep 暂不支持)
  * @returns 
  */
 export function watch(source: Source, cb: Cb, option: Option = {}): Function {

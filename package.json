@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "esbuild src/index.ts --outfile=dist/index.js --bundle --watch",
+    "build": "node esbuild.js",
     "start": "node dist/index.js"
   },
   "keywords": [],
