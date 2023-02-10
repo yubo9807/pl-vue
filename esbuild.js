@@ -5,6 +5,6 @@ build({
   outfile: "dist/index.js",
   bundle: true,
   watch: true,
-  minify: true,
+  minify: false,
 }).then(res => console.log('success'))
   .catch(err => console.log(err));

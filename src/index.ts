@@ -23,15 +23,16 @@ const btn = document.getElementById('btn');
 
 
 const a = ref(1);
-const d = computed(() => a.value);
-binding(() => value.innerText = d.value);
+// const d = computed(() => a.value);
+// binding(() => value.innerText = d.value);
 
-watch(a, (value, oldValue) => {
+const unwatch = watch(() => o.a, (value, oldValue) => {
   console.log(value, oldValue)
-}, { immediate: true })
+}, { immediate: false, deep: true })
 
 btn.onclick = () => {
-  a.value ++;
+  o.a ++;
+  o.a >= 5 && unwatch();
 }
 
 
