@@ -130,13 +130,13 @@ class CustomRefImpl extends RefImpl {
     return this.__v_isRef ? super.value : this._get();
   }
 
-  // 方法重写，将 val 指给 set 函数
+  // 方法重写，阻断，将 val 指给 set 函数
   set value(val) {
     this._set(val);
   }
 
   /**
-   * 设置 value
+   * 设置 value，在合适的时间调用
    */
   setValue() {
     super.value = this._get();

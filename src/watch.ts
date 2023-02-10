@@ -23,8 +23,9 @@ export function watch(source: Source, cb: Cb, option: Option = {}): Function {
   let backup = clone(oldValue);
   option.immediate && cb(oldValue, void 0);
 
+  // 数据被调用，自执行
   binding(() => {
-    if (cleanup) return;
+    if (cleanup) return;  // 被取消监听
 
     const value = source();
     const bool = option.deep ? compare(value, backup) : value === oldValue;
@@ -35,6 +36,7 @@ export function watch(source: Source, cb: Cb, option: Option = {}): Function {
     }
   });
 
+  // 取消监听
   return () => {
     cleanup = true;
   }
@@ -48,20 +50,21 @@ export function watch(source: Source, cb: Cb, option: Option = {}): Function {
  * @returns 一致则返回 true，否则 false
  */
 function compare<T>(obj1: T, obj2: T): boolean {
-  let flag = true;
   if (typeof obj1 === 'object' && typeof obj2 === 'object') {
+    let flag = true;
     for (const prop in obj1) {
       if (typeof obj1[prop] === 'object') {
+        // 递归再次比较
         flag = compare(obj1[prop], obj2[prop]);
       } else {
         if (obj1[prop] !== obj2[prop]) {
-          flag = false
+          flag = false;
           break;
         };
       }
     }
+    return flag;
   } else {
     return obj1 === obj2;
   }
-  return flag;
 }

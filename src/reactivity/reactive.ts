@@ -11,7 +11,7 @@ const funcsMap: WeakMap<object, Function[]> = new WeakMap();
  */
 export function binding(fn: Function) {
   func = fn;
-  fn();
+  fn();  // 自执行触发 get 方法，方法被保存
   func = null;
 }
 
