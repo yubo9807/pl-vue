@@ -3,68 +3,40 @@ import { customRef, isRef, ref, toRef, toRefs, unref } from "./reactivity/ref";
 import { readonly } from "./reactivity/readonly";
 import { computed } from "./reactivity/computed";
 import { watch } from "./watch";
+import { h, hFragment } from "./h";
 
-const obj = {
-  a: 1,
-  b: {
-    c: 3,
-    d: {
-      e: 5
+
+const count = ref(1);
+const text = debounceRef('');
+
+const root = hFragment([
+  h('div', { style: { transform: () => `translateX(${count.value}px)`}}, () => count.value),
+  h('button', { onclick: () => count.value++ }, 'click'),
+  h('div', {}, [
+    h('input', { oninput: val => text.value = val.target.value }),
+    h('span', {}, () => text.value),
+  ]),
+])
+
+document.getElementById('root').appendChild(root);
+
+
+function debounceRef<T>(value: T, delay = 300) {
+  let timer = null;
+  return customRef((track, trigger) => ({
+    get() {
+      track();
+      return value;
     },
-  }
-};
-// markRaw(obj);
-const o = reactive(obj);
-
-
-
-const value = document.getElementById('value');
-const btn = document.getElementById('btn');
-
-
-const a = ref(1);
-// const d = computed(() => a.value);
-// binding(() => value.innerText = d.value);
-
-const unwatch = watch(() => o.a, (value, oldValue) => {
-  console.log(value, oldValue)
-}, { immediate: false, deep: true })
-
-btn.onclick = () => {
-  o.a ++;
-  o.a >= 5 && unwatch();
+    set(val: T) {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        value = val;
+        trigger();
+      }, delay)
+    }
+  }))
 }
-
-
-
-
-
-// const input: any = document.getElementById('input');
-// const c = debounceRef('');
-// binding(() => {
-//   input.value     = c.value;
-//   value.innerText = c.value;
-// });
-// input.oninput = e => {
-//   c.value = e.target.value
-// }
-
-// function debounceRef(value, delay = 300) {
-//   let timer = null;
-//   return customRef((track, trigger) => ({
-//     get() {
-//       track();
-//       return value;
-//     },
-//     set(val) {
-//       clearTimeout(timer);
-//       timer = setTimeout(() => {
-//         value = val;
-//         trigger();
-//       }, delay)
-//     }
-//   }))
-// }
 
 
 

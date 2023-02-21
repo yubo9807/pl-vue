@@ -1,7 +1,7 @@
 (() => {
   // src/utils/judge.ts
-  function isObject(o2) {
-    return typeof o2 === "object";
+  function isObject(o) {
+    return typeof o === "object";
   }
   function hasOwn(target, key) {
     return Object.prototype.hasOwnProperty.call(target, key);
@@ -33,13 +33,13 @@
         const result = Reflect.get(target2, key, receiver);
         return isObject(result) ? reactive(result) : result;
       },
-      set(target2, key, value2, receiver) {
+      set(target2, key, value, receiver) {
         const oldValue = Reflect.get(target2, key, receiver);
-        const result = Reflect.set(target2, key, value2, receiver);
+        const result = Reflect.set(target2, key, value, receiver);
         if (target2[ReactiveFlags.IS_READONLY]) {
           return oldValue;
         }
-        if (result && oldValue !== value2) {
+        if (result && oldValue !== value) {
           const funcs = funcsMap.get(target2);
           funcs && funcs.forEach((fn) => fn());
         }
@@ -64,9 +64,9 @@
     __v_isShallow = false;
     _rawValue;
     _value;
-    constructor(value2) {
-      this._rawValue = value2;
-      this._value = isObject(value2) ? reactive(value2) : reactive({ value: value2 });
+    constructor(value) {
+      this._rawValue = value;
+      this._value = isObject(value) ? reactive(value) : reactive({ value });
     }
     get value() {
       return isObject(this._rawValue) ? this._value : this._value.value;
@@ -79,96 +79,98 @@
         this._value.value = newValue;
     }
   };
-  function ref(value2) {
-    return new RefImpl(value2);
+  function ref(value) {
+    return new RefImpl(value);
+  }
+  var CustomRefImpl = class extends RefImpl {
+    _get;
+    _set;
+    constructor(callback) {
+      let isRef2 = false;
+      const { get, set } = callback(
+        () => isRef2 = true,
+        () => this.setValue()
+      );
+      super(get());
+      this.__v_isRef = isRef2;
+      this._get = get;
+      this._set = set;
+    }
+    get value() {
+      return this.__v_isRef ? super.value : this._get();
+    }
+    set value(val) {
+      this._set(val);
+    }
+    setValue() {
+      super.value = this._get();
+    }
+  };
+  function customRef(callback) {
+    return new CustomRefImpl(callback);
   }
 
-  // src/utils/object.ts
-  function clone(obj2) {
-    if (obj2 instanceof Array)
-      return cloneArray(obj2);
-    else if (obj2 instanceof Object)
-      return cloneObject(obj2);
-    else
-      return obj2;
-  }
-  function cloneObject(obj2) {
-    let result = {};
-    let names = Object.getOwnPropertyNames(obj2);
-    for (let i = 0; i < names.length; i++) {
-      result[names[i]] = clone(obj2[names[i]]);
-    }
-    return result;
-  }
-  function cloneArray(obj2) {
-    let result = new Array(obj2.length);
-    for (let i = 0; i < result.length; i++) {
-      result[i] = clone(obj2[i]);
-    }
-    return result;
-  }
-
-  // src/watch.ts
-  function watch(source, cb, option = {}) {
-    let cleanup = false;
-    if (cleanup)
-      return;
-    const oldValue = source();
-    let backup = clone(oldValue);
-    option.immediate && cb(oldValue, void 0);
-    binding(() => {
-      if (cleanup)
-        return;
-      const value2 = source();
-      const bool = option.deep ? compare(value2, backup) : value2 === oldValue;
-      if (!bool) {
-        cb(value2, reactive(backup));
-        backup = clone(value2);
+  // src/h.ts
+  function h(tag, props = {}, children = "") {
+    const div = document.createElement(tag);
+    if (children instanceof Array) {
+      children.forEach((val) => div.appendChild(val));
+    } else {
+      for (const prop in props) {
+        div[prop] = props[prop];
       }
-    });
-    return () => {
-      cleanup = true;
-    };
-  }
-  function compare(obj1, obj2) {
-    let flag = true;
-    if (typeof obj1 === "object" && typeof obj2 === "object") {
-      for (const prop in obj1) {
-        if (typeof obj1[prop] === "object") {
-          flag = compare(obj1[prop], obj2[prop]);
-        } else {
-          if (obj1[prop] !== obj2[prop]) {
-            flag = false;
-            break;
+      if (props.style && props.style instanceof Object) {
+        for (const prop in props.style) {
+          const value = props.style[prop];
+          if (typeof value === "function") {
+            binding(() => div.style[prop] = value());
+          } else {
+            div.style[prop] = value;
           }
-          ;
         }
       }
-    } else {
-      return obj1 === obj2;
+      if (typeof children === "function") {
+        binding(() => div.innerText = children());
+      } else {
+        div.innerText = children;
+      }
     }
-    return flag;
+    return div;
+  }
+  function hFragment(arr) {
+    const fragment = document.createDocumentFragment();
+    arr.forEach((val) => {
+      fragment.appendChild(val);
+    });
+    return fragment;
   }
 
   // src/index.ts
-  var obj = {
-    a: 1,
-    b: {
-      c: 3,
-      d: {
-        e: 5
+  var count = ref(1);
+  var text = debounceRef("");
+  var root = hFragment([
+    h("div", { style: { transform: () => `translateX(${count.value}px)` } }, () => count.value),
+    h("button", { onclick: () => count.value++ }, "click"),
+    h("div", {}, [
+      h("input", { oninput: (val) => text.value = val.target.value }),
+      h("span", {}, () => text.value)
+    ])
+  ]);
+  document.getElementById("root").appendChild(root);
+  function debounceRef(value, delay = 300) {
+    let timer = null;
+    return customRef((track, trigger) => ({
+      get() {
+        track();
+        return value;
+      },
+      set(val) {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          value = val;
+          trigger();
+        }, delay);
       }
-    }
-  };
-  var o = reactive(obj);
-  var value = document.getElementById("value");
-  var btn = document.getElementById("btn");
-  var a = ref(1);
-  var unwatch = watch(() => o.a, (value2, oldValue) => {
-    console.log(value2, oldValue);
-  }, { immediate: false, deep: true });
-  btn.onclick = () => {
-    o.a++;
-    o.a >= 5 && unwatch();
-  };
+    }));
+  }
 })();
