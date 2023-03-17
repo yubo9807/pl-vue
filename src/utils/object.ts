@@ -13,7 +13,7 @@ function cloneObject(obj: any) {
   let result = {};
   let names = Object.getOwnPropertyNames(obj);
   for (let i = 0; i < names.length; i ++) {
-      result[names[i]] = clone(obj[names[i]]);
+    result[names[i]] = clone(obj[names[i]]);
   }
   return result;
 }
@@ -21,7 +21,7 @@ function cloneObject(obj: any) {
 function cloneArray(obj: any) {
   let result = new Array(obj.length);
   for (let i = 0; i < result.length; i ++) {
-      result[i] = clone(obj[i]);
+    result[i] = clone(obj[i]);
   }
   return result;
 }

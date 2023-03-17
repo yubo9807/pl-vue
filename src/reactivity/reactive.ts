@@ -25,9 +25,7 @@ export function reactive<T extends AnyObj>(target: T): T {
     get(target, key, receiver) {
       if (key === ReactiveFlags.RAW) return target;  // 返回原始值
 
-      // 依赖收集
       dependencyCollection(target);
-
       const result = Reflect.get(target, key, receiver);
       return isObject(result) ? reactive(result) : result;
     },
