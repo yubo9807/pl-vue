@@ -1,4 +1,4 @@
-import { binding } from "./reactivity/reactive";
+import { binding } from "./reactivity/depend";
 import { AnyObj } from "./utils/type";
 
 /**

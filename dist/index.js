@@ -22,7 +22,7 @@
     }
   }
 
-  // src/reactivity/reactive.ts
+  // src/reactivity/depend.ts
   var func = null;
   var funcsMap = /* @__PURE__ */ new WeakMap();
   function binding(fn) {
@@ -30,6 +30,23 @@
     fn();
     func = null;
   }
+  function dependencyCollection(key) {
+    const funcs = funcsMap.get(key) || [];
+    func && funcs.push(func);
+    funcsMap.set(key, funcs);
+  }
+  function distributeUpdates(key) {
+    const funcs = funcsMap.get(key);
+    funcs && funcs.forEach((fn, index) => {
+      const del = fn();
+      if (typeof del === "boolean" && del) {
+        funcs.splice(index, 1);
+        funcsMap.set(key, funcs);
+      }
+    });
+  }
+
+  // src/reactivity/reactive.ts
   var rawMap = /* @__PURE__ */ new WeakMap();
   var ReactiveFlags = {
     RAW: Symbol("__v_raw"),
@@ -42,9 +59,7 @@
       get(target2, key, receiver) {
         if (key === ReactiveFlags.RAW)
           return target2;
-        const funcs = funcsMap.get(target2) || [];
-        func && funcs.push(func);
-        funcsMap.set(target2, funcs);
+        dependencyCollection(target2);
         const result = Reflect.get(target2, key, receiver);
         return isObject(result) ? reactive(result) : result;
       },
@@ -66,16 +81,6 @@
           distributeUpdates(target2);
         }
         return result;
-      }
-    });
-  }
-  function distributeUpdates(key) {
-    const funcs = funcsMap.get(key);
-    funcs && funcs.forEach((fn, index) => {
-      const del = fn();
-      if (typeof del === "boolean" && del) {
-        funcs.splice(index, 1);
-        funcsMap.set(key, funcs);
       }
     });
   }
