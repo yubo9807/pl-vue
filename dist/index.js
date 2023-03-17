@@ -110,29 +110,46 @@
     return new CustomRefImpl(callback);
   }
 
+  // src/watch.ts
+  function watchEffect(cb) {
+    let cleanup = false;
+    let lock = false;
+    binding(() => {
+      if (cleanup)
+        return;
+      cb((cleanupFn) => {
+        lock && cleanupFn();
+        lock = true;
+      });
+    });
+    return () => {
+      cleanup = true;
+    };
+  }
+
   // src/h.ts
   function h(tag, props = {}, children = "") {
     const div = document.createElement(tag);
     if (children instanceof Array) {
       children.forEach((val) => div.appendChild(val));
     } else {
-      for (const prop in props) {
-        div[prop] = props[prop];
-      }
-      if (props.style && props.style instanceof Object) {
-        for (const prop in props.style) {
-          const value = props.style[prop];
-          if (typeof value === "function") {
-            binding(() => div.style[prop] = value());
-          } else {
-            div.style[prop] = value;
-          }
-        }
-      }
       if (typeof children === "function") {
         binding(() => div.innerText = children());
       } else {
         div.innerText = children;
+      }
+    }
+    for (const prop in props) {
+      div[prop] = props[prop];
+    }
+    if (props.style && props.style instanceof Object) {
+      for (const prop in props.style) {
+        const value = props.style[prop];
+        if (typeof value === "function") {
+          binding(() => div.style[prop] = value());
+        } else {
+          div.style[prop] = value;
+        }
       }
     }
     return div;
@@ -173,4 +190,10 @@
       }
     }));
   }
+  watchEffect((onCleanup) => {
+    onCleanup(() => {
+      console.log(11111);
+    });
+    console.log(count.value);
+  });
 })();

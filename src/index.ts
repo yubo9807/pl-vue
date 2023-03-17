@@ -2,7 +2,7 @@ import { isReactive, markRaw, reactive, toRaw, binding, isProxy } from "./reacti
 import { customRef, isRef, ref, toRef, toRefs, unref } from "./reactivity/ref";
 import { readonly } from "./reactivity/readonly";
 import { computed } from "./reactivity/computed";
-import { watch } from "./watch";
+import { watch, watchEffect } from "./watch";
 import { h, hFragment } from "./h";
 
 
@@ -37,6 +37,13 @@ function debounceRef<T>(value: T, delay = 300) {
     }
   }))
 }
+
+watchEffect((onCleanup) => {
+  onCleanup(() => {
+    console.log(11111)
+  })
+  console.log(count.value)
+})
 
 
 
