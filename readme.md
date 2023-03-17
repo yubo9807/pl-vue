@@ -97,7 +97,7 @@ const a = ref(0);
 binding(() => div.innerText = a.value);
 ```
 
-## watch 实现
+## watch
 
 watch 是基于数据挂载实现的。既然已经有一个可以自动触发响应式数据的函数，每次改变数据他都会执行，我甚至可以直接写在 watch 中。
 
@@ -128,3 +128,25 @@ function watch(source: Function, cb: Function, option = {}) {
 }
 ```
 
+## watchEffect
+
+watchEffect 与 watch 实现方式类似。不支持深度监听，无论绑定的是否为响应式对象都会立即执行。
+
+```ts
+function watchEffect(cb: Callback) {
+  let cleanup = false;
+  let lock = false;
+
+  binding(() => {
+    if (cleanup) return;
+    cb((cleanupFn) => {
+      lock && cleanupFn();  // 第一次不执行
+      lock = true;
+    });
+  })
+
+  return () => {
+    cleanup = true;
+  }
+}
+```
