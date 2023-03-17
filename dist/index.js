@@ -6,6 +6,21 @@
   function hasOwn(target, key) {
     return Object.prototype.hasOwnProperty.call(target, key);
   }
+  function isEquals(val1, val2) {
+    if (typeof val1 === "object" && typeof val2 === "object") {
+      const keys1 = Object.keys(val1), keys2 = Object.keys(val2);
+      if (keys1.length !== keys2.length)
+        return false;
+      for (const key of keys1) {
+        if (!keys2.includes(key))
+          return false;
+        return isEquals(val1[key], val2[key]);
+      }
+      return true;
+    } else {
+      return val1 === val2;
+    }
+  }
 
   // src/reactivity/reactive.ts
   var func = null;
@@ -40,8 +55,7 @@
           return oldValue;
         }
         if (result && oldValue !== value) {
-          const funcs = funcsMap.get(target2);
-          funcs && funcs.forEach((fn) => fn());
+          distributeUpdates(target2);
         }
         return result;
       },
@@ -49,10 +63,19 @@
         const hasKey = hasOwn(target2, key);
         const result = Reflect.deleteProperty(target2, key);
         if (hasKey && result) {
-          const funcs = funcsMap.get(target2);
-          funcs && funcs.forEach((fn) => fn());
+          distributeUpdates(target2);
         }
         return result;
+      }
+    });
+  }
+  function distributeUpdates(key) {
+    const funcs = funcsMap.get(key);
+    funcs && funcs.forEach((fn, index) => {
+      const del = fn();
+      if (typeof del === "boolean" && del) {
+        funcs.splice(index, 1);
+        funcsMap.set(key, funcs);
       }
     });
   }
@@ -110,17 +133,48 @@
     return new CustomRefImpl(callback);
   }
 
+  // src/utils/object.ts
+  function clone(obj) {
+    if (obj instanceof Array)
+      return cloneArray(obj);
+    else if (obj instanceof Object)
+      return cloneObject(obj);
+    else
+      return obj;
+  }
+  function cloneObject(obj) {
+    let result = {};
+    let names = Object.getOwnPropertyNames(obj);
+    for (let i = 0; i < names.length; i++) {
+      result[names[i]] = clone(obj[names[i]]);
+    }
+    return result;
+  }
+  function cloneArray(obj) {
+    let result = new Array(obj.length);
+    for (let i = 0; i < result.length; i++) {
+      result[i] = clone(obj[i]);
+    }
+    return result;
+  }
+
   // src/watch.ts
-  function watchEffect(cb) {
+  function watch(source, cb, option = {}) {
     let cleanup = false;
-    let lock = false;
+    if (cleanup)
+      return;
+    const oldValue = source();
+    let backup = clone(oldValue);
+    option.immediate && cb(oldValue, void 0);
     binding(() => {
       if (cleanup)
-        return;
-      cb((cleanupFn) => {
-        lock && cleanupFn();
-        lock = true;
-      });
+        return true;
+      const value = source();
+      const bool = option.deep ? isEquals(value, backup) : value === oldValue;
+      if (!bool) {
+        cb(value, reactive(backup));
+        backup = clone(value);
+      }
     });
     return () => {
       cleanup = true;
@@ -190,10 +244,9 @@
       }
     }));
   }
-  watchEffect((onCleanup) => {
-    onCleanup(() => {
-      console.log(11111);
-    });
-    console.log(count.value);
+  var unwatch = watch(() => count.value, (value) => {
+    if (value > 5)
+      unwatch();
+    console.log(value);
   });
 })();

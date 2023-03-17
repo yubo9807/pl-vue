@@ -38,11 +38,9 @@ function debounceRef<T>(value: T, delay = 300) {
   }))
 }
 
-watchEffect((onCleanup) => {
-  onCleanup(() => {
-    console.log(11111)
-  })
-  console.log(count.value)
+const unwatch = watch(() => count.value, value => {
+  if (value > 5) unwatch();
+  console.log(value)
 })
 
 
