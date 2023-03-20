@@ -1,25 +1,13 @@
 (() => {
   // src/utils/judge.ts
+  function isType(o) {
+    return Object.prototype.toString.call(o).slice(8, -1).toLowerCase();
+  }
   function isObject(o) {
     return typeof o === "object";
   }
   function hasOwn(target, key) {
     return Object.prototype.hasOwnProperty.call(target, key);
-  }
-  function isEquals(val1, val2) {
-    if (typeof val1 === "object" && typeof val2 === "object") {
-      const keys1 = Object.keys(val1), keys2 = Object.keys(val2);
-      if (keys1.length !== keys2.length)
-        return false;
-      for (const key of keys1) {
-        if (!keys2.includes(key))
-          return false;
-        return isEquals(val1[key], val2[key]);
-      }
-      return true;
-    } else {
-      return val1 === val2;
-    }
   }
 
   // src/reactivity/depend.ts
@@ -110,148 +98,93 @@
   function ref(value) {
     return new RefImpl(value);
   }
-  var CustomRefImpl = class extends RefImpl {
-    _get;
-    _set;
-    constructor(callback) {
-      let isRef2 = false;
-      const { get, set } = callback(
-        () => isRef2 = true,
-        () => this.setValue()
-      );
-      super(get());
-      this.__v_isRef = isRef2;
-      this._get = get;
-      this._set = set;
-    }
-    get value() {
-      return this.__v_isRef ? super.value : this._get();
-    }
-    set value(val) {
-      this._set(val);
-    }
-    setValue() {
-      super.value = this._get();
-    }
-  };
-  function customRef(callback) {
-    return new CustomRefImpl(callback);
-  }
 
-  // src/utils/object.ts
-  function clone(obj) {
-    if (obj instanceof Array)
-      return cloneArray(obj);
-    else if (obj instanceof Object)
-      return cloneObject(obj);
-    else
-      return obj;
-  }
-  function cloneObject(obj) {
-    let result = {};
-    let names = Object.getOwnPropertyNames(obj);
-    for (let i = 0; i < names.length; i++) {
-      result[names[i]] = clone(obj[names[i]]);
-    }
-    return result;
-  }
-  function cloneArray(obj) {
-    let result = new Array(obj.length);
-    for (let i = 0; i < result.length; i++) {
-      result[i] = clone(obj[i]);
-    }
-    return result;
-  }
-
-  // src/watch.ts
-  function watch(source, cb, option = {}) {
-    let cleanup = false;
-    if (cleanup)
+  // src/createElement.ts
+  function createElement(tag, attrs = {}, children = "") {
+    if ([void 0, null, "", true, false].includes(children))
       return;
-    const oldValue = source();
-    let backup = clone(oldValue);
-    option.immediate && cb(oldValue, void 0);
-    binding(() => {
-      if (cleanup)
-        return true;
-      const value = source();
-      const bool = option.deep ? isEquals(value, backup) : value === oldValue;
-      if (!bool) {
-        cb(value, reactive(backup));
-        backup = clone(value);
-      }
-    });
-    return () => {
-      cleanup = true;
-    };
-  }
-
-  // src/h.ts
-  function h(tag, props = {}, children = "") {
-    const div = document.createElement(tag);
-    if (children instanceof Array) {
-      children.forEach((val) => div.appendChild(val));
+    if (!tag) {
+      return createElementFragment(children);
     } else {
-      if (typeof children === "function") {
-        binding(() => div.innerText = children());
-      } else {
-        div.innerText = children;
-      }
+      return createElementReal(tag, attrs, children);
     }
-    for (const prop in props) {
-      div[prop] = props[prop];
+  }
+  function createElementReal(tag, attrs = {}, children = "") {
+    const el = document.createElement(tag);
+    if (children instanceof Array) {
+      children.forEach((val) => {
+        if (val instanceof Array) {
+          el.appendChild(createElementFragment(val));
+        } else if (isType(val) === "object") {
+          const node = createElementReal(val.tag, val.attrs, val.children);
+          el.appendChild(node);
+        } else if (["string", "number"].includes(typeof val)) {
+          const textNode = document.createTextNode(val.toString());
+          el.appendChild(textNode);
+        } else if (typeof val === "function") {
+          const textNode = document.createTextNode("");
+          el.appendChild(textNode);
+          binding(() => {
+            textNode.nodeValue = val().toString();
+          });
+        }
+      });
+    } else if (["string", "number"].includes(typeof children)) {
+      el.innerText = children.toString();
+    } else if (typeof children === "function") {
+      binding(() => {
+        el.innerText = children().toString();
+      });
     }
-    if (props.style && props.style instanceof Object) {
-      for (const prop in props.style) {
-        const value = props.style[prop];
+    for (const prop in attrs) {
+      el[prop] = attrs[prop];
+    }
+    if (attrs.style && attrs.style instanceof Object) {
+      for (const prop in attrs.style) {
+        const value = attrs.style[prop];
         if (typeof value === "function") {
-          binding(() => div.style[prop] = value());
+          binding(() => el.style[prop] = value());
         } else {
-          div.style[prop] = value;
+          el.style[prop] = value;
         }
       }
     }
-    return div;
+    return el;
   }
-  function hFragment(arr) {
+  function createElementFragment(children) {
     const fragment = document.createDocumentFragment();
-    arr.forEach((val) => {
-      fragment.appendChild(val);
-    });
+    if (children instanceof Array) {
+      children.forEach((val) => {
+        const node = createElement(val.tag, val.attrs, val.children);
+        fragment.appendChild(node);
+      });
+    } else if (["string", "number"].includes(typeof children)) {
+      const textNode = document.createTextNode(children);
+      fragment.appendChild(textNode);
+    } else if (typeof children === "function") {
+      const textNode = document.createTextNode("");
+      binding(() => {
+        textNode.nodeValue = children();
+      });
+      fragment.appendChild(textNode);
+    }
     return fragment;
   }
 
-  // src/index.ts
-  var count = ref(1);
-  var text = debounceRef("");
-  var root = hFragment([
-    h("div", { style: { transform: () => `translateX(${count.value}px)` } }, () => count.value),
-    h("button", { onclick: () => count.value++ }, "click"),
-    h("div", {}, [
-      h("input", { oninput: (val) => text.value = val.target.value }),
-      h("span", {}, () => text.value)
-    ])
-  ]);
-  document.getElementById("root").appendChild(root);
-  function debounceRef(value, delay = 300) {
-    let timer = null;
-    return customRef((track, trigger) => ({
-      get() {
-        track();
-        return value;
-      },
-      set(val) {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          value = val;
-          trigger();
-        }, delay);
-      }
-    }));
+  // src/h.ts
+  function h(tag, attrs, ...children) {
+    return {
+      tag,
+      attrs: attrs || {},
+      children
+    };
   }
-  var unwatch = watch(() => count.value, (value) => {
-    if (value > 5)
-      unwatch();
-    console.log(value);
-  });
+  function render({ tag, attrs, children }) {
+    return createElement(tag, attrs, children);
+  }
+
+  // src/index.tsx
+  var count = ref(0);
+  var jsx = /* @__PURE__ */ h("div", { className: "wrap" }, () => count.value, /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"), [1, 2, 3].map((val) => /* @__PURE__ */ h("span", null, val)), null, 0, () => count.value & 1 ? "\u5355\u6570" : "\u53CC\u6570");
+  document.getElementById("root").appendChild(render(jsx));
 })();
