@@ -99,6 +99,15 @@
     return new RefImpl(value);
   }
 
+  // src/h.ts
+  function h(tag, attrs, ...children) {
+    return {
+      tag,
+      attrs: attrs || {},
+      children
+    };
+  }
+
   // src/createElement.ts
   function createElement(tag, attrs = {}, children = "") {
     if ([void 0, null, "", true, false].includes(children))
@@ -171,14 +180,7 @@
     return fragment;
   }
 
-  // src/h.ts
-  function h(tag, attrs, ...children) {
-    return {
-      tag,
-      attrs: attrs || {},
-      children
-    };
-  }
+  // src/render.ts
   function render({ tag, attrs, children }) {
     return createElement(tag, attrs, children);
   }

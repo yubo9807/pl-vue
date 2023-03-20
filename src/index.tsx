@@ -3,7 +3,8 @@ import { customRef, isRef, ref, toRef, toRefs, unref } from "./reactivity/ref";
 import { readonly } from "./reactivity/readonly";
 import { computed } from "./reactivity/computed";
 import { watch, watchEffect } from "./watch";
-import { h, Fragment, render } from "./h";
+import { h, Fragment } from "./h";
+import { render } from "./render";
 
 const count = ref(0);
 
@@ -16,4 +17,4 @@ const jsx = <div className='wrap'>
   {() => count.value & 1 ? '单数' : '双数'}
 </div>
 
-document.getElementById('root').appendChild(render(jsx))
+document.getElementById('root').appendChild(render(jsx));

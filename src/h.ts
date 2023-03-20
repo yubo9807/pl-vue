@@ -12,7 +12,3 @@ export function h(tag: string, attrs: AnyObj, ...children: any[]) {
 export function Fragment({ children }) {
   return children;
 }
-
-export function render({ tag, attrs, children }) {
-  return createElement(tag, attrs, children);
-}
