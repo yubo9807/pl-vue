@@ -1,5 +1,5 @@
-import { createElement } from "./createElement";
-import { isAssignmentValueToNode, isType, noRenderValue } from "./utils/judge";
+import { createElement } from "./create-element";
+import { isAssignmentValueToNode, isType, noRenderValue } from "../utils/judge";
 
 /**
  * 创建组件虚拟 DOM 树的函数

@@ -1,5 +1,5 @@
 (() => {
-  // src/utils/judge.ts
+  // src/vue3/utils/judge.ts
   function isType(o) {
     return Object.prototype.toString.call(o).slice(8, -1).toLowerCase();
   }
@@ -31,7 +31,7 @@
     return [void 0, null, "", true, false].includes(value);
   }
 
-  // src/reactivity/depend.ts
+  // src/vue3/reactivity/depend.ts
   var func = null;
   var funcsMap = /* @__PURE__ */ new WeakMap();
   function binding(fn) {
@@ -55,7 +55,7 @@
     });
   }
 
-  // src/reactivity/reactive.ts
+  // src/vue3/reactivity/reactive.ts
   var rawMap = /* @__PURE__ */ new WeakMap();
   var ReactiveFlags = {
     RAW: Symbol("__v_raw"),
@@ -94,7 +94,7 @@
     });
   }
 
-  // src/reactivity/ref.ts
+  // src/vue3/reactivity/ref.ts
   var ISREF = "__v_isRef";
   var RefImpl = class {
     [ISREF] = true;
@@ -120,7 +120,35 @@
     return new RefImpl(value);
   }
 
-  // src/utils/object.ts
+  // src/vue3/reactivity/effect.ts
+  var ReactiveEffect = class {
+    fn;
+    constructor(fn) {
+      this.fn = fn;
+    }
+  };
+
+  // src/vue3/reactivity/computed.ts
+  var ComputedRefImpl = class {
+    __v_isReadonly = true;
+    [ISREF] = true;
+    _cacheable = true;
+    _dirty = true;
+    computed;
+    _setter;
+    constructor(getter, setter) {
+      this.computed = new ReactiveEffect(getter);
+      this._setter = setter;
+    }
+    get value() {
+      return this.computed.fn();
+    }
+    set value(val) {
+      this._setter ? this._setter(val) : console.warn(`Write operation failed: computed value is readonly`);
+    }
+  };
+
+  // src/vue3/utils/object.ts
   function clone(obj) {
     if (obj instanceof Array)
       return cloneArray(obj);
@@ -145,7 +173,7 @@
     return result;
   }
 
-  // src/watch.ts
+  // src/vue3/watch.ts
   function watch(source, cb, option = {}) {
     let cleanup = false;
     if (cleanup)
@@ -168,7 +196,7 @@
     };
   }
 
-  // src/h.ts
+  // src/vue3/vdom/h.ts
   function h(tag, attrs, ...children) {
     return {
       tag,
@@ -177,7 +205,7 @@
     };
   }
 
-  // src/createElement.ts
+  // src/vue3/vdom/create-element.ts
   function createElement(tag, attrs = {}, children = "") {
     if (noRenderValue(children))
       return;
@@ -255,6 +283,12 @@
         } else if (isType(val) === "object") {
           const node = createElement(val.tag, val.attrs, val.children);
           fragment.appendChild(node);
+        } else if (typeof val === "function") {
+          const textNode = document.createTextNode("");
+          binding(() => {
+            textNode.nodeValue = val().toString();
+          });
+          fragment.appendChild(textNode);
         }
       });
     } else if (isAssignmentValueToNode(children)) {
@@ -263,76 +297,30 @@
     } else if (typeof children === "function") {
       const textNode = document.createTextNode("");
       binding(() => {
-        textNode.nodeValue = children();
+        textNode.nodeValue = children().toString();
       });
       fragment.appendChild(textNode);
     }
     return fragment;
   }
 
-  // src/render.ts
+  // src/vue3/vdom/render.ts
   function render({ tag, attrs, children }) {
     return createElement(tag, attrs, children);
-  }
-  function renderToString({ tag, attrs, children }) {
-    if (noRenderValue(children))
-      return "";
-    if (typeof tag === "string") {
-      let attrStr = "";
-      for (const attr in attrs) {
-        attrStr += ` ${attr}=${attrs[attr]}`;
-      }
-      let text = "";
-      if (typeof children === "function") {
-        text = children();
-      } else if (isAssignmentValueToNode(children)) {
-        text = children;
-      } else if (children instanceof Array) {
-        children.forEach((val) => {
-          if (isType(val) === "object") {
-            text += renderToString(val);
-          } else if (typeof val === "function") {
-            const value = val();
-            if (isAssignmentValueToNode(value)) {
-              text += value.toString();
-            } else if (isType(value) === "object") {
-              text += renderToString(value);
-            }
-          } else if (isAssignmentValueToNode(val)) {
-            text += val;
-          } else if (val instanceof Array) {
-            val.forEach((item) => {
-              text += renderToString(item);
-            });
-          }
-        });
-      }
-      return `<${tag}${attrStr}>${text}</${tag}>`;
-    } else if (typeof tag === "function") {
-      if (tag.name === "Fragment") {
-        let html2 = "";
-        children.forEach((val) => {
-          html2 += renderToString(val);
-        });
-        return html2;
-      } else {
-        return renderToString(tag(attrs));
-      }
-    }
   }
 
   // src/index.tsx
   function Comp(props) {
-    watch(() => props.count(), (value) => {
+    const unwatch = watch(() => props.count(), (value) => {
+      if (value >= 5)
+        unwatch();
       console.log(value);
-    });
+    }, { immediate: true });
     return /* @__PURE__ */ h("span", null, props.count);
   }
   function App() {
     const count = ref(1);
     return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h(Comp, { count: () => count.value }), /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"));
   }
-  var html = renderToString(/* @__PURE__ */ h(App, null));
-  console.log(html);
   document.getElementById("root").appendChild(render(/* @__PURE__ */ h(App, null)));
 })();

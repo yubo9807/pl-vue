@@ -1,6 +1,6 @@
-import { binding } from "./reactivity/depend";
-import { isAssignmentValueToNode, isType, noRenderValue } from "./utils/judge";
-import { AnyObj } from "./utils/type";
+import { binding } from "../reactivity/depend";
+import { isAssignmentValueToNode, isType, noRenderValue } from "../utils/judge";
+import { AnyObj } from "../utils/type";
 
 type Tag = string | Function
 type Attrs = AnyObj
@@ -114,6 +114,12 @@ function createElementFragment(children: Children): DocumentFragment {
       } else if (isType(val) === 'object') {
         const node = createElement(val.tag, val.attrs, val.children);
         fragment.appendChild(node);
+      } else if (typeof val === 'function') {
+        const textNode = document.createTextNode('');
+        binding(() => {
+          textNode.nodeValue = val().toString();
+        })
+        fragment.appendChild(textNode);
       }
     })
   } else if (isAssignmentValueToNode(children)) {
@@ -122,7 +128,7 @@ function createElementFragment(children: Children): DocumentFragment {
   } else if (typeof children === 'function') {
     const textNode = document.createTextNode('');
     binding(() => {
-      textNode.nodeValue = children();
+      textNode.nodeValue = children().toString();
     })
     fragment.appendChild(textNode);
   }

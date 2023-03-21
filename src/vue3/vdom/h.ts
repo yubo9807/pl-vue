@@ -1,5 +1,4 @@
-import { createElement } from "./createElement";
-import { AnyObj } from "./utils/type";
+import { AnyObj } from "../utils/type";
 
 export function h(tag: string, attrs: AnyObj, ...children: any[]) {
   return {

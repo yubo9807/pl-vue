@@ -1,19 +1,15 @@
-import { isReactive, markRaw, reactive, toRaw, isProxy } from "./reactivity/reactive";
-import { customRef, isRef, ref, toRef, toRefs, unref } from "./reactivity/ref";
-import { readonly } from "./reactivity/readonly";
-import { computed } from "./reactivity/computed";
-import { watch, watchEffect } from "./watch";
-import { h, Fragment } from "./h";
-import { render, renderToString } from "./render";
+import { watch, h, ref, Fragment, render } from "./vue3";
 
 type Props = {
   count: () => number
 }
 function Comp(props: Props) {
 
-  watch(() => props.count(), value => {
-    console.log(value)
-  })
+  const unwatch = watch(() => props.count(), value => {
+    if (value >= 5) unwatch();
+    console.log(value);
+  }, { immediate: true })
+
   return <span>
     {props.count}
   </span>
@@ -29,6 +25,4 @@ function App() {
   </div>
 }
 
-const html = renderToString(<App />)
-console.log(html)
 document.getElementById('root').appendChild(render(<App />));
