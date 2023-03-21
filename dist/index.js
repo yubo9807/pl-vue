@@ -184,9 +184,42 @@
   function render({ tag, attrs, children }) {
     return createElement(tag, attrs, children);
   }
+  function renderToString({ tag, attrs, children }) {
+    if ([void 0, null, "", true, false].includes(children))
+      return "";
+    let attrStr = "";
+    for (const attr in attrs) {
+      attrStr += ` ${attr}=${attrs[attr]}`;
+    }
+    let text = "";
+    if (typeof children === "function") {
+      text = children();
+    } else if (["string", "number"].includes(typeof children)) {
+      text = children;
+    } else if (children instanceof Array) {
+      children.forEach((val) => {
+        if (isType(val) === "object") {
+          text += renderToString(val);
+        } else if (typeof val === "function") {
+          text += val();
+        } else if (["string", "number"].includes(typeof val)) {
+          text += val;
+        } else if (val instanceof Array) {
+          val.forEach((item) => {
+            text += renderToString(item);
+          });
+        }
+      });
+    }
+    let html2 = "";
+    html2 += `<${tag}${attrStr}>${text}</${tag}>`;
+    return html2;
+  }
 
   // src/index.tsx
   var count = ref(0);
   var jsx = /* @__PURE__ */ h("div", { className: "wrap" }, () => count.value, /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"), [1, 2, 3].map((val) => /* @__PURE__ */ h("span", null, val)), null, 0, () => count.value & 1 ? "\u5355\u6570" : "\u53CC\u6570");
+  var html = renderToString(jsx);
+  console.log(html);
   document.getElementById("root").appendChild(render(jsx));
 })();
