@@ -1,5 +1,5 @@
 import { createElement } from "./createElement";
-import { isAssignmentValueToNode, isType } from "./utils/judge";
+import { isAssignmentValueToNode, isType, noRenderValue } from "./utils/judge";
 
 /**
  * 创建组件虚拟 DOM 树的函数
@@ -16,7 +16,7 @@ export function render({ tag, attrs, children }) {
  * @returns 
  */
 export function renderToString({ tag, attrs, children }) {
-  if ([void 0, null, '', true, false].includes(children)) return '';
+  if (noRenderValue(children)) return '';
 
   if (typeof tag === 'string') {
     // 属性值拼接

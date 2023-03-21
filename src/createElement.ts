@@ -1,5 +1,5 @@
 import { binding } from "./reactivity/depend";
-import { isAssignmentValueToNode, isType } from "./utils/judge";
+import { isAssignmentValueToNode, isType, noRenderValue } from "./utils/judge";
 import { AnyObj } from "./utils/type";
 
 type Tag = string | Function
@@ -15,7 +15,7 @@ type Children = any
  * @returns 
  */
 export function createElement(tag: Tag, attrs: Attrs = {}, children: Children = ''): HTMLElement | DocumentFragment {
-  if ([undefined, null, '', true, false].includes(children)) return;
+  if (noRenderValue(children)) return;
 
   if (typeof tag === 'string') {
     return createElementReal(tag, attrs, children);

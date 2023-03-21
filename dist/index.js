@@ -9,8 +9,26 @@
   function hasOwn(target, key) {
     return Object.prototype.hasOwnProperty.call(target, key);
   }
+  function isEquals(val1, val2) {
+    if (typeof val1 === "object" && typeof val2 === "object") {
+      const keys1 = Object.keys(val1), keys2 = Object.keys(val2);
+      if (keys1.length !== keys2.length)
+        return false;
+      for (const key of keys1) {
+        if (!keys2.includes(key))
+          return false;
+        return isEquals(val1[key], val2[key]);
+      }
+      return true;
+    } else {
+      return val1 === val2;
+    }
+  }
   function isAssignmentValueToNode(value) {
     return ["string", "number"].includes(typeof value);
+  }
+  function noRenderValue(value) {
+    return [void 0, null, "", true, false].includes(value);
   }
 
   // src/reactivity/depend.ts
@@ -102,6 +120,54 @@
     return new RefImpl(value);
   }
 
+  // src/utils/object.ts
+  function clone(obj) {
+    if (obj instanceof Array)
+      return cloneArray(obj);
+    else if (obj instanceof Object)
+      return cloneObject(obj);
+    else
+      return obj;
+  }
+  function cloneObject(obj) {
+    let result = {};
+    let names = Object.getOwnPropertyNames(obj);
+    for (let i = 0; i < names.length; i++) {
+      result[names[i]] = clone(obj[names[i]]);
+    }
+    return result;
+  }
+  function cloneArray(obj) {
+    let result = new Array(obj.length);
+    for (let i = 0; i < result.length; i++) {
+      result[i] = clone(obj[i]);
+    }
+    return result;
+  }
+
+  // src/watch.ts
+  function watch(source, cb, option = {}) {
+    let cleanup = false;
+    if (cleanup)
+      return;
+    const oldValue = source();
+    let backup = clone(oldValue);
+    option.immediate && cb(oldValue, void 0);
+    binding(() => {
+      if (cleanup)
+        return true;
+      const value = source();
+      const bool = option.deep ? isEquals(value, backup) : value === oldValue;
+      if (!bool) {
+        cb(value, reactive(backup));
+        backup = clone(value);
+      }
+    });
+    return () => {
+      cleanup = true;
+    };
+  }
+
   // src/h.ts
   function h(tag, attrs, ...children) {
     return {
@@ -113,7 +179,7 @@
 
   // src/createElement.ts
   function createElement(tag, attrs = {}, children = "") {
-    if ([void 0, null, "", true, false].includes(children))
+    if (noRenderValue(children))
       return;
     if (typeof tag === "string") {
       return createElementReal(tag, attrs, children);
@@ -209,7 +275,7 @@
     return createElement(tag, attrs, children);
   }
   function renderToString({ tag, attrs, children }) {
-    if ([void 0, null, "", true, false].includes(children))
+    if (noRenderValue(children))
       return "";
     if (typeof tag === "string") {
       let attrStr = "";
@@ -257,11 +323,14 @@
 
   // src/index.tsx
   function Comp(props) {
+    watch(() => props.count(), (value) => {
+      console.log(value);
+    });
     return /* @__PURE__ */ h("span", null, props.count);
   }
   function App() {
     const count = ref(1);
-    return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h(Comp, { count: count.value }), () => count.value & 1 ? /* @__PURE__ */ h(Comp, { count: count.value }) : "o", () => null, /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"));
+    return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h(Comp, { count: () => count.value }), /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"));
   }
   var html = renderToString(/* @__PURE__ */ h(App, null));
   console.log(html);

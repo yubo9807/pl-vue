@@ -7,9 +7,13 @@ import { h, Fragment } from "./h";
 import { render, renderToString } from "./render";
 
 type Props = {
-  count: number
+  count: () => number
 }
 function Comp(props: Props) {
+
+  watch(() => props.count(), value => {
+    console.log(value)
+  })
   return <span>
     {props.count}
   </span>
@@ -20,9 +24,7 @@ function App() {
   const count = ref(1);
 
   return <div>
-    <Comp count={count.value} />
-    {() => count.value & 1 ? <Comp count={count.value} /> : 'o'}
-    {() => null}
+    <Comp count={() => count.value} />
     <button onclick={() => count.value ++}>click</button>
   </div>
 }

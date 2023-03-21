@@ -63,3 +63,12 @@ export function isEquals(val1: any, val2: any) {
 export function isAssignmentValueToNode(value: any) {
   return ['string', 'number'].includes(typeof value);
 }
+
+/**
+ * 不进行渲染的值
+ * @param value 
+ * @returns 
+ */
+export function noRenderValue(value: any) {
+  return [void 0, null, '', true, false].includes(value);
+}
