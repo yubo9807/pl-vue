@@ -2,7 +2,7 @@ import { binding } from "./reactivity/depend";
 import { isType } from "./utils/judge";
 import { AnyObj } from "./utils/type";
 
-type Tag = string
+type Tag = string | Function
 type Attrs = AnyObj
 type Children = any
 
@@ -16,10 +16,16 @@ type Children = any
 export function createElement(tag: Tag, attrs: Attrs = {}, children: Children = ''): HTMLElement | DocumentFragment {
   if ([undefined, null, '', true, false].includes(children)) return;
 
-  if (!tag) {
-    return createElementFragment(children);
-  } else {
+  if (typeof tag === 'string') {
     return createElementReal(tag, attrs, children);
+  } else if (typeof tag === 'function') {
+    // 节点片段 <></>
+    if (tag.name === 'Fragment') {
+      return createElementFragment(children);
+    }
+    // 组件
+    const h = tag(attrs);
+    return createElement(h.tag, h.attrs, h.children);
   }
 }
 
@@ -30,7 +36,7 @@ export function createElement(tag: Tag, attrs: Attrs = {}, children: Children = 
  * @param children 
  * @returns 
  */
-function createElementReal(tag: Tag, attrs: Attrs = {}, children: Children = ''): HTMLElement {
+function createElementReal(tag: string, attrs: Attrs = {}, children: Children = ''): HTMLElement {
   const el = document.createElement(tag);
 
   if (children instanceof Array) {
@@ -38,16 +44,27 @@ function createElementReal(tag: Tag, attrs: Attrs = {}, children: Children = '')
       if (val instanceof Array) {
         el.appendChild(createElementFragment(val));
       } else if (isType(val) === 'object') {
-        const node = createElementReal(val.tag, val.attrs, val.children);
+        const node = createElement(val.tag, val.attrs, val.children);
         el.appendChild(node);
       } else if (['string', 'number'].includes(typeof val)) {
         const textNode = document.createTextNode(val.toString());
         el.appendChild(textNode);
       } else if (typeof val === 'function') {
-        const textNode = document.createTextNode('');
-        el.appendChild(textNode);
+        const fragment = document.createDocumentFragment();
+        let cache = null;
         binding(() => {
-          textNode.nodeValue = val().toString();
+          cache && cache.nodeName !== '#document-fragment' && cache.remove();
+          const value = val();
+          if (['string', 'number'].includes(typeof value)) {
+            const textNode = document.createTextNode(value.toString());
+            fragment.appendChild(textNode);
+            cache = textNode;
+          } else {
+            const node = createElement(value.tag, value.attrs, value.children);
+            fragment.appendChild(node);
+            cache = node;
+          }
+          el.appendChild(fragment);
         })
       }
     })
@@ -88,8 +105,13 @@ function createElementFragment(children: Children): DocumentFragment {
   if (children instanceof Array) {
     // 递归调用
     children.forEach(val => {
-      const node = createElement(val.tag, val.attrs, val.children);
-      fragment.appendChild(node);
+      if (['string', 'number'].includes(typeof val)) {
+        const textNode = document.createTextNode(val.toString());
+        fragment.appendChild(textNode);
+      } else if (isType(val) === 'object') {
+        const node = createElement(val.tag, val.attrs, val.children);
+        fragment.appendChild(node);
+      }
     })
   } else if (['string', 'number'].includes(typeof children)) {
     const textNode = document.createTextNode(children);

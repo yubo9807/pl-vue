@@ -107,15 +107,22 @@
       children
     };
   }
+  function Fragment({ children }) {
+    return children;
+  }
 
   // src/createElement.ts
   function createElement(tag, attrs = {}, children = "") {
     if ([void 0, null, "", true, false].includes(children))
       return;
-    if (!tag) {
-      return createElementFragment(children);
-    } else {
+    if (typeof tag === "string") {
       return createElementReal(tag, attrs, children);
+    } else if (typeof tag === "function") {
+      if (tag.name === "Fragment") {
+        return createElementFragment(children);
+      }
+      const h2 = tag(attrs);
+      return createElement(h2.tag, h2.attrs, h2.children);
     }
   }
   function createElementReal(tag, attrs = {}, children = "") {
@@ -125,16 +132,27 @@
         if (val instanceof Array) {
           el.appendChild(createElementFragment(val));
         } else if (isType(val) === "object") {
-          const node = createElementReal(val.tag, val.attrs, val.children);
+          const node = createElement(val.tag, val.attrs, val.children);
           el.appendChild(node);
         } else if (["string", "number"].includes(typeof val)) {
           const textNode = document.createTextNode(val.toString());
           el.appendChild(textNode);
         } else if (typeof val === "function") {
-          const textNode = document.createTextNode("");
-          el.appendChild(textNode);
+          const fragment = document.createDocumentFragment();
+          let cache = null;
           binding(() => {
-            textNode.nodeValue = val().toString();
+            cache && cache.nodeName !== "#document-fragment" && cache.remove();
+            const value = val();
+            if (["string", "number"].includes(typeof value)) {
+              const textNode = document.createTextNode(value.toString());
+              fragment.appendChild(textNode);
+              cache = textNode;
+            } else {
+              const node = createElement(value.tag, value.attrs, value.children);
+              fragment.appendChild(node);
+              cache = node;
+            }
+            el.appendChild(fragment);
           });
         }
       });
@@ -164,8 +182,13 @@
     const fragment = document.createDocumentFragment();
     if (children instanceof Array) {
       children.forEach((val) => {
-        const node = createElement(val.tag, val.attrs, val.children);
-        fragment.appendChild(node);
+        if (["string", "number"].includes(typeof val)) {
+          const textNode = document.createTextNode(val.toString());
+          fragment.appendChild(textNode);
+        } else if (isType(val) === "object") {
+          const node = createElement(val.tag, val.attrs, val.children);
+          fragment.appendChild(node);
+        }
       });
     } else if (["string", "number"].includes(typeof children)) {
       const textNode = document.createTextNode(children);
@@ -184,42 +207,15 @@
   function render({ tag, attrs, children }) {
     return createElement(tag, attrs, children);
   }
-  function renderToString({ tag, attrs, children }) {
-    if ([void 0, null, "", true, false].includes(children))
-      return "";
-    let attrStr = "";
-    for (const attr in attrs) {
-      attrStr += ` ${attr}=${attrs[attr]}`;
-    }
-    let text = "";
-    if (typeof children === "function") {
-      text = children();
-    } else if (["string", "number"].includes(typeof children)) {
-      text = children;
-    } else if (children instanceof Array) {
-      children.forEach((val) => {
-        if (isType(val) === "object") {
-          text += renderToString(val);
-        } else if (typeof val === "function") {
-          text += val();
-        } else if (["string", "number"].includes(typeof val)) {
-          text += val;
-        } else if (val instanceof Array) {
-          val.forEach((item) => {
-            text += renderToString(item);
-          });
-        }
-      });
-    }
-    let html2 = "";
-    html2 += `<${tag}${attrStr}>${text}</${tag}>`;
-    return html2;
-  }
 
   // src/index.tsx
-  var count = ref(0);
-  var jsx = /* @__PURE__ */ h("div", { className: "wrap" }, () => count.value, /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"), [1, 2, 3].map((val) => /* @__PURE__ */ h("span", null, val)), null, 0, () => count.value & 1 ? "\u5355\u6570" : "\u53CC\u6570");
-  var html = renderToString(jsx);
-  console.log(html);
-  document.getElementById("root").appendChild(render(jsx));
+  function Comp(props) {
+    const count = ref(0);
+    return /* @__PURE__ */ h(Fragment, null, "hello ", props.text, /* @__PURE__ */ h("span", null, () => count.value), /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"));
+  }
+  function App() {
+    const hidden = ref(true);
+    return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h("div", null, () => hidden.value ? /* @__PURE__ */ h("span", null, "heihei") : /* @__PURE__ */ h(Comp, { text: "word" })), /* @__PURE__ */ h("div", null, /* @__PURE__ */ h("button", { onclick: () => hidden.value = !hidden.value }, () => hidden.value ? "\u9690\u85CF" : "\u663E\u793A")));
+  }
+  document.getElementById("root").appendChild(render(/* @__PURE__ */ h(App, null)));
 })();

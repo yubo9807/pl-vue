@@ -6,17 +6,36 @@ import { watch, watchEffect } from "./watch";
 import { h, Fragment } from "./h";
 import { render, renderToString } from "./render";
 
-const count = ref(0);
+type Props = {
+  text: string
+}
+function Comp(props: Props) {
+  const count = ref(0);
 
-const jsx = <div className='wrap'>
-  {() => count.value}
-  <button onclick={() => count.value ++}>click</button>
-  {[1,2,3].map((val) => <span>{val}</span>)}
-  {null}
-  {0}
-  {() => count.value & 1 ? '单数' : '双数'}
-</div>
+  return <>
+    hello {props.text}
+    <span>{() => count.value}</span>
+    <button onclick={() => count.value ++}>click</button>
+  </>
+}
 
-const html = renderToString(jsx)
-console.log(html)
-document.getElementById('root').appendChild(render(jsx));
+function App() {
+
+  const hidden = ref(true);
+
+  return <div>
+    <div>
+      {() => hidden.value
+        ? <span>heihei</span>
+        : <Comp text='word' />
+      }
+    </div>
+    <div>
+      <button onclick={() => hidden.value = !hidden.value}>{() => hidden.value ? '隐藏' : '显示'}</button>
+    </div>
+  </div>
+}
+
+// const html = renderToString(<App />)
+// console.log(html)
+document.getElementById('root').appendChild(render(<App />));

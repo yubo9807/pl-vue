@@ -18,34 +18,45 @@ export function render({ tag, attrs, children }) {
 export function renderToString({ tag, attrs, children }) {
   if ([void 0, null, '', true, false].includes(children)) return '';
 
-  let attrStr = '';
-  for (const attr in attrs) {
-    attrStr += ` ${attr}=${attrs[attr]}`;
+  if (typeof tag === 'string') {
+    // 属性值拼接
+    let attrStr = '';
+    for (const attr in attrs) {
+      attrStr += ` ${attr}=${attrs[attr]}`;
+    }
+
+    // 子节点拼接
+    let text = '';
+    if (typeof children === 'function') {
+      text = children();
+    } else if (['string', 'number'].includes(typeof children)) {
+      text = children;
+    } else if (children instanceof Array) {
+      children.forEach(val => {
+        if (isType(val) === 'object') {
+          text += renderToString(val);
+        } else if (typeof val === 'function') {
+          text += val();
+        } else if (['string', 'number'].includes(typeof val)) {
+          text += val;
+        } else if (val instanceof Array) {
+          val.forEach(item => {
+            text += renderToString(item);
+          })
+        }
+      })
+    }
+
+    return `<${tag}${attrStr}>${text}</${tag}>`;
+  } else if (typeof tag === 'function') {
+    if (tag.name === 'Fragment') {
+      let html = '';
+      children.forEach(val => {
+        html += renderToString(val);
+      })
+      return html;
+    } else {
+      return renderToString(tag(attrs));
+    }
   }
-
-  let text = '';
-  if (typeof children === 'function') {
-    text = children();
-  } else if (['string', 'number'].includes(typeof children)) {
-    text = children;
-  } else if (children instanceof Array) {
-    children.forEach(val => {
-      if (isType(val) === 'object') {
-        text += renderToString(val);
-      } else if (typeof val === 'function') {
-        text += val();
-      } else if (['string', 'number'].includes(typeof val)) {
-        text += val;
-      } else if (val instanceof Array) {
-        val.forEach(item => {
-          text += renderToString(item);
-        })
-      }
-    })
-  }
-
-  let html = '';
-  html += `<${tag}${attrStr}>${text}</${tag}>`;
-
-  return html;
 }
