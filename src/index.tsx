@@ -12,11 +12,11 @@ type Props = {
 function Comp(props: Props) {
   const count = ref(0);
 
-  return <>
+  return <div>
     hello {props.text}
     <span>{() => count.value}</span>
     <button onclick={() => count.value ++}>click</button>
-  </>
+  </div>
 }
 
 function App() {
@@ -27,7 +27,7 @@ function App() {
     <div>
       {() => hidden.value
         ? <span>heihei</span>
-        : <Comp text='word' />
+        : <Comp text="word" />
       }
     </div>
     <div>

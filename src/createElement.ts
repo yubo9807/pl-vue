@@ -50,21 +50,15 @@ function createElementReal(tag: string, attrs: Attrs = {}, children: Children = 
         const textNode = document.createTextNode(val.toString());
         el.appendChild(textNode);
       } else if (typeof val === 'function') {
-        const fragment = document.createDocumentFragment();
-        let cache = null;
         binding(() => {
-          cache && cache.nodeName !== '#document-fragment' && cache.remove();
           const value = val();
           if (['string', 'number'].includes(typeof value)) {
             const textNode = document.createTextNode(value.toString());
-            fragment.appendChild(textNode);
-            cache = textNode;
+            el.replaceChildren('', textNode)
           } else {
             const node = createElement(value.tag, value.attrs, value.children);
-            fragment.appendChild(node);
-            cache = node;
+            el.replaceChildren('', node)
           }
-          el.appendChild(fragment);
         })
       }
     })

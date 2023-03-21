@@ -107,9 +107,6 @@
       children
     };
   }
-  function Fragment({ children }) {
-    return children;
-  }
 
   // src/createElement.ts
   function createElement(tag, attrs = {}, children = "") {
@@ -138,21 +135,15 @@
           const textNode = document.createTextNode(val.toString());
           el.appendChild(textNode);
         } else if (typeof val === "function") {
-          const fragment = document.createDocumentFragment();
-          let cache = null;
           binding(() => {
-            cache && cache.nodeName !== "#document-fragment" && cache.remove();
             const value = val();
             if (["string", "number"].includes(typeof value)) {
               const textNode = document.createTextNode(value.toString());
-              fragment.appendChild(textNode);
-              cache = textNode;
+              el.replaceChildren("", textNode);
             } else {
               const node = createElement(value.tag, value.attrs, value.children);
-              fragment.appendChild(node);
-              cache = node;
+              el.replaceChildren("", node);
             }
-            el.appendChild(fragment);
           });
         }
       });
@@ -211,7 +202,7 @@
   // src/index.tsx
   function Comp(props) {
     const count = ref(0);
-    return /* @__PURE__ */ h(Fragment, null, "hello ", props.text, /* @__PURE__ */ h("span", null, () => count.value), /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"));
+    return /* @__PURE__ */ h("div", null, "hello ", props.text, /* @__PURE__ */ h("span", null, () => count.value), /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"));
   }
   function App() {
     const hidden = ref(true);
