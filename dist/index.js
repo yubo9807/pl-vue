@@ -138,16 +138,23 @@
           const textNode = document.createTextNode(val.toString());
           el.appendChild(textNode);
         } else if (typeof val === "function") {
+          const textNode = document.createTextNode("");
+          let backupNode = null;
           binding(() => {
             const value = val();
             if (isAssignmentValueToNode(value)) {
-              const textNode = document.createTextNode(value.toString());
-              el.replaceChildren("", textNode);
+              textNode.nodeValue = value.toString();
+              if (backupNode !== null) {
+                backupNode.parentElement.replaceChild(textNode, backupNode);
+              }
+              backupNode = textNode;
             } else {
               const node = createElement(value.tag, value.attrs, value.children);
-              el.replaceChildren("", node);
+              backupNode ? backupNode.parentElement.replaceChild(node, backupNode) : el.appendChild(node);
+              backupNode = node;
             }
           });
+          el.appendChild(textNode);
         }
       });
     } else if (isAssignmentValueToNode(children)) {
@@ -250,12 +257,11 @@
 
   // src/index.tsx
   function Comp(props) {
-    const count = ref(0);
-    return /* @__PURE__ */ h("div", null, "hello ", props.text, /* @__PURE__ */ h("span", null, () => count.value), /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"));
+    return /* @__PURE__ */ h("span", null, props.count);
   }
   function App() {
-    const hidden = ref(true);
-    return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h("div", null, () => hidden.value ? /* @__PURE__ */ h("span", null, "heihei") : /* @__PURE__ */ h(Comp, { text: "word" })), /* @__PURE__ */ h("div", null, /* @__PURE__ */ h("button", { onclick: () => hidden.value = !hidden.value }, () => hidden.value ? "\u9690\u85CF" : "\u663E\u793A")));
+    const count = ref(1);
+    return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h(Comp, { count: count.value }), () => count.value & 1 ? /* @__PURE__ */ h(Comp, { count: count.value }) : "o", () => count.value, /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"));
   }
   var html = renderToString(/* @__PURE__ */ h(App, null));
   console.log(html);

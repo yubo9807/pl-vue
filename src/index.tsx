@@ -7,32 +7,23 @@ import { h, Fragment } from "./h";
 import { render, renderToString } from "./render";
 
 type Props = {
-  text: string
+  count: number
 }
 function Comp(props: Props) {
-  const count = ref(0);
-
-  return <div>
-    hello {props.text}
-    <span>{() => count.value}</span>
-    <button onclick={() => count.value ++}>click</button>
-  </div>
+  return <span>
+    {props.count}
+  </span>
 }
 
 function App() {
 
-  const hidden = ref(true);
+  const count = ref(1);
 
   return <div>
-    <div>
-      {() => hidden.value
-        ? <span>heihei</span>
-        : <Comp text="word" />
-      }
-    </div>
-    <div>
-      <button onclick={() => hidden.value = !hidden.value}>{() => hidden.value ? '隐藏' : '显示'}</button>
-    </div>
+    <Comp count={count.value} />
+    {() => count.value & 1 ? <Comp count={count.value} /> : 'o'}
+    {() => count.value}
+    <button onclick={() => count.value ++}>click</button>
   </div>
 }
 

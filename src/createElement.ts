@@ -51,16 +51,24 @@ function createElementReal(tag: string, attrs: Attrs = {}, children: Children = 
         const textNode = document.createTextNode(val.toString());
         el.appendChild(textNode);
       } else if (typeof val === 'function') {
+        const textNode = document.createTextNode('');
+        let backupNode = null;
         binding(() => {
           const value = val();
+
           if (isAssignmentValueToNode(value)) {
-            const textNode = document.createTextNode(value.toString());
-            el.replaceChildren('', textNode)
+            textNode.nodeValue = value.toString();
+            if (backupNode !== null) {
+              backupNode.parentElement.replaceChild(textNode, backupNode);
+            }
+            backupNode = textNode;
           } else {
             const node = createElement(value.tag, value.attrs, value.children);
-            el.replaceChildren('', node)
+            backupNode ? backupNode.parentElement.replaceChild(node, backupNode) : el.appendChild(node)
+            backupNode = node;
           }
         })
+        el.appendChild(textNode);
       }
     })
   } else if (isAssignmentValueToNode(children)) {
