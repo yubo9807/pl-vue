@@ -22,7 +22,7 @@ function App() {
   return <div>
     <Comp count={count.value} />
     {() => count.value & 1 ? <Comp count={count.value} /> : 'o'}
-    {() => count.value}
+    {() => null}
     <button onclick={() => count.value ++}>click</button>
   </div>
 }

@@ -62,7 +62,7 @@ function createElementReal(tag: string, attrs: Attrs = {}, children: Children = 
               backupNode.parentElement.replaceChild(textNode, backupNode);
             }
             backupNode = textNode;
-          } else {
+          } else if (isType(value) === 'object') {
             const node = createElement(value.tag, value.attrs, value.children);
             backupNode ? backupNode.parentElement.replaceChild(node, backupNode) : el.appendChild(node)
             backupNode = node;

@@ -38,8 +38,8 @@ export function renderToString({ tag, attrs, children }) {
         } else if (typeof val === 'function') {
           const value = val();
           if (isAssignmentValueToNode(value)) {
-            text += val();
-          } else {
+            text += value.toString();
+          } else if (isType(value) === 'object') {
             text += renderToString(value);
           }
         } else if (isAssignmentValueToNode(val)) {

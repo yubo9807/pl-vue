@@ -148,7 +148,7 @@
                 backupNode.parentElement.replaceChild(textNode, backupNode);
               }
               backupNode = textNode;
-            } else {
+            } else if (isType(value) === "object") {
               const node = createElement(value.tag, value.attrs, value.children);
               backupNode ? backupNode.parentElement.replaceChild(node, backupNode) : el.appendChild(node);
               backupNode = node;
@@ -228,8 +228,8 @@
           } else if (typeof val === "function") {
             const value = val();
             if (isAssignmentValueToNode(value)) {
-              text += val();
-            } else {
+              text += value.toString();
+            } else if (isType(value) === "object") {
               text += renderToString(value);
             }
           } else if (isAssignmentValueToNode(val)) {
@@ -261,7 +261,7 @@
   }
   function App() {
     const count = ref(1);
-    return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h(Comp, { count: count.value }), () => count.value & 1 ? /* @__PURE__ */ h(Comp, { count: count.value }) : "o", () => count.value, /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"));
+    return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h(Comp, { count: count.value }), () => count.value & 1 ? /* @__PURE__ */ h(Comp, { count: count.value }) : "o", () => null, /* @__PURE__ */ h("button", { onclick: () => count.value++ }, "click"));
   }
   var html = renderToString(/* @__PURE__ */ h(App, null));
   console.log(html);
