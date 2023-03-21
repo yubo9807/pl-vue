@@ -219,7 +219,12 @@
           if (isType(val) === "object") {
             text += renderToString(val);
           } else if (typeof val === "function") {
-            text += val();
+            const value = val();
+            if (isAssignmentValueToNode(value)) {
+              text += val();
+            } else {
+              text += renderToString(value);
+            }
           } else if (isAssignmentValueToNode(val)) {
             text += val;
           } else if (val instanceof Array) {
