@@ -9,6 +9,9 @@
   function hasOwn(target, key) {
     return Object.prototype.hasOwnProperty.call(target, key);
   }
+  function isAssignmentValueToNode(value) {
+    return ["string", "number"].includes(typeof value);
+  }
 
   // src/reactivity/depend.ts
   var func = null;
@@ -131,13 +134,13 @@
         } else if (isType(val) === "object") {
           const node = createElement(val.tag, val.attrs, val.children);
           el.appendChild(node);
-        } else if (["string", "number"].includes(typeof val)) {
+        } else if (isAssignmentValueToNode(val)) {
           const textNode = document.createTextNode(val.toString());
           el.appendChild(textNode);
         } else if (typeof val === "function") {
           binding(() => {
             const value = val();
-            if (["string", "number"].includes(typeof value)) {
+            if (isAssignmentValueToNode(value)) {
               const textNode = document.createTextNode(value.toString());
               el.replaceChildren("", textNode);
             } else {
@@ -147,7 +150,7 @@
           });
         }
       });
-    } else if (["string", "number"].includes(typeof children)) {
+    } else if (isAssignmentValueToNode(children)) {
       el.innerText = children.toString();
     } else if (typeof children === "function") {
       binding(() => {
@@ -173,7 +176,7 @@
     const fragment = document.createDocumentFragment();
     if (children instanceof Array) {
       children.forEach((val) => {
-        if (["string", "number"].includes(typeof val)) {
+        if (isAssignmentValueToNode(val)) {
           const textNode = document.createTextNode(val.toString());
           fragment.appendChild(textNode);
         } else if (isType(val) === "object") {
@@ -181,7 +184,7 @@
           fragment.appendChild(node);
         }
       });
-    } else if (["string", "number"].includes(typeof children)) {
+    } else if (isAssignmentValueToNode(children)) {
       const textNode = document.createTextNode(children);
       fragment.appendChild(textNode);
     } else if (typeof children === "function") {
@@ -198,6 +201,47 @@
   function render({ tag, attrs, children }) {
     return createElement(tag, attrs, children);
   }
+  function renderToString({ tag, attrs, children }) {
+    if ([void 0, null, "", true, false].includes(children))
+      return "";
+    if (typeof tag === "string") {
+      let attrStr = "";
+      for (const attr in attrs) {
+        attrStr += ` ${attr}=${attrs[attr]}`;
+      }
+      let text = "";
+      if (typeof children === "function") {
+        text = children();
+      } else if (isAssignmentValueToNode(children)) {
+        text = children;
+      } else if (children instanceof Array) {
+        children.forEach((val) => {
+          if (isType(val) === "object") {
+            text += renderToString(val);
+          } else if (typeof val === "function") {
+            text += val();
+          } else if (isAssignmentValueToNode(val)) {
+            text += val;
+          } else if (val instanceof Array) {
+            val.forEach((item) => {
+              text += renderToString(item);
+            });
+          }
+        });
+      }
+      return `<${tag}${attrStr}>${text}</${tag}>`;
+    } else if (typeof tag === "function") {
+      if (tag.name === "Fragment") {
+        let html2 = "";
+        children.forEach((val) => {
+          html2 += renderToString(val);
+        });
+        return html2;
+      } else {
+        return renderToString(tag(attrs));
+      }
+    }
+  }
 
   // src/index.tsx
   function Comp(props) {
@@ -208,5 +252,7 @@
     const hidden = ref(true);
     return /* @__PURE__ */ h("div", null, /* @__PURE__ */ h("div", null, () => hidden.value ? /* @__PURE__ */ h("span", null, "heihei") : /* @__PURE__ */ h(Comp, { text: "word" })), /* @__PURE__ */ h("div", null, /* @__PURE__ */ h("button", { onclick: () => hidden.value = !hidden.value }, () => hidden.value ? "\u9690\u85CF" : "\u663E\u793A")));
   }
+  var html = renderToString(/* @__PURE__ */ h(App, null));
+  console.log(html);
   document.getElementById("root").appendChild(render(/* @__PURE__ */ h(App, null)));
 })();

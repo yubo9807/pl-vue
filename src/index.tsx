@@ -36,6 +36,6 @@ function App() {
   </div>
 }
 
-// const html = renderToString(<App />)
-// console.log(html)
+const html = renderToString(<App />)
+console.log(html)
 document.getElementById('root').appendChild(render(<App />));

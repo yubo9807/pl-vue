@@ -54,3 +54,12 @@ export function isEquals(val1: any, val2: any) {
     return val1 === val2;
   }
 }
+
+/**
+ * 可以直接赋值给 dom 节点
+ * @param value 
+ * @returns 
+ */
+export function isAssignmentValueToNode(value: any) {
+  return ['string', 'number'].includes(typeof value);
+}

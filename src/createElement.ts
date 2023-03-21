@@ -1,10 +1,11 @@
 import { binding } from "./reactivity/depend";
-import { isType } from "./utils/judge";
+import { isAssignmentValueToNode, isType } from "./utils/judge";
 import { AnyObj } from "./utils/type";
 
 type Tag = string | Function
 type Attrs = AnyObj
 type Children = any
+
 
 /**
  * 创建元素
@@ -46,13 +47,13 @@ function createElementReal(tag: string, attrs: Attrs = {}, children: Children = 
       } else if (isType(val) === 'object') {
         const node = createElement(val.tag, val.attrs, val.children);
         el.appendChild(node);
-      } else if (['string', 'number'].includes(typeof val)) {
+      } else if (isAssignmentValueToNode(val)) {
         const textNode = document.createTextNode(val.toString());
         el.appendChild(textNode);
       } else if (typeof val === 'function') {
         binding(() => {
           const value = val();
-          if (['string', 'number'].includes(typeof value)) {
+          if (isAssignmentValueToNode(value)) {
             const textNode = document.createTextNode(value.toString());
             el.replaceChildren('', textNode)
           } else {
@@ -62,7 +63,7 @@ function createElementReal(tag: string, attrs: Attrs = {}, children: Children = 
         })
       }
     })
-  } else if (['string', 'number'].includes(typeof children)) {
+  } else if (isAssignmentValueToNode(children)) {
     el.innerText = children.toString();
   } else if (typeof children === 'function') {
     binding(() => {
@@ -99,7 +100,7 @@ function createElementFragment(children: Children): DocumentFragment {
   if (children instanceof Array) {
     // 递归调用
     children.forEach(val => {
-      if (['string', 'number'].includes(typeof val)) {
+      if (isAssignmentValueToNode(val)) {
         const textNode = document.createTextNode(val.toString());
         fragment.appendChild(textNode);
       } else if (isType(val) === 'object') {
@@ -107,7 +108,7 @@ function createElementFragment(children: Children): DocumentFragment {
         fragment.appendChild(node);
       }
     })
-  } else if (['string', 'number'].includes(typeof children)) {
+  } else if (isAssignmentValueToNode(children)) {
     const textNode = document.createTextNode(children);
     fragment.appendChild(textNode);
   } else if (typeof children === 'function') {

@@ -1,5 +1,5 @@
 import { createElement } from "./createElement";
-import { isType } from "./utils/judge";
+import { isAssignmentValueToNode, isType } from "./utils/judge";
 
 /**
  * 创建组件虚拟 DOM 树的函数
@@ -29,7 +29,7 @@ export function renderToString({ tag, attrs, children }) {
     let text = '';
     if (typeof children === 'function') {
       text = children();
-    } else if (['string', 'number'].includes(typeof children)) {
+    } else if (isAssignmentValueToNode(children)) {
       text = children;
     } else if (children instanceof Array) {
       children.forEach(val => {
@@ -37,7 +37,7 @@ export function renderToString({ tag, attrs, children }) {
           text += renderToString(val);
         } else if (typeof val === 'function') {
           text += val();
-        } else if (['string', 'number'].includes(typeof val)) {
+        } else if (isAssignmentValueToNode(val)) {
           text += val;
         } else if (val instanceof Array) {
           val.forEach(item => {
