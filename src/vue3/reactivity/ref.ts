@@ -47,7 +47,7 @@ export function ref<T>(value: T): Ref<T> {
  * @param ref
  */
 export function isRef(ref: unknown) {
-  return ref && ref[ISREF];
+  return ref && !!ref[ISREF];
 }
 
 /**
