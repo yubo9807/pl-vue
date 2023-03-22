@@ -1,6 +1,7 @@
 import { binding } from "../reactivity/depend";
 import { isAssignmentValueToNode, isType, noRenderValue } from "../utils/judge";
 import { AnyObj } from "../utils/type";
+import { isFragment } from "./h";
 
 type Tag = string | Function
 type Attrs = AnyObj
@@ -21,7 +22,7 @@ export function createElement(tag: Tag, attrs: Attrs = {}, children: Children = 
     return createElementReal(tag, attrs, children);
   } else if (typeof tag === 'function') {
     // 节点片段 <></>
-    if (tag.name === 'Fragment') {
+    if (isFragment(tag)) {
       return createElementFragment(children);
     }
     // 组件

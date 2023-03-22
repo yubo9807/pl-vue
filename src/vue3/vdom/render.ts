@@ -1,5 +1,6 @@
 import { createElement } from "./create-element";
 import { isAssignmentValueToNode, isType, noRenderValue } from "../utils/judge";
+import { isFragment } from "./h";
 
 /**
  * 创建组件虚拟 DOM 树的函数
@@ -54,7 +55,7 @@ export function renderToString({ tag, attrs, children }) {
 
     return `<${tag}${attrStr}>${text}</${tag}>`;
   } else if (typeof tag === 'function') {
-    if (tag.name === 'Fragment') {
+    if (isFragment(tag)) {
       let html = '';
       children.forEach(val => {
         html += renderToString(val);
