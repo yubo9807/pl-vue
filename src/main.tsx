@@ -4,21 +4,27 @@ import style from './module.scss';
 function App() {
   const count = ref(1);
   return <>
-    <Comp text="word" count={() => count.value} />
     {/* 响应式数据写为函数形式 */}
+    父组件
     <h1 className={style.demo}>{() => count.value}</h1>
+    <Comp count={() => count.value}>
+      <p>插槽1</p>
+      <p>插槽2</p>
+    </Comp>
     <button onclick={() => count.value ++}>click</button>
   </>
 }
 
 type CompProps = {
-  text: string
+  children?: any
   count: () => number  // 想让父组件传递的 props 具有响应式也同样传一个函数类型
 }
 function Comp(props: CompProps) {
+  console.log(props.children)
   return <div>
-    hello {props.text}
-    {props.count}
+    <p>子组件</p>
+    <p>props: {props.count}</p>
+    <p>{props.children}</p>
   </div>
 }
 

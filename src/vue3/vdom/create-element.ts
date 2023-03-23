@@ -1,5 +1,6 @@
 import { binding } from "../reactivity/depend";
 import { isAssignmentValueToNode, isType, noRenderValue } from "../utils/judge";
+import { clone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 import { isFragment } from "./h";
 
@@ -26,7 +27,8 @@ export function createElement(tag: Tag, attrs: Attrs = {}, children: Children = 
       return createElementFragment(children);
     }
     // 组件
-    const h = tag(attrs);
+    const props = clone(Object.assign({}, attrs, { children }));
+    const h = tag(props);
     return createElement(h.tag, h.attrs, h.children);
   }
 }

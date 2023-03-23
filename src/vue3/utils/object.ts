@@ -1,3 +1,4 @@
+import { isType } from "./judge";
 
 /**
  * 深度克隆对象
@@ -5,7 +6,7 @@
  */
 export function clone(obj: any) {
   if (obj instanceof Array) return cloneArray(obj);
-  else if (obj instanceof Object) return cloneObject(obj);
+  else if (isType(obj) === 'object') return cloneObject(obj);
   else return obj;
 }
 
