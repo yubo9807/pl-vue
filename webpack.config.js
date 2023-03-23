@@ -11,7 +11,6 @@ module.exports = {
   },
   mode: 'production',
   // devtool: "source-map",
-  watch: false,
   resolve: {
     extensions: [".ts", ".tsx"],
     alias: {
