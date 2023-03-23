@@ -7,15 +7,18 @@ module.exports = {
   entry: './src/main.tsx',
   output: {
     path: path.resolve('./dist'),
-    filename: '[name].[fullhash:8].js'
+    filename: 'assets/[name].[fullhash:8].js'
   },
-  mode: 'production',
   // devtool: "source-map",
   resolve: {
     extensions: [".ts", ".tsx"],
     alias: {
       '@': path.resolve(__dirname, 'src')
     },
+  },
+  watchOptions: {
+    aggregateTimeout: 1000,
+    ignored: /node_modules/,
   },
   module: {
     rules: [
@@ -47,7 +50,7 @@ module.exports = {
       template: './public/index.html'
     }),
     new MiniCssExtractPlugin({
-      filename: '[name].[fullhash:8].css',
+      filename: 'assets/[name].[fullhash:8].css',
     }),
   ],
 }
