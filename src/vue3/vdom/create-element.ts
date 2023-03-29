@@ -69,6 +69,13 @@ function createElementReal(tag: string, attrs: Attrs = {}, children: Children = 
             const node = createElement(value.tag, value.attrs, value.children);
             backupNode ? backupNode.parentElement.replaceChild(node, backupNode) : el.appendChild(node)
             backupNode = node;
+          } else if (value instanceof Array) {
+            const div = document.createElement('div');
+            const fragment = createElementFragment(value);
+            div.appendChild(fragment);
+            backupNode ? el.replaceChildren(...backupNode, fragment) : el.appendChild(fragment);
+            backupNode = div.children;
+            div.remove();
           }
         })
         el.appendChild(textNode);
