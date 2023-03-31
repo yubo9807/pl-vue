@@ -1,4 +1,4 @@
-import { h, ref, Fragment, render } from "./vue3";
+import { h, ref, Fragment, render, renderToString } from "./vue3";
 import style from './module.scss';
 
 function App() {
@@ -6,7 +6,7 @@ function App() {
   return <>
     {/* 响应式数据写为函数形式 */}
     父组件
-    <h1 className={style.demo}>{() => count.value}</h1>
+    <h1 className={style.demo} style={{ transform: () => `translateX(${count.value}px)`, color: 'red' }}>{() => count.value}</h1>
     <Comp count={() => count.value}>
       <p>插槽1</p>
       <p>插槽2</p>
@@ -27,4 +27,5 @@ function Comp(props: CompProps) {
   </div>
 }
 
+// console.log(renderToString(<App />))
 document.getElementById('root').appendChild(render(<App />));
