@@ -61,7 +61,7 @@ export function isEquals(val1: any, val2: any) {
  * @returns 
  */
 export function isAssignmentValueToNode(value: any) {
-  return ['string', 'number'].includes(typeof value);
+  return ['string', 'number'].includes(typeof value) && value !== '';
 }
 
 /**

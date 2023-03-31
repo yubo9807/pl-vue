@@ -1,4 +1,4 @@
-import { createElement } from "./create-element";
+import { createElement, createTree } from "./create-element";
 import { isAssignmentValueToNode, isType, noRenderValue } from "../utils/judge";
 import { isFragment } from "./h";
 
@@ -8,7 +8,11 @@ import { isFragment } from "./h";
  * @returns 
  */
 export function render({ tag, attrs, children }) {
-  return createElement(tag, attrs, children);
+  const tree = createTree(tag, attrs, children)
+  const dom = createElement(tree.tag, tree.attrs, tree.children);
+  // console.log(tree)
+  // console.dir(dom)
+  return dom;
 }
 
 /**
