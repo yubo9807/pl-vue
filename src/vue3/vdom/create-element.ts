@@ -1,5 +1,5 @@
 import { binding } from "../reactivity/depend";
-import { isAssignmentValueToNode, isType } from "../utils/judge"
+import { isAssignmentValueToNode, isReactiveChangeAttr, isType } from "../utils/judge"
 import { clone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 import { isFragment } from "./h";
@@ -109,8 +109,15 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
   })
 
   // attrs 赋值
-  for (const prop in attrs) {
-    el[prop] = attrs[prop];
+  for (const attr in attrs) {
+    const value = attrs[attr];
+    el[attr] = value;
+
+    if (typeof value === 'function' && isReactiveChangeAttr(attr)) {
+      binding(() => {
+        el[attr] = value();
+      })
+    }
   }
 
   // 对样式单独处理
@@ -219,7 +226,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
   for (const attr in attrs) {
     if (attr.startsWith('on')) continue;
 
-    let value = attrs[attr];
+    let value = typeof attrs[attr] === 'function' && isReactiveChangeAttr(attr) ? attrs[attr]() : attrs[attr];
 
     if (attr === 'className') {
       attrStr += ` class=${value}`;

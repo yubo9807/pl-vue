@@ -65,6 +65,14 @@ export function isAssignmentValueToNode(value: any) {
 }
 
 /**
+ * 可进行响应式改变的属性
+ * @param attr
+ */
+export function isReactiveChangeAttr(attr: string) {
+  return ['className', 'innerHTML', 'innerText', 'textContent'].includes(attr);
+}
+
+/**
  * 不进行渲染的值
  * @param value 
  * @returns 
