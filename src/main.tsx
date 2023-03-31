@@ -20,7 +20,6 @@ type CompProps = {
   count: () => number  // 想让父组件传递的 props 具有响应式也同样传一个函数类型
 }
 function Comp(props: CompProps) {
-  console.log(props.children)
   return <div>
     <p>子组件</p>
     <p>props: {props.count}</p>

@@ -172,12 +172,6 @@ function createElementFragment(children: Children[]) {
           backupNode = node;
         } else if (value instanceof Array) {
           console.warn('暂不支持直接返回一个数组，请包裹一层标签')
-          // const div = document.createElement('div');
-          // const fragmentNode = createElementFragment(value);
-          // div.appendChild(fragmentNode);
-          // backupNode ? fragment.replaceChildren(...backupNode, fragmentNode) : fragment.appendChild(fragmentNode);
-          // backupNode = div.children;
-          // div.remove();
         }
       })
       fragment.appendChild(textNode);
