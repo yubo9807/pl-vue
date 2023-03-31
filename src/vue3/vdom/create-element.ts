@@ -6,8 +6,7 @@ import { isFragment } from "./h";
 
 type Tag = string | Function
 type Attrs = AnyObj
-type Children = any
-
+type Children = any[]
 
 
 
@@ -18,7 +17,7 @@ type Children = any
  * @param children 
  * @returns 
  */
-export function createTree(tag: string | Function, attrs = {}, children = []) {
+export function createTree(tag: Tag, attrs: Attrs = {}, children: Children = []) {
   
   if (typeof tag === 'function' && !isFragment(tag)) {  // 组件
     const props = clone(Object.assign({}, attrs, { children }));
@@ -68,7 +67,7 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
  * @param children 
  * @returns 
  */
-function createElementReal(tag: string | Function, attrs: AnyObj = {}, children: any = '') {
+function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['']) {
 
   if (isFragment(tag)) {
     return createElement(tag, attrs, children);
@@ -138,7 +137,7 @@ function createElementReal(tag: string | Function, attrs: AnyObj = {}, children:
  * @param children 
  * @returns 
  */
-function createElementFragment(children: Children[]) {
+function createElementFragment(children: Children) {
 
   const fragment = document.createDocumentFragment();
 
