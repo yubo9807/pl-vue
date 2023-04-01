@@ -47,7 +47,8 @@ export function isEquals(val1: any, val2: any) {
     if (keys1.length !== keys2.length) return false;
     for (const key of keys1) {
       if (!keys2.includes(key)) return false;
-      return isEquals(val1[key], val2[key]);
+      const bool = isEquals(val1[key], val2[key]);
+      if (!bool) return false;
     }
     return true;
   } else {

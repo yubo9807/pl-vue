@@ -1,5 +1,5 @@
 import { binding } from "../reactivity/depend";
-import { isAssignmentValueToNode, isReactiveChangeAttr, isType } from "../utils/judge"
+import { isAssignmentValueToNode, isReactiveChangeAttr, isType, isEquals } from "../utils/judge"
 import { clone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 import { isFragment } from "./h";
@@ -161,24 +161,52 @@ function createElementFragment(children: Children) {
     // 响应式数据
     if (typeof val === 'function') {
       const textNode = document.createTextNode('');
-      let backupNode = null;
+      let backupNodes = [];
+      let runCount = 0;
 
       binding(() => {
-        const value = val();
+        let value = val();
+        if (!(value instanceof Array)) value = [value];
+        value = value.filter(val => val);
 
-        if (isAssignmentValueToNode(value)) {
-          textNode.nodeValue = value.toString();
-          if (backupNode !== null) {
-            backupNode.parentElement.replaceChild(textNode, backupNode);
+        value.forEach((val, i: number) => {
+          const key = i;
+          const index = backupNodes.findIndex(item => item.key === key);
+          if (index >= 0) {  // 节点已经存在
+            if (isEquals(val, backupNodes[index].tree)) return;  // 任何数据都没有变化
+            
+            // 节点替换，重新备份
+            let node = null;
+            if (isAssignmentValueToNode(val)) node = document.createTextNode(val.toString());
+            else if (isType(val) === 'object') node = createElement(val.tag, val.attrs, val.children);
+
+            backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
+            backupNodes[index].tree = val;
+            backupNodes[index].node = node;
+          } else {  // 节点不存在，追加节点
+            let node = null;
+            if (isAssignmentValueToNode(val)) node = document.createTextNode(val.toString());
+            else if (isType(val) === 'object') node = createElement(val.tag, val.attrs, val.children);
+
+            if (runCount === 0) {
+              fragment.appendChild(node);
+            } else {
+              const lastNode = backupNodes[backupNodes.length - 1].node;
+              const nextNode = lastNode.nextSibling;
+              lastNode.parentElement.insertBefore(node, nextNode);
+            }
+            backupNodes.push({ key, tree: val, node });
           }
-          backupNode = textNode;
-        } else if (isType(value) === 'object') {
-          const node = createElement(value.tag, value.attrs, value.children);
-          backupNode ? backupNode.parentElement.replaceChild(node, backupNode) : fragment.appendChild(node)
-          backupNode = node;
-        } else if (value instanceof Array) {
-          console.warn('暂不支持直接返回一个数组，请包裹一层标签')
+        })
+
+        // 检查有没有要删除的节点
+        if (backupNodes.length > value.length) {
+          for (let i = value.length; i < backupNodes.length; i ++) {
+            backupNodes[i].node.remove();
+          }
         }
+
+        runCount ++;
       })
       fragment.appendChild(textNode);
       return;
