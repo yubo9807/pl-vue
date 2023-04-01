@@ -1,7 +1,7 @@
-import { binding } from "./reactivity/depend";
-import { reactive } from "./reactivity/reactive";
-import { isEquals } from "./utils/judge";
-import { clone } from "./utils/object";
+import { binding } from "./depend";
+import { reactive } from "./reactive";
+import { isEquals } from "../utils/judge";
+import { clone } from "../utils/object";
 
 type Source = () => {}
 type Option = {
