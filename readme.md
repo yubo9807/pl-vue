@@ -2,7 +2,7 @@
 
 参照 vue3 所写响应式源码，并结合 JSX 实现节点挂载、组件数据传递
 
-## Use
+## 示例
 
 ```tsx
 import { h, ref, Fragment, render } from "./vue3";
@@ -39,7 +39,7 @@ document.getElementById('root').appendChild(render(<App />));
 reactive 是核心，所有响应式数据都是建立在 reactive 的基础上。
 
 ```ts
-function reacttive(target) {
+function reactive(target) {
   return new Proxy(target, {
 
     // 获取
@@ -203,3 +203,8 @@ export function Fragment({ children }) {
   return children;
 }
 ```
+
+### createElement
+
+通过生成的虚拟 DOM 树形结构进行创建，返回一个根节点或一个节点片段。
+这里我将响应式数据规定为了一个函数，因为这样可以最简单直接的对响应式数据进行处理。
