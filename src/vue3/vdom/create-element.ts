@@ -1,5 +1,5 @@
 import { binding } from "../reactivity/depend";
-import { isAssignmentValueToNode, isReactiveChangeAttr, isType, isEquals, isVirtualDomObject } from "../utils/judge"
+import { isAssignmentValueToNode, isReactiveChangeAttr, isType, isEquals, isVirtualDomObject, isComponent } from "../utils/judge"
 import { clone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 import { isFragment } from "./h";
@@ -9,6 +9,7 @@ type Attrs = AnyObj
 type Children = any[]
 
 
+const comp = Symbol('__comp');
 
 /**
  * 对 dom 树简单的做下处理，去掉包裹的组件层
@@ -22,6 +23,7 @@ export function createTree(tag: Tag, attrs: Attrs = {}, children: Children = [])
   if (typeof tag === 'function' && !isFragment(tag)) {  // 组件
     const props = clone(Object.assign({}, attrs, { children }));
     const h = tag(props);
+    h.attrs[comp] = comp;
     return createTree(h.tag, h.attrs, h.children);
   }
 
@@ -117,7 +119,6 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
 
     if (attr === 'ref') {
       value.value = el;
-      continue;
     }
 
     if (typeof value === 'function' && isReactiveChangeAttr(attr)) {
@@ -182,17 +183,12 @@ function createElementFragment(children: Children) {
             if (isEquals(val, backupNodes[index].tree)) return;  // 任何数据都没有变化
             
             // 节点替换，重新备份
-            let node = null;
-            if (isAssignmentValueToNode(val)) node = document.createTextNode(val.toString());
-            else if (isType(val) === 'object') node = createElement(val.tag, val.attrs, val.children);
-
+            const node = createNode(val);
             backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
             backupNodes[index].tree = val;
             backupNodes[index].node = node;
           } else {  // 节点不存在，追加节点
-            let node = null;
-            if (isAssignmentValueToNode(val)) node = document.createTextNode(val.toString());
-            else if (isType(val) === 'object') node = createElement(val.tag, val.attrs, val.children);
+            const node = createNode(val);
 
             if (runCount === 0) {
               fragment.appendChild(node);
@@ -236,6 +232,31 @@ function createElementFragment(children: Children) {
   })
 
   return fragment;
+
+}
+
+/**
+ * 创建一个节点
+ * @param value 
+ * @returns 
+ */
+function createNode(value) {
+
+  // 文本节点
+  if (isAssignmentValueToNode(value)) {
+    return document.createTextNode(value.toString());
+  }
+
+  // 节点
+  if (isVirtualDomObject(value)) {
+    return createElement(value.tag, value.attrs, value.children);
+  }
+
+  // 组件
+  if (isType(value) === 'object' && isComponent(value.tag)) {
+    const tree = createTree(value.tag, value.attrs, value.children);
+    return createElement(tree.tag, tree.attrs, tree.children);
+  }
 
 }
 

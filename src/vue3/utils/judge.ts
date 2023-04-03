@@ -84,6 +84,15 @@ export function isVirtualDomObject(o) {
 }
 
 /**
+ * 是否为一个组件
+ * @param o 
+ * @returns 
+ */
+export function isComponent(tag) {
+  return !isFragment(tag) && typeof tag === 'function';
+}
+
+/**
  * 不进行渲染的值
  * @param value 
  * @returns 
