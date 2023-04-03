@@ -9,7 +9,18 @@ import { createElement, createHTML, createTree } from "./create-element";
 export function render({ tag, attrs, children }) {
   const tree = createTree(tag, attrs, children)
   const dom = createElement(tree.tag, tree.attrs, tree.children);
-  Promise.resolve().then(mounted);  // 等节点挂载完之后执行
+
+  if (dom instanceof DocumentFragment) {  // 节点片段
+    const node = dom.children[0];
+    Promise.resolve().then(() => {  // 在挂载后执行
+      node.parentNode && mounted();
+    })
+  } else if (dom instanceof HTMLElement) {
+    Promise.resolve().then(() => {
+      dom.parentNode && mounted();
+    })
+  }
+
   return dom;
 }
 
