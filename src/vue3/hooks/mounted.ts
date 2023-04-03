@@ -1,11 +1,18 @@
+import { nextTick } from "../utils/next-tick";
 
 const collect = [];
+
+let isMounted = false;
 
 /**
  * 创建一个 mounted 钩子
  * @param fn 
  */
 export function onMounted(fn: Function) {
+  if (isMounted) {
+    nextTick(fn);
+    return;
+  }
   collect.push(fn);
 }
 
@@ -16,4 +23,6 @@ export function mounted() {
   collect.forEach(fn => {
     fn();
   })
+  collect.length = 0;
+  isMounted = true;
 }

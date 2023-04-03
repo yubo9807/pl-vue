@@ -1,4 +1,5 @@
 import { mounted } from "../hooks/mounted";
+import { nextTick } from "../utils/next-tick";
 import { createElement } from "./create-element";
 import { createHTML } from "./create-html";
 import { createTree } from "./create-tree";
@@ -14,11 +15,11 @@ export function render({ tag, attrs, children }) {
 
   if (dom instanceof DocumentFragment) {  // 节点片段
     const node = dom.children[0];
-    Promise.resolve().then(() => {  // 在挂载后执行
+    nextTick(() => {  // 在挂载后执行
       node.parentNode && mounted();
     })
   } else if (dom instanceof HTMLElement) {
-    Promise.resolve().then(() => {
+    nextTick(() => {
       dom.parentNode && mounted();
     })
   }
