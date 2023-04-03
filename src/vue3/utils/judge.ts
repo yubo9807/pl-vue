@@ -1,3 +1,4 @@
+import { isFragment } from "../vdom/h";
 import { Key } from "./type";
 
 export type Type = 'string'    | 'number'  | 'boolean' |
@@ -71,6 +72,15 @@ export function isAssignmentValueToNode(value: any) {
  */
 export function isReactiveChangeAttr(attr: string) {
   return ['className', 'innerHTML', 'innerText', 'textContent'].includes(attr);
+}
+
+/**
+ * 是否为一个虚拟 dom 对象
+ * @param o 
+ * @returns 
+ */
+export function isVirtualDomObject(o) {
+  return isType(o) === 'object' && (typeof o.tag === 'string' || isFragment(o.tag));
 }
 
 /**

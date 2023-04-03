@@ -1,5 +1,5 @@
 import { binding } from "../reactivity/depend";
-import { isAssignmentValueToNode, isReactiveChangeAttr, isType, isEquals } from "../utils/judge"
+import { isAssignmentValueToNode, isReactiveChangeAttr, isType, isEquals, isVirtualDomObject } from "../utils/judge"
 import { clone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 import { isFragment } from "./h";
@@ -100,11 +100,13 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
     }
   
     // 节点
-    if (isType(val) === 'object') {
+    if (isVirtualDomObject(val)) {
       const node = createElementReal(val.tag, val.attrs, val.children);
       el.appendChild(node);
       return;
     }
+
+    console.warn(`render: 不支持 ${val} 值渲染`);
 
   })
 
@@ -160,7 +162,6 @@ function createElementFragment(children: Children) {
   
     // 响应式数据
     if (typeof val === 'function') {
-      const textNode = document.createTextNode('');
       let backupNodes = [];
       let runCount = 0;
 
@@ -208,7 +209,6 @@ function createElementFragment(children: Children) {
 
         runCount ++;
       })
-      fragment.appendChild(textNode);
       return;
     }
   
@@ -220,11 +220,13 @@ function createElementFragment(children: Children) {
     }
   
     // 节点
-    if (isType(val) === 'object') {
+    if (isVirtualDomObject(val)) {
       const node = createElementReal(val.tag, val.attrs, val.children);
       fragment.appendChild(node);
       return;
     }
+
+    console.warn(`render: 不支持 ${val} 值渲染`);
 
   })
 
@@ -299,7 +301,7 @@ function createHTMLFragment(children: Children) {
     }
 
     // 节点
-    if (isType(val) === 'object') {
+    if (isVirtualDomObject(val)) {
       text += createHTML(val.tag, val.attrs, val.children);
       return;
     }
@@ -316,6 +318,8 @@ function createHTMLFragment(children: Children) {
       text += createHTMLFragment([value]);
       return;
     }
+
+    console.warn(`renderToString: 不支持 ${val} 值渲染`);
 
   })
   return text;

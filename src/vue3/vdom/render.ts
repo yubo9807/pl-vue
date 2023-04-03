@@ -1,6 +1,4 @@
 import { createElement, createHTML, createTree } from "./create-element";
-import { isAssignmentValueToNode, isType, noRenderValue } from "../utils/judge";
-import { isFragment } from "./h";
 
 /**
  * 创建组件虚拟 DOM 树的函数
