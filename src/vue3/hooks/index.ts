@@ -1,0 +1,1 @@
+export { onMounted } from './mounted';

@@ -1,3 +1,4 @@
+import { mounted } from "../hooks/mounted";
 import { createElement, createHTML, createTree } from "./create-element";
 
 /**
@@ -8,6 +9,7 @@ import { createElement, createHTML, createTree } from "./create-element";
 export function render({ tag, attrs, children }) {
   const tree = createTree(tag, attrs, children)
   const dom = createElement(tree.tag, tree.attrs, tree.children);
+  Promise.resolve().then(mounted);  // 等节点挂载完之后执行
   return dom;
 }
 
