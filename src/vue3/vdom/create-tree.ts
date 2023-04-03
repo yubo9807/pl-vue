@@ -11,13 +11,12 @@ import { Attrs, Children, Tag } from "./type";
  * @returns 
  */
 export function createTree(tag: Tag, attrs: Attrs = {}, children: Children = []) {
-  
+
   if (typeof tag === 'function' && !isFragment(tag)) {  // 组件
     const props = clone(Object.assign({}, attrs, { children }));
     const h = tag(props);
     return createTree(h.tag, h.attrs, h.children);
   }
-
 
   const newChildren = []
   children.forEach(val => {
@@ -29,4 +28,5 @@ export function createTree(tag: Tag, attrs: Attrs = {}, children: Children = [])
     }
   })
   return { tag, attrs, children: newChildren };
+
 }

@@ -51,21 +51,21 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
       el.appendChild(textNode);
       return;
     }
-  
+
     // 响应式数据
     if (typeof val === 'function') {
       const fragment = createElementFragment([val]);
       el.appendChild(fragment);
       return;
     }
-  
+
     // 节点片段
     if (val instanceof Array) {
       const fragment = createElementFragment(val);
       el.appendChild(fragment);
       return;
     }
-  
+
     // 节点
     if (isVirtualDomObject(val)) {
       const node = createElementReal(val.tag, val.attrs, val.children);
@@ -130,7 +130,7 @@ function createElementFragment(children: Children) {
       fragment.appendChild(textNode);
       return;
     }
-  
+
     // 响应式数据
     if (typeof val === 'function') {
       let backupNodes = [];
@@ -149,7 +149,7 @@ function createElementFragment(children: Children) {
           const index = backupNodes.findIndex(item => item.key === key);
           if (index >= 0) {  // 节点已经存在
             if (isEquals(val, backupNodes[index].tree)) return;  // 任何数据都没有变化
-            
+
             // 节点替换，重新备份
             const node = createNode(val);
             backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
@@ -191,7 +191,7 @@ function createElementFragment(children: Children) {
       fragment.appendChild(fragmentNode);
       return;
     }
-  
+
     // 节点
     if (isVirtualDomObject(val)) {
       const node = createElementReal(val.tag, val.attrs, val.children);

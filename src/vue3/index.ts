@@ -6,4 +6,5 @@ export { computed } from "./reactivity/computed";
 export { watch, watchEffect } from "./reactivity/watch";
 export { h, Fragment } from "./vdom/h";
 export { render, renderToString } from "./vdom/render";
+export { nextTick } from './utils/next-tick';
 export { onMounted } from './hooks';
