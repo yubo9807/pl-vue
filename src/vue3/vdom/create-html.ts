@@ -1,6 +1,7 @@
-import { isAssignmentValueToNode, isReactiveChangeAttr, isType, isVirtualDomObject } from "../utils/judge";
+import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject } from "./utils";
 import { isFragment } from "./h";
 import { Attrs, Children, Tag } from "./type";
+import { isType } from "../utils/judge";
 
 
 /**
