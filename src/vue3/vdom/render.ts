@@ -1,5 +1,6 @@
 import { mounted } from "../hooks/mounted";
-import { createElement, createHTML, createTree } from "./create-element";
+import { createElement, createTree } from "./create-element";
+import { createHTML } from "./create-html";
 
 /**
  * 创建组件虚拟 DOM 树的函数
