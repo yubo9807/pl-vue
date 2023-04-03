@@ -115,6 +115,11 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
     const value = attrs[attr];
     el[attr] = value;
 
+    if (attr === 'ref') {
+      value.value = el;
+      continue;
+    }
+
     if (typeof value === 'function' && isReactiveChangeAttr(attr)) {
       binding(() => {
         el[attr] = value();
