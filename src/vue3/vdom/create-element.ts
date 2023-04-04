@@ -135,6 +135,7 @@ function createElementFragment(children: Children) {
     if (typeof val === 'function') {
       let backupNodes = [];
       let runCount = 0;
+      let parent = null;
 
       const textNode = document.createTextNode('');  // 用于记录添加位置
       fragment.appendChild(textNode);
@@ -161,11 +162,13 @@ function createElementFragment(children: Children) {
             if (runCount === 0) {
               fragment.appendChild(node);
             } else if (backupNodes.length === 0) {
-              textNode.parentElement.insertBefore(node, textNode.nextSibling);
+              parent ??= textNode.parentElement;
+              parent.insertBefore(node, textNode.nextSibling);
+              textNode.remove();
             } else {
-              const lastNode = backupNodes[backupNodes.length - 1].node;
-              const nextNode = lastNode.nextSibling;
-              lastNode.parentElement.insertBefore(node, nextNode);
+              const prevNode = backupNodes[backupNodes.length - 1].node;
+              const lastNode = prevNode.nextSibling;
+              prevNode.parentElement.insertBefore(node, lastNode);
             }
             backupNodes.push({ key, tree: val, node });
           }
