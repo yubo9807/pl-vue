@@ -148,9 +148,12 @@ function createElementFragment(children: Children) {
 
       binding(() => {
         let value = val();
-        if (value instanceof Array) {
-          value.length > 50 && console.warn(`渲染子节点过多，有严重的性能问题。建议包裹一层虚拟节点 '<></>'`);
-        } else {
+        if (isType(value) && isFragment(value.tag)) {
+          console.warn('不支持响应式节点片段渲染');
+          return;
+        }
+
+        if (!(value instanceof Array)) {
           value = [value];
         }
         value = value.filter(val => val);
