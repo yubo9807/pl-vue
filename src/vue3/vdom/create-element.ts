@@ -73,6 +73,12 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
       return;
     }
 
+    if (isType(val) === 'object' && isComponent(val.tag)) {
+      const node = createNode(val);
+      el.appendChild(node);
+      return;
+    }
+
     console.warn(`render: 不支持 ${val} 值渲染`);
 
   })
@@ -142,7 +148,11 @@ function createElementFragment(children: Children) {
 
       binding(() => {
         let value = val();
-        if (!(value instanceof Array)) value = [value];
+        if (value instanceof Array) {
+          value.length > 50 && console.warn(`渲染子节点过多，有严重的性能问题。建议包裹一层虚拟节点 '<></>'`);
+        } else {
+          value = [value];
+        }
         value = value.filter(val => val);
 
         value.forEach((val, i: number) => {
@@ -198,6 +208,12 @@ function createElementFragment(children: Children) {
     // 节点
     if (isVirtualDomObject(val)) {
       const node = createElementReal(val.tag, val.attrs, val.children);
+      fragment.appendChild(node);
+      return;
+    }
+
+    if (isType(val) === 'object' && isComponent(val.tag)) {
+      const node = createNode(val);
       fragment.appendChild(node);
       return;
     }
