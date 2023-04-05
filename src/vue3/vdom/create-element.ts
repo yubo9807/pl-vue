@@ -165,13 +165,19 @@ function createElementFragment(children: Children) {
         let i = 0;
         while (i < value.length) {
           const val = value[i];
-          if (!val) continue;
+          if (!val) {
+            i++;
+            continue;
+          }
 
           const key = i;
           const index = backupNodes.findIndex(item => item.key === key);
           if (index >= 0) {  // 节点已经存在
-            if (isEquals(val, backupNodes[index].tree)) return;  // 任何数据都没有变化
-  
+            if (isEquals(val, backupNodes[index].tree)) {  // 任何数据都没有变化
+              i++;
+              continue;
+            }
+
             // 节点替换，重新备份
             const node = createNode(val);
             backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
@@ -179,7 +185,7 @@ function createElementFragment(children: Children) {
             backupNodes[index].node = node;
           } else {  // 节点不存在，追加节点
             const node = createNode(val);
-  
+
             if (runCount === 0) {
               fragment.appendChild(node);
             } else if (backupNodes.length === 0) {
