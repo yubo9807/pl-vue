@@ -161,14 +161,17 @@ function createElementFragment(children: Children) {
         if (!(value instanceof Array)) {
           value = [value];
         }
-        value = value.filter(val => val);
 
-        value.forEach((val, i: number) => {
+        let i = 0;
+        while (i < value.length) {
+          const val = value[i];
+          if (!val) continue;
+
           const key = i;
           const index = backupNodes.findIndex(item => item.key === key);
           if (index >= 0) {  // 节点已经存在
             if (isEquals(val, backupNodes[index].tree)) return;  // 任何数据都没有变化
-
+  
             // 节点替换，重新备份
             const node = createNode(val);
             backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
@@ -176,7 +179,7 @@ function createElementFragment(children: Children) {
             backupNodes[index].node = node;
           } else {  // 节点不存在，追加节点
             const node = createNode(val);
-
+  
             if (runCount === 0) {
               fragment.appendChild(node);
             } else if (backupNodes.length === 0) {
@@ -190,7 +193,9 @@ function createElementFragment(children: Children) {
             }
             backupNodes.push({ key, tree: val, node });
           }
-        })
+
+          i++;
+        }
 
         // 检查有没有要删除的节点
         if (backupNodes.length > value.length) {
