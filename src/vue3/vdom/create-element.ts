@@ -16,11 +16,16 @@ import { Tag, Attrs, Children } from "./type";
  * @returns 
  */
 export function createElement(tag: Tag, attrs: Attrs, children: Children) {
-  if (typeof tag === 'string') {
-    return createElementReal(tag, attrs, children)
+  if (typeof tag === 'string') {  // 节点
+    return createElementReal(tag, attrs, children);
   }
   if (isFragment(tag)) {  // 节点片段
     return createElementFragment(children);
+  }
+  if (isComponent(tag)) {  // 组件
+    const props = Object.assign({}, attrs, { children });
+    const tree = tag(props);
+    return createElement(tree.tag, tree.attrs, tree.children);
   }
 }
 

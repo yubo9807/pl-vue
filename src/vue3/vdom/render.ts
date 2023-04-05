@@ -10,8 +10,7 @@ import { createTree } from "./create-tree";
  * @returns 
  */
 export function render({ tag, attrs, children }) {
-  const tree = createTree(tag, attrs, children)
-  const dom = createElement(tree.tag, tree.attrs, tree.children);
+  const dom = createElement(tag, attrs, children);
 
   if (dom instanceof DocumentFragment) {  // 节点片段
     const node = dom.children[0];
