@@ -2,7 +2,6 @@ import { mounted } from "../hooks/mounted";
 import { nextTick } from "../utils/next-tick";
 import { createElement } from "./create-element";
 import { createHTML } from "./create-html";
-import { createTree } from "./create-tree";
 
 /**
  * 创建组件虚拟 DOM 树的函数
@@ -32,7 +31,6 @@ export function render({ tag, attrs, children }) {
  * @returns 
  */
 export function renderToString({ tag, attrs, children }) {
-  const tree = createTree(tag, attrs, children);
-  const html = createHTML(tree.tag, tree.attrs, tree.children);
+  const html = createHTML(tag, attrs, children);
   return html;
 }

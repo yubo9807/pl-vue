@@ -145,7 +145,7 @@ function createElementFragment(children: Children) {
     // 响应式数据
     if (typeof val === 'function') {
       let backupNodes = [];
-      let runCount = 0;
+      let lockFirstRun = true;  // 锁：第一次运行
       let parent = null;
 
       const textNode = document.createTextNode('');  // 用于记录添加位置
@@ -186,7 +186,7 @@ function createElementFragment(children: Children) {
           } else {  // 节点不存在，追加节点
             const node = createNode(val);
 
-            if (runCount === 0) {
+            if (lockFirstRun) {
               fragment.appendChild(node);
             } else if (backupNodes.length === 0) {
               parent ??= textNode.parentElement;
@@ -211,7 +211,7 @@ function createElementFragment(children: Children) {
           }
         }
 
-        runCount ++;
+        lockFirstRun = false;
       })
 
       return;

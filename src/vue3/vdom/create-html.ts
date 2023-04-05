@@ -1,4 +1,4 @@
-import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject } from "./utils";
+import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr } from "./utils";
 import { isFragment } from "./h";
 import { Attrs, Children, Tag } from "./type";
 import { isType } from "../utils/judge";
@@ -17,6 +17,13 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
     const h = (tag as Function)(props);
     return createHTMLFragment(h);
   }
+
+  // 组件
+  if (isComponent(tag)) {
+    const props = Object.assign({}, attrs, { children });
+    const h = (tag as Function)(props);
+    return createHTML(h.tag, h.attrs, h.children);
+  } 
 
   // 属性
   let attrStr = '';
@@ -68,12 +75,6 @@ function createHTMLFragment(children: Children) {
       return;
     }
 
-    // 节点
-    if (isVirtualDomObject(val)) {
-      text += createHTML(val.tag, val.attrs, val.children);
-      return;
-    }
-
     // 节点片段
     if (val instanceof Array) {
       text += createHTMLFragment(val);
@@ -84,6 +85,12 @@ function createHTMLFragment(children: Children) {
     if (typeof val === 'function') {
       const value = val();
       text += createHTMLFragment([value]);
+      return;
+    }
+
+    // 节点 || 组件 || 虚拟节点
+    if (isType(val)) {
+      text += createHTML(val.tag, val.attrs, val.children);
       return;
     }
 

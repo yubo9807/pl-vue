@@ -33,7 +33,7 @@ export function isVirtualDomObject(o) {
  * @returns 
  */
 export function isComponent(tag) {
-  return !isFragment(tag) && typeof tag === 'function';
+  return typeof tag === 'function' && !isFragment(tag);
 }
 
 /**

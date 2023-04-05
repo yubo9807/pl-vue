@@ -27,5 +27,5 @@ function Comp(props: CompProps) {
   </div>
 }
 
-// console.log(renderToString(<App />))
+console.log(renderToString(<App />))
 document.getElementById('root').appendChild(render(<App />));
