@@ -5,6 +5,7 @@ import { AnyObj } from "../utils/type";
 import { createTree } from "./create-tree";
 import { isFragment } from "./h";
 import { Tag, Attrs, Children } from "./type";
+import { triggerUnmounted } from "../hooks";
 
 
 
@@ -153,22 +154,18 @@ function createElementFragment(children: Children) {
 
       binding(() => {
         let value = val();
-        if (isType(value) && isFragment(value.tag)) {
+        if (value && isType(value) && isFragment(value.tag)) {
           console.warn('不支持响应式节点片段渲染');
           return;
         }
 
         if (!(value instanceof Array)) {
-          value = [value];
+          value = [value].filter(val => val);
         }
 
         let i = 0;
         while (i < value.length) {
           const val = value[i];
-          if (!val) {
-            i++;
-            continue;
-          }
 
           const key = i;
           const index = backupNodes.findIndex(item => item.key === key);
@@ -181,6 +178,11 @@ function createElementFragment(children: Children) {
             // 节点替换，重新备份
             const node = createNode(val);
             backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
+
+            // 组件被卸载
+            const { tag } = backupNodes[index].tree;
+            isComponent(tag) && triggerUnmounted(tag);
+
             backupNodes[index].tree = val;
             backupNodes[index].node = node;
           } else {  // 节点不存在，追加节点
@@ -191,7 +193,6 @@ function createElementFragment(children: Children) {
             } else if (backupNodes.length === 0) {
               parent ??= textNode.parentElement;
               parent.insertBefore(node, textNode.nextSibling);
-              textNode.remove();
             } else {
               const prevNode = backupNodes[backupNodes.length - 1].node;
               const lastNode = prevNode.nextSibling;
@@ -207,6 +208,11 @@ function createElementFragment(children: Children) {
         if (backupNodes.length > value.length) {
           for (let i = value.length; i < backupNodes.length; i ++) {
             backupNodes[i].node.remove();
+
+            // 组件被卸载
+            const { tag } = backupNodes[i].tree;
+            isComponent(tag) && triggerUnmounted(tag);
+
             backupNodes.splice(i, 1);
           }
         }

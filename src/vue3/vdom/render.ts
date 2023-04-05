@@ -1,4 +1,4 @@
-import { mounted } from "../hooks/mounted";
+import { triggerMounted } from "../hooks";
 import { nextTick } from "../utils/next-tick";
 import { createElement } from "./create-element";
 import { createHTML } from "./create-html";
@@ -14,11 +14,11 @@ export function render({ tag, attrs, children }) {
   if (dom instanceof DocumentFragment) {  // 节点片段
     const node = dom.children[0];
     nextTick(() => {  // 在挂载后执行
-      node.parentNode && mounted();
+      node.parentNode && triggerMounted();
     })
   } else if (dom instanceof HTMLElement) {
     nextTick(() => {
-      dom.parentNode && mounted();
+      dom.parentNode && triggerMounted();
     })
   }
 

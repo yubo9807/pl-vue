@@ -1,1 +1,2 @@
-export { onMounted } from './mounted';
+export { onMounted, triggerMounted } from './mounted';
+export { onUnmounted, triggerUnmounted } from './unmounted';

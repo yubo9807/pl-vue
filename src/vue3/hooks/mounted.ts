@@ -19,7 +19,7 @@ export function onMounted(fn: Function) {
 /**
  * 执行所有 mounted 钩子
  */
-export function mounted() {
+export function triggerMounted() {
   collect.forEach(fn => {
     fn();
   })
