@@ -5,7 +5,7 @@ const collect = [];
 let isMounted = false;
 
 /**
- * 创建一个 mounted 钩子
+ * 注册一个 onMounted 钩子
  * @param fn 
  */
 export function onMounted(fn: Function) {
@@ -17,7 +17,7 @@ export function onMounted(fn: Function) {
 }
 
 /**
- * 执行所有 mounted 钩子
+ * 执行所有 onMounted 钩子
  */
 export function triggerMounted() {
   collect.forEach(fn => {

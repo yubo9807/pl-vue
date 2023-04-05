@@ -1,4 +1,4 @@
-import { triggerMounted } from "../hooks";
+import { triggerMounted, triggerBeforeMount } from "../hooks";
 import { nextTick } from "../utils/next-tick";
 import { createElement } from "./create-element";
 import { createHTML } from "./create-html";
@@ -10,11 +10,13 @@ import { createHTML } from "./create-html";
  */
 export function render({ tag, attrs, children }) {
   const dom = createElement(tag, attrs, children);
-
+  
+  // 执行钩子函数
+  triggerBeforeMount();
   if (dom instanceof DocumentFragment) {  // 节点片段
     const node = dom.children[0];
-    nextTick(() => {  // 在挂载后执行
-      node.parentNode && triggerMounted();
+    nextTick(() => {
+      node.parentNode && triggerMounted();  // 能找到父级节点，说明已经被挂载
     })
   } else if (dom instanceof HTMLElement) {
     nextTick(() => {

@@ -5,7 +5,7 @@ import { AnyObj } from "../utils/type";
 import { createTree } from "./create-tree";
 import { isFragment } from "./h";
 import { Tag, Attrs, Children } from "./type";
-import { triggerUnmounted } from "../hooks";
+import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
 
 
 
@@ -177,11 +177,11 @@ function createElementFragment(children: Children) {
 
             // 节点替换，重新备份
             const node = createNode(val);
-            backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
-
-            // 组件被卸载
             const { tag } = backupNodes[index].tree;
-            isComponent(tag) && triggerUnmounted(tag);
+
+            isComponent(tag) && triggerBeforeUnmount(tag);  // 组件卸载之前
+            backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
+            isComponent(tag) && triggerUnmounted(tag);      // 组件卸载之后
 
             backupNodes[index].tree = val;
             backupNodes[index].node = node;

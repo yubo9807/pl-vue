@@ -7,4 +7,5 @@ export { watch, watchEffect } from "./reactivity/watch";
 export { h, Fragment } from "./vdom/h";
 export { render, renderToString } from "./vdom/render";
 export { nextTick } from './utils/next-tick';
-export { onMounted, onUnmounted } from './hooks';
+export { onMounted, onUnmounted, onBeforeMount, onBeforeUnmount } from './hooks';
+
