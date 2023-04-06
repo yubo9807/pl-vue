@@ -1,4 +1,5 @@
 import { triggerMounted, triggerBeforeMount } from "../hooks";
+import { setLock } from "../hooks/utils";
 import { nextTick } from "../utils/next-tick";
 import { createElement } from "./create-element";
 import { createHTML } from "./create-html";
@@ -33,6 +34,8 @@ export function render({ tag, attrs, children }) {
  * @returns 
  */
 export function renderToString({ tag, attrs, children }) {
+  setLock(true);
   const html = createHTML(tag, attrs, children);
+  setLock(false);
   return html;
 }

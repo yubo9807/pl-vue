@@ -1,4 +1,5 @@
 import { nextTick } from "../utils/next-tick";
+import { hookLock } from "./utils";
 
 const collect = [];
 
@@ -9,6 +10,7 @@ let isMounted = false;
  * @param fn 
  */
 export function onMounted(fn: Function) {
+  if (hookLock) return;
   if (isMounted) {
     nextTick(fn);
     return;

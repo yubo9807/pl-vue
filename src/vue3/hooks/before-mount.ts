@@ -1,3 +1,4 @@
+import { hookLock } from "./utils";
 
 const collect = [];
 
@@ -8,6 +9,7 @@ let isBeforeMount = false;
  * @param fn 
  */
 export function onBeforeMount(fn: Function) {
+  if (hookLock) return;
   if (isBeforeMount) {
     fn();
     return;
