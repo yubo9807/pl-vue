@@ -207,14 +207,13 @@ function createElementFragment(children: Children) {
         // 检查有没有要删除的节点
         if (backupNodes.length > value.length) {
           for (let i = value.length; i < backupNodes.length; i ++) {
-            backupNodes[i].node.remove();
-
-            // 组件被卸载
             const { tag } = backupNodes[i].tree;
-            isComponent(tag) && triggerUnmounted(tag);
 
-            backupNodes.splice(i, 1);
+            isComponent(tag) && triggerBeforeUnmount(tag);  // 组件卸载之前
+            backupNodes[i].node.remove();
+            isComponent(tag) && triggerUnmounted(tag);      // 组件卸载之后
           }
+          backupNodes.splice(value.length, backupNodes.length - value.length);
         }
 
         lockFirstRun = false;
