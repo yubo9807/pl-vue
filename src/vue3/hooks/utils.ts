@@ -25,7 +25,9 @@ export function triggerSubCompHook(comp: Function, triggerHook: Function) {
   if (tree && isType(tree) === 'object') {
     tree.children.forEach(val => {
       if (isComponent(val.tag)) {
-        triggerHook(val.tag);
+        const { tag, attrs, children } = val;
+        const props = Object.assign({}, attrs, { children });
+        triggerHook(() => tag(props));
       }
     })
   }
