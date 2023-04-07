@@ -24,6 +24,8 @@ export function onUnmounted(comp: Function, fn: Function) {
  */
 export function triggerUnmounted(comp: Function) {
   const funcs = map.get(comp) || [];
+  if (funcs.length === 0) return;
+
   funcs.forEach(func => func());
   map.delete(comp);
 

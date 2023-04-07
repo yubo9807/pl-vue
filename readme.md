@@ -138,11 +138,11 @@ watch 是基于数据挂载实现的。既然已经有一个可以自动触发�
 ```ts
 // source 只实现了函数传参
 function watch(source: Function, cb: Function, option = {}) {
-	let cleanup = false;
+  let cleanup = false;
   if (cleanup) return;
 
   const oldValue = source();
-	option.immediate && cb(oldValue, viod 0);
+  option.immediate && cb(oldValue, viod 0);
 
 
   // 数据被调用，自执行
@@ -208,3 +208,8 @@ export function Fragment({ children }) {
 
 通过生成的虚拟 DOM 树形结构进行创建，返回一个根节点或一个节点片段。
 这里我将响应式数据规定为了一个函数，因为这样可以最简单直接的对响应式数据进行处理。
+
+### 钩子
+
+`onMounted` & `onBeforemount` 在挂载的前后执行，放在 `render` 中就好；
+`onUnmounted` & `onBeforeUnmount` 需要传递对应的组件名来找到对应的回调函数来执行。
