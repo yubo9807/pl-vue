@@ -1,4 +1,5 @@
 import { hasOwn, isObject } from "../utils/judge";
+import { nextTick } from "../utils/next-tick";
 import { AnyObj } from "../utils/type";
 import { dependencyCollection, distributeUpdates } from "./depend";
 import { isReadonly } from "./readonly";
@@ -36,16 +37,19 @@ export function reactive<T extends AnyObj>(target: T): T {
     set(target, key, value, receiver) {
 
       const oldValue = Reflect.get(target, key, receiver);
-      const result   = Reflect.set(target, key, value, receiver);
+      const result = Reflect.set(target, key, value, receiver);
 
       if (target[ReactiveFlags.IS_READONLY]) {
         return oldValue;
       }
 
-      if (result && oldValue !== value) {
-        // console.log(`%c update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`, 'color: orange');
-        distributeUpdates(target);
-      }
+      nextTick(() => {  // 利用时间循环机制，防止同一时刻多次将数据更新
+        const newValue = Reflect.get(target, key, receiver);  // 拿到最最新的值
+        if (result && oldValue !== value && newValue === value) {
+          // console.log(`%c update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`, 'color: orange');
+          distributeUpdates(target);  // 在同一时刻多次改变数据
+        }
+      })
 
       return result;
     },
