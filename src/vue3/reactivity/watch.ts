@@ -30,7 +30,7 @@ export function watch(source: Source, cb: Cb, option: Option = {}): Function {
     if (cleanup) return true;  // 被取消监听
 
     const value = source();
-    const bool = option.deep ? isEquals(value, backup) : value === oldValue;
+    const bool = option.deep ? isEquals(value, backup) : value === backup;
 
     if (!bool) {
       cb(value, reactive(backup));  // 源码中是将 oldValue 返回的
