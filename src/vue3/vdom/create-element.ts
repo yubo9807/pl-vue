@@ -1,6 +1,6 @@
 import { binding } from "../reactivity/depend";
 import { isType, isEquals } from '../utils/judge';
-import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent } from "./utils"
+import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue } from "./utils"
 import { AnyObj } from "../utils/type";
 import { createTree } from "./create-tree";
 import { isFragment } from "./h";
@@ -160,7 +160,7 @@ function createElementFragment(children: Children) {
         }
 
         if (!(value instanceof Array)) {
-          value = [value].filter(val => val);
+          value = [value].filter(val => !noRenderValue(val));
         }
 
         let i = 0;
