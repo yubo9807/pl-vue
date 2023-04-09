@@ -3,6 +3,7 @@ import { clone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 import { analysisRoute, currentRoute } from "./use-route";
 import { useRouter } from "./use-router";
+import { formatPath } from "./utils";
 
 export type Route = {
   name?:     string
@@ -32,7 +33,7 @@ export function createRouter(option: Option) {
 
   function recursion(routes: Route[], prefix = '') {
     routes.forEach(route => {
-      route.path = (prefix + route.path).replace(/\/+/, '/');
+      route.path = formatPath(prefix + route.path);
       if (route.children && route.children.length > 0) {
         recursion(route.children, route.path);
       }

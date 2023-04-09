@@ -1,4 +1,4 @@
-import { splicingUrl } from "./utils";
+import { formatPath, splicingUrl } from "./utils";
 import { analysisRoute, currentRoute } from "./use-route";
 import { base, Route, routes } from "./create-router";
 
@@ -17,8 +17,13 @@ export type Config = {
  * 向前 push 一个路由
  * @param option 
  */
-function push(option: Config) {
-  const path = splicingUrl(option);
+function push(option: Config | string) {
+  let path = '';
+  if (typeof option === 'string') {
+    path = formatPath(base + option);
+  } else {
+    path = splicingUrl(option);
+  }
   history.pushState({}, null, path);
   analysisRoute(location.href);
 }
@@ -27,8 +32,13 @@ function push(option: Config) {
  * 替换当前路由
  * @param option 
  */
-function replace(option: Config) {
-  const path = splicingUrl(option);
+function replace(option: Config | string) {
+  let path = '';
+  if (typeof option === 'string') {
+    path = formatPath(base + option);
+  } else {
+    path = splicingUrl(option);
+  }
   history.replaceState({}, null, path);
   analysisRoute(location.href);
 }
