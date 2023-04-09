@@ -1,6 +1,8 @@
-import { triggerSubCompHook, hookLock } from "./utils";
+import { nextTick } from "../utils/next-tick";
+import { Tree } from "../vdom/type";
+import { collectCompId, hookLock } from "./utils";
 
-const map = new WeakMap();
+const map = new Map();
 
 /**
  * 注册 onBeforeUnmount 钩子
@@ -10,24 +12,28 @@ const map = new WeakMap();
  */
 export function onBeforeUnmount(comp: Function, fn: Function) {
   if (hookLock) return;
-  const arr = map.get(comp) || [];
-  const isExist = arr.some(func => func === fn);
-  if (isExist) return;
-  
-  arr.push(fn);
-  map.set(comp, arr);
+  nextTick(() => {
+    const key = comp.prototype._id;
+    const arr = map.get(key) || [];
+    const isExist = arr.some(func => func === fn);
+    if (isExist) return;
+    
+    arr.push(fn);
+    map.set(key, arr);
+  })
 }
 
 /**
  * 执行对应的 onBeforeUnmount 钩子
  * @param comp 组件名
  */
-export function triggerBeforeUnmount(comp: Function) {
-  const funcs = map.get(comp) || [];
-  if (funcs.length === 0) return;
+export function triggerBeforeUnmount(tree: Tree) {
+  const comps = collectCompId(tree);
+  comps.forEach(key => {
+    const funcs = map.get(key) || [];
+    if (funcs.length === 0) return;
 
-  funcs.forEach(func => func());
-  map.delete(comp);
-
-  triggerSubCompHook(comp, triggerBeforeUnmount);
+    funcs.forEach(func => func());
+    map.delete(key);
+  })
 }

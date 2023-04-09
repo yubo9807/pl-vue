@@ -176,12 +176,11 @@ function createElementFragment(children: Children) {
 
             // 节点替换，重新备份
             const node = createNode(val);
-            const { tag, attrs, children } = backupNodes[index].tree;
-            const props = Object.assign({}, attrs, { children });
+            const originTree = backupNodes[index].tree;
 
-            isComponent(tag) && triggerBeforeUnmount(() => tag(props));  // 组件卸载之前
+            isComponent(originTree.tag) && triggerBeforeUnmount(originTree);  // 组件卸载之前
             backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
-            isComponent(tag) && triggerUnmounted(() => tag(props));      // 组件卸载之后
+            isComponent(originTree.tag) && triggerUnmounted(originTree);      // 组件卸载之后
 
             backupNodes[index].tree = val;
             backupNodes[index].node = node;
@@ -207,12 +206,11 @@ function createElementFragment(children: Children) {
         // 检查有没有要删除的节点
         if (backupNodes.length > value.length) {
           for (let i = value.length; i < backupNodes.length; i ++) {
-            const { tag, attrs, children } = backupNodes[i].tree;
-            const props = Object.assign({}, attrs, { children });
+            const originTree = backupNodes[i].tree;
 
-            isComponent(tag) && triggerBeforeUnmount(() => tag(props));  // 组件卸载之前
+            isComponent(originTree.tag) && triggerBeforeUnmount(originTree);  // 组件卸载之前
             backupNodes[i].node.remove();
-            isComponent(tag) && triggerUnmounted(() => tag(props));      // 组件卸载之后
+            isComponent(originTree.tag) && triggerUnmounted(originTree);      // 组件卸载之后
           }
           backupNodes.splice(value.length, backupNodes.length - value.length);
         }

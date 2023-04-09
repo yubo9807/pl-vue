@@ -1,13 +1,12 @@
-import { watch } from "../reactivity/watch";
 import { clone } from "../utils/object";
 import { AnyObj } from "../utils/type";
-import { analysisRoute, currentRoute } from "./use-route";
+import { analysisRoute } from "./use-route";
 import { useRouter } from "./use-router";
 import { formatPath } from "./utils";
 
 export type Route = {
   name?:     string
-  path:     string
+  path:      string
   component: Function
   redirect?: string
   meta?:     AnyObj
@@ -45,14 +44,6 @@ export function createRouter(option: Option) {
   window.addEventListener('popstate', () => {
     analysisRoute(location.href);
   })
-
-  watch(() => currentRoute.path, value => {
-    const router = useRouter();
-    const route = router.getRoutes().find(val => val.path === value);
-    if (route) {
-      // console.log('组件渲染', route)
-    }
-  }, { immediate: true })
 
   return useRouter();
 

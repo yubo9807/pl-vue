@@ -1,4 +1,4 @@
-import { h, Fragment, render } from "./vue3";
+import { h, Fragment, render, onUnmounted } from "./vue3";
 import style from './module.scss';
 import { createRouter, RouterView, RouterLink } from "./vue3/router";
 const routes = [
@@ -13,12 +13,14 @@ const routes = [
 ]
 
 function Home() {
+  onUnmounted(Home, () => {
+    console.log('首页被卸载')
+  })
   return <div className={style.demo}>home</div>
 }
 function About() {
   return <div>about</div>
 }
-
 
 function App() {
   return <>

@@ -19,17 +19,29 @@ export function setLock(bool: boolean) {
  * @param comp 
  * @param triggerHook 
  */
-export function triggerSubCompHook(comp: Function, triggerHook: Function) {
+export function collectCompId(tree) {
   hookLock = true;
-  const tree = comp();
-  if (tree && isType(tree) === 'object') {
-    tree.children.forEach(val => {
-      if (isComponent(val.tag)) {
-        const { tag, attrs, children } = val;
-        const props = Object.assign({}, attrs, { children });
-        triggerHook(() => tag(props));
-      }
-    })
+
+  const collect = [];
+
+  function recursion(tree) {
+    if (isType(tree) !== 'object') return;
+
+    const { tag, attrs, children } = tree;
+    const props = Object.assign({}, attrs, { children });
+    if (isComponent(tag)) {
+      collect.push(tag.prototype._id);
+      const newTree = tag(props);
+      recursion(newTree);
+    } else {
+      children.forEach(val => {
+        recursion(val);
+      })
+    }
   }
+  recursion(tree);
+
   hookLock = false;
+
+  return collect;
 }

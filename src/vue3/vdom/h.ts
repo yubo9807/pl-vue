@@ -1,6 +1,11 @@
-import { AnyObj } from "../utils/type";
+import { createId } from "../utils/string";
+import { Attrs, Children, Tag } from "./type";
+import { isComponent } from "./utils";
 
-export function h(tag: string, attrs: AnyObj, ...children: any[]) {
+export function h(tag: Tag, attrs: Attrs, ...children: Children) {
+  if (isComponent(tag)) {
+    (tag as Function).prototype._id = createId();
+  }
   return {
     tag,
     attrs: attrs || {},
