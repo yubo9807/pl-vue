@@ -2,7 +2,6 @@ import { binding } from "../reactivity/depend";
 import { isType, isEquals } from '../utils/judge';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue } from "./utils"
 import { AnyObj } from "../utils/type";
-import { createTree } from "./create-tree";
 import { isFragment } from "./h";
 import { Tag, Attrs, Children } from "./type";
 import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
@@ -80,7 +79,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
     }
 
     if (isType(val) === 'object' && isComponent(val.tag)) {
-      const node = createNode(val);
+      const node = createElement(val.tag, val.attrs, val.children);
       el.appendChild(node);
       return;
     }
@@ -238,8 +237,9 @@ function createElementFragment(children: Children) {
       return;
     }
 
+    // 组件
     if (isType(val) === 'object' && isComponent(val.tag)) {
-      const node = createNode(val);
+      const node = createElement(val.tag, val.attrs, val.children);
       fragment.appendChild(node);
       return;
     }
@@ -273,8 +273,7 @@ function createNode(value) {
 
   // 组件
   if (isType(value) === 'object' && isComponent(value.tag)) {
-    const tree = createTree(value.tag, value.attrs, value.children);
-    return createElement(tree.tag, tree.attrs, tree.children);
+    return createElement(value.tag, value.attrs, value.children);
   }
 
 }
