@@ -1,40 +1,24 @@
-import { h, Fragment, render, onUnmounted } from "./vue3";
+import { h, ref, Fragment, render } from "./vue3";
 import style from './module.scss';
-import { createRouter, RouterView, RouterLink } from "./vue3/router";
-const routes = [
-  {
-    path: '/',
-    component: Home,
-  },
-  {
-    path: '/about',
-    component: About,
-  },
-]
-
-function Home() {
-  onUnmounted(Home, () => {
-    console.log('首页被卸载')
-  })
-  return <div className={style.demo}>home</div>
-}
-function About() {
-  return <div>about</div>
-}
 
 function App() {
+  const count = ref(1);
   return <>
-    <div>My Vue</div>
-    <RouterLink to={{ path: '/' }}>首页</RouterLink>
-    <RouterLink to={{ path: '/about' }}>关于</RouterLink>
-    <RouterView />
+    <h1 className={style.demo}>{() => count.value}</h1>
+    <Comp text="word" count={() => count.value} />
+    {/* 因为实现方式的原因，响应式数据写为函数形式 */}
+    <button onclick={() => count.value ++}>click</button>
   </>
 }
 
-// console.log(renderToString(<App />))
-const root = document.getElementById('root');
-createRouter({
-  base: '/dist',
-  routes,
-})
-root.appendChild(render(<App />));
+type CompProps = {
+  text: string
+  count: () => number  // 想让父组件传递的 props 具有响应式也同样传一个函数类型
+}
+function Comp(props: CompProps) {
+  return <p>
+    hello {props.text} {props.count}
+  </p>
+}
+
+document.getElementById('root').appendChild(render(<App />));

@@ -1,4 +1,3 @@
-import { nextTick } from "../utils/next-tick";
 import { Tree } from "../vdom/type";
 import { collectCompId, hookLock } from "./utils";
 
@@ -12,15 +11,13 @@ const map = new Map();
  */
 export function onBeforeUnmount(comp: Function, fn: Function) {
   if (hookLock) return;
-  nextTick(() => {
-    const key = comp.prototype._id;
-    const arr = map.get(key) || [];
-    const isExist = arr.some(func => func === fn);
-    if (isExist) return;
-    
-    arr.push(fn);
-    map.set(key, arr);
-  })
+  const key = comp.prototype._id;
+  const arr = map.get(key) || [];
+  const isExist = arr.some(func => func === fn);
+  if (isExist) return;
+
+  arr.push(fn);
+  map.set(key, arr);
 }
 
 /**
