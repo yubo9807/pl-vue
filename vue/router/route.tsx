@@ -18,6 +18,11 @@ export function Route(props: RouteProps) {
   const Comp = props.component;
   return <Comp />
 }
+const route = Symbol('Route');
+Route.prototype[route] = route;
+export function isRoute(comp: Function) {
+  return comp.prototype[route] === route;
+}
 
 
 

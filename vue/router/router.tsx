@@ -4,6 +4,7 @@ import { nextTick } from '../utils/next-tick';
 import { Fragment, h } from '../vdom/h';
 import { Tree } from '../vdom/type';
 import { isComponent } from '../vdom/utils';
+import { isRoute } from './route';
 import { currentRoute, analysisRoute, base, setMode } from './use-history';
 
 type Props = {
@@ -19,7 +20,9 @@ function watchRoutePath(props: Props) {
   const CurrentComp = ref(null);
 
   watch(() => currentRoute.path, value => {
-    const routes = props.children;
+    const routes = props.children.filter((tree: Tree) =>
+      typeof tree === 'object' && isRoute(tree.tag as Function));
+
     const tree: Tree = routes.find((tree: Tree) => {
       if (tree.attrs.exact) {
         return value === tree.attrs.path;
