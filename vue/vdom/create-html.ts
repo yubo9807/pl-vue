@@ -89,7 +89,7 @@ function createHTMLFragment(children: Children) {
     }
 
     // 节点 || 组件 || 虚拟节点
-    if (isType(val)) {
+    if (isType(val) === 'object') {
       text += createHTML(val.tag, val.attrs, val.children);
       return;
     }
