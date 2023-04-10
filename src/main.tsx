@@ -1,5 +1,5 @@
-import { h, Fragment, render } from "./vue3";
-import { HashRouter, Route, Link } from "./vue3/router";
+import { h, Fragment, render } from "~/vue";
+import { HashRouter, Route, Link } from "~/vue/router";
 import Home from '@/pages/home';
 import About from '@/pages/about';
 import NotFound from "./pages/not-found";

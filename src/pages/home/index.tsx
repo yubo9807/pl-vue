@@ -1,4 +1,5 @@
-import { h, onUnmounted, ref, computed } from "@/vue3";
+import { createColor } from "@/utils/string";
+import { h, onUnmounted, ref, computed } from "~/vue";
 import style from './module.scss';
 
 function Home() {
@@ -23,13 +24,15 @@ function Home() {
   </div>
 }
 
+
+
 type CompProps = {
   count: () => number
 }
 function Comp(props: CompProps) {
-  const top = computed(() => props.count() + 'px');
+  const color = computed(() => createColor().slice(0, -1) + props.count());
 
-  return <div style={{ marginTop: () => top.value }}>
+  return <div style={{ color: () => color.value }}>
     子组件 {props.count}
   </div>
 }

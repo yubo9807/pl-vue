@@ -1,4 +1,4 @@
-import { h } from "@/vue3";
+import { h } from "~/vue";
 import style from './module.scss';
 
 export default function NotFound() {
