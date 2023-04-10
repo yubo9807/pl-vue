@@ -30,7 +30,7 @@ type CompProps = {
   count: () => number
 }
 function Comp(props: CompProps) {
-  const color = computed(() => createColor().slice(0, -1) + props.count());
+  const color = computed(() => createColor().slice(0, -1) + props.count().toString().slice(0, 1));
 
   return <div style={{ color: () => color.value }}>
     子组件 {props.count}
