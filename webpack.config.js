@@ -54,4 +54,22 @@ module.exports = {
       filename: 'assets/[name].[fullhash:8].css',
     }),
   ],
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      minSize: 300,
+      cacheGroups: {
+        'vue-router': {
+          name: 'vue-router',
+          test: /[\\/]vue[\\/]router[\\/]/,
+          priority: 10,
+        },
+        vue: {
+          name: 'vue',
+          test: /[\\/]vue[\\/]/,
+          priority: 9,
+        },
+      }
+    }
+  }
 }
