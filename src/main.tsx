@@ -9,7 +9,7 @@ function App() {
   return <>
     <div className={style.header}>
       <Link to='/'>首页</Link>
-      <Link to='/about'>关于</Link>
+      <Link to={{ path: '/about' }}>关于</Link>
       <Link to='/404'>notFound</Link>
       <a className={style.github} href="https://github.com/yubo9807/mvvm_vue3" target="_blank">GitHub</a>
     </div>

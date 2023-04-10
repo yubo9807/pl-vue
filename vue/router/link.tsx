@@ -1,9 +1,9 @@
 import { computed, h } from ".."
 import { useHistory } from "./use-history";
-import { splicingUrl } from "./utils";
+import { Config, splicingUrl } from "./utils";
 
 type Props = {
-  to:        string
+  to:        Config | string
   children?: []
   type?:     'push' | 'replace'
 }

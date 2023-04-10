@@ -1,9 +1,9 @@
 import { AnyObj } from "../utils/type";
 
-type Config = {
-  path:  string
-  query: AnyObj
-  hash:  string
+export type Config = {
+  path?:  string
+  query?: AnyObj
+  hash?:  string
 }
 
 /**

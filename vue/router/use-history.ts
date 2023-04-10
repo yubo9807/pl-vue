@@ -1,12 +1,5 @@
 import { reactive } from "../reactivity/reactive";
-import { AnyObj } from "../utils/type";
-import { formatPath, getQueryAll, splicingUrl } from "./utils";
-
-type Config = {
-  path:  string
-  query: AnyObj
-  hash:  string
-}
+import { Config, formatPath, getQueryAll, splicingUrl } from "./utils";
 
 export const base = '/dist';
 
