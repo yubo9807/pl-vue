@@ -17,7 +17,7 @@ type Cb = <T>(newValue: T, oldValue: T) => void
  * @param option  配置参数
  * @returns unwatch() 取消监听
  */
-export function watch(source: Source, cb: Cb, option: Option = {}): Function {
+export function watch<T>(source: Source, cb: Cb, option: Option = {}): Function {
   let cleanup = false;
   if (cleanup) return;  // 侦听器被取消
 

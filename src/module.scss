@@ -1,3 +1,14 @@
-.demo{
-  color: red;
+:global(#root){
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header{
+  a {
+    margin-right: 20px;
+  }
+  .github{
+    float: right;
+    color: #f200ff;
+  }
 }

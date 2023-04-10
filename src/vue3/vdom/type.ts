@@ -6,7 +6,7 @@ export type Children = any[]
 
 export type Tree = {
   tag:      Tag
-  attts:    Attrs
+  attrs:    Attrs
   children: Children
 }
 

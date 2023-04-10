@@ -7,7 +7,12 @@
     "outDir": "./dist",
     "moduleResolution": "node",
     "jsxFactory": "h",
-    "jsxFragmentFactory": "Fragment"
+    "jsxFragmentFactory": "Fragment",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "~/*": ["./*"],
+    },
   },
   "include": ["./src"],
 }
