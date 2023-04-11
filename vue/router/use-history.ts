@@ -1,7 +1,7 @@
 import { reactive } from "../reactivity/reactive";
 import { Config, formatPath, getQueryAll, splicingUrl } from "./utils";
 
-export const base = '/dist';
+export const base = '/';
 
 export type Mode = 'history' | 'hash'
 let mode: Mode = 'history';
