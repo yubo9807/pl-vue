@@ -9,6 +9,7 @@ import { currentRoute, analysisRoute, base, setMode } from './use-history';
 
 type Props = {
   children?: []
+  url?:      string  // 仅对 StaticRouter 有效
 }
 
 /**
@@ -16,7 +17,7 @@ type Props = {
  * @param props 
  * @returns 
  */
-function watchRoutePath(props: Props) {
+function watchRoutePath(props: Props, isBrowser = true) {
   const CurrentComp = ref(null);
 
   watch(() => currentRoute.path, value => {
@@ -31,9 +32,9 @@ function watchRoutePath(props: Props) {
       }
     });
     if (tree) {
-      nextTick(() => {  // 等待组件创建完 id
-        CurrentComp.value = tree.attrs.component;
-      })
+      isBrowser
+        ? nextTick(() => CurrentComp.value = tree.attrs.component)  // 等待组件创建完 id
+        : CurrentComp.value = tree.attrs.component;
     } else {
       const tree: Tree = routes[routes.length - 1];
       if (isComponent(tree.tag) && !tree.attrs.path) {
@@ -72,7 +73,7 @@ export function BrowserRouter(props: Props) {
   const { CurrentComp } = watchRoutePath(props);
 
   return <>
-    {() => <CurrentComp.value />}
+    {() => CurrentComp.value ? <CurrentComp.value /> : null}
   </>
 }
 
@@ -100,5 +101,22 @@ export function HashRouter(props: Props) {
 
   return <>
     {() => CurrentComp.value ? <CurrentComp.value /> : null}
+  </>
+}
+
+
+/**
+ * 服务端渲染
+ * @param props 
+ * @returns 
+ */
+export function StaticRouter(props: Props) {
+
+  analysisRoute('http://0.0.0.0' + props.url);
+
+  const { CurrentComp } = watchRoutePath(props, false);
+
+  return <>
+    {() => <CurrentComp.value />}
   </>
 }

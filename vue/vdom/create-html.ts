@@ -29,7 +29,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
   let attrStr = '';
 
   for (const attr in attrs) {
-    if (attr.startsWith('on')) continue;
+    if (attr.startsWith('on') || attr === 'ref') continue;
 
     let value = typeof attrs[attr] === 'function' && isReactiveChangeAttr(attr) ? attrs[attr]() : attrs[attr];
 
