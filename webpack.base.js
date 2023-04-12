@@ -10,6 +10,7 @@ module.exports = {
       '~': path.resolve(__dirname),
     },
   },
+  mode: 'production',
   module: {
     rules: [
       {
