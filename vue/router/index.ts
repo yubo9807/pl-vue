@@ -1,4 +1,6 @@
-export { BrowserRouter, HashRouter, StaticRouter } from './router';
+export { Router } from './router';
 export { Route, Redirect } from './route';
 export { Link } from './link';
-export { useHistory } from './use-history';
+export { initRouter as createRouter } from './init-router';
+export { useRoute } from './use-route';
+export { useRouter } from './use-router';

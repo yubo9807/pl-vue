@@ -1,31 +1,6 @@
-import { reactive } from "../reactivity/reactive";
-import { Config, formatPath, getQueryAll, splicingUrl } from "./utils";
-
-export const base = '/';
-
-export type Mode = 'history' | 'hash'
-let mode: Mode = 'history';
-export function setMode(type: Mode) {
-  mode = type;
-}
-
-export const currentRoute = reactive({
-  path:  '',
-  query: {},
-  hash:  '',
-  meta:  {},
-})
-
-/**
- * 解析 url
- * @param url 
- */
-export function analysisRoute(url: string) {
-  const newUrl = new URL(url);
-  currentRoute.path = newUrl.pathname;
-  currentRoute.query = getQueryAll(newUrl.search);
-  currentRoute.hash = newUrl.hash;
-}
+import { Config, formatPath, splicingUrl } from './utils';
+import { base, mode } from './init-router';
+import { analysisRoute } from './use-route';
 
 /**
  * 向前 push 一个路由
@@ -40,7 +15,7 @@ function push(option: Config | string) {
   }
 
   if (mode === 'history') {
-    history.pushState({}, null, path);
+    history.pushState({}, '', path);
   } else {
     location.hash = path;
   }
@@ -60,7 +35,7 @@ function replace(option: Config | string) {
   }
 
   if (mode === 'history') {
-    history.pushState({}, null, path);
+    history.pushState({}, '', path);
   } else {
     location.hash = path;
   }
@@ -72,10 +47,8 @@ function go(num: number) {
   analysisRoute(location.href);
 }
 
-export function useHistory() {
+export function useRouter() {
   return {
-    mode,
-    currentRoute,
     push,
     replace,
     go,

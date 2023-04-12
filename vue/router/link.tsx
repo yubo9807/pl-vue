@@ -1,33 +1,28 @@
-import { computed, h } from ".."
-import { useHistory } from "./use-history";
-import { Config, splicingUrl } from "./utils";
+import { h } from "../vdom/h";
+import { base, mode } from "./init-router";
+import { useRouter } from "./use-router";
+import { Config, formatPath, splicingUrl } from "./utils";
 
 type Props = {
   to:        Config | string
   children?: []
   type?:     'push' | 'replace'
 }
+
 export function Link(props: Props = { to: '/', type: 'push' }) {
-
-  const href = computed(() => {
-    const result = props.to;
-    if (typeof result === 'string') {
-      return result;
-    } else {
-      return splicingUrl(result);
-    }
-  });
-
   
+  const url = typeof props.to === 'string' ? props.to : splicingUrl(props.to);
+  const href = formatPath(base + (mode === 'hash' ? '#' + url : url));
+
+  const router = useRouter();
   function jump(e: Event) {
     e.preventDefault();
-    const history = useHistory();
-    if (history.mode === 'history') {
-      history.push(href.value);
+    if (props.type === 'push') {
+      router.push(url);
     } else {
-      location.hash = href.value;
+      router.replace(url);
     }
   }
 
-  return <a href={href.value} onclick={jump}>{props.children}</a>
+  return <a href={href} onclick={jump}>{props.children}</a>
 }

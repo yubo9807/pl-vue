@@ -1,7 +1,7 @@
 import { onMounted } from '../hooks';
-import { Fragment, h } from '../vdom/h';
+import { h } from '../vdom/h';
 import { Component } from '../vdom/type';
-import { useHistory } from './use-history';
+import { useRouter } from './use-router';
 
 type RouteProps = {
   path?:     string
@@ -21,7 +21,7 @@ export function Route(props: RouteProps) {
 const route = Symbol('Route');
 Route.prototype[route] = route;
 export function isRoute(comp: Function) {
-  return comp.prototype[route] === route;
+  return typeof comp === 'function' && comp.prototype[route] === route;
 }
 
 
@@ -35,7 +35,7 @@ type RedirectProps = {
  * @returns 
  */
 export function Redirect(props: RedirectProps) {
-  const history = useHistory();
+  const history = useRouter();
   onMounted(() => {
     history.replace(props.to);
   })

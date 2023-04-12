@@ -3,13 +3,12 @@ import { watch } from '../reactivity/watch';
 import { nextTick } from '../utils/next-tick';
 import { Fragment, h } from '../vdom/h';
 import { Tree } from '../vdom/type';
-import { isComponent } from '../vdom/utils';
+import { base, isBrowser, mode } from './init-router';
 import { isRoute } from './route';
-import { currentRoute, analysisRoute, base, setMode } from './use-history';
+import { analysisRoute, currentRoute } from './use-route';
 
 type Props = {
   children?: []
-  url?:      string  // 仅对 StaticRouter 有效
 }
 
 /**
@@ -31,13 +30,16 @@ function watchRoutePath(props: Props, isBrowser = true) {
         return ((value as string) + '/').startsWith(tree.attrs.path + '/');
       }
     });
+
     if (tree) {
+      // 能匹配到响应路径
       isBrowser
         ? nextTick(() => CurrentComp.value = tree.attrs.component)  // 等待组件创建完 id
         : CurrentComp.value = tree.attrs.component;
     } else {
       const tree: Tree = routes[routes.length - 1];
-      if (isComponent(tree.tag) && !tree.attrs.path) {
+      // 设置了 NotFound 组件
+      if (typeof tree === 'object' && isRoute(tree.tag as Function) && !tree.attrs.path) {
         CurrentComp.value = tree.attrs.component;
       } else {
         CurrentComp.value = null;
@@ -57,18 +59,27 @@ function watchRoutePath(props: Props, isBrowser = true) {
  * @param props 
  * @returns 
  */
-export function BrowserRouter(props: Props) {
-
-  setMode('history');
+function BrowserRouter(props: Props) {
 
   function getUrl() {
-    return location.href.replace(base, '');
+    if (mode === 'history') {
+      return location.href.replace(base, '');
+    } else {
+      return location.origin + location.hash.slice(1);
+    }
   }
 
   analysisRoute(getUrl());
-  window.addEventListener('popstate', () => {
-    analysisRoute(getUrl());
-  })
+
+  if (mode === 'history') {
+    window.addEventListener('popstate', () => {
+      analysisRoute(getUrl());
+    })
+  } else {
+    window.addEventListener('hashchange', () => {
+      analysisRoute(getUrl());
+    })
+  }
 
   const { CurrentComp } = watchRoutePath(props);
 
@@ -78,45 +89,36 @@ export function BrowserRouter(props: Props) {
 }
 
 
-
-/**
- * hash 模式路由
- * @param props 
- * @returns 
- */
-export function HashRouter(props: Props) {
-
-  setMode('hash')
-
-  function getUrl() {
-    return location.origin + location.hash.slice(1);
-  }
-
-  analysisRoute(getUrl());
-  window.addEventListener('hashchange', () => {
-    analysisRoute(getUrl());
-  })
-
-  const { CurrentComp } = watchRoutePath(props);
-
-  return <>
-    {() => CurrentComp.value ? <CurrentComp.value /> : null}
-  </>
+interface StaticRouterProps extends Props {
+  url?: string
 }
-
-
 /**
  * 服务端渲染
  * @param props 
  * @returns 
  */
-export function StaticRouter(props: Props) {
+function StaticRouter(props: StaticRouterProps) {
 
-  analysisRoute('http://0.0.0.0' + props.url);
+  let url = ''
+  if (mode === 'history') {
+    url = props.url.replace(base, '');
+  } else {
+    const match = props.url.match(/#.*/);
+    url = match ? match[0] : '';
+  }
 
+  analysisRoute('http://0.0.0.0' + url);
   const { CurrentComp } = watchRoutePath(props, false);
 
   return <>
     {() => <CurrentComp.value />}
   </>
+}
+
+export function Router(props: StaticRouterProps) {
+  return <>{
+    isBrowser
+      ? <BrowserRouter children={props.children}></BrowserRouter>
+      : <StaticRouter {...props}></StaticRouter>
+  }</>
 }

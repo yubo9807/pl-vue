@@ -1,10 +1,10 @@
 import { h, renderToString } from "~/vue";
-import App from "./app";
+import App, { base } from "./app";
 import { createServer } from 'http';
 import { readFileSync, readFile } from 'fs';
 import { resolve, extname } from 'path';
 
-const html = readFileSync(resolve(__dirname, './index.html'), 'utf-8');
+const html = readFileSync(resolve(__dirname, base.slice(1), './index.html'), 'utf-8');
 const staticExtList = [
   'html', 'css', 'js', 'json',
   'xml', 'txt',
@@ -19,8 +19,9 @@ const server = createServer((req, res) => {
   const ext = extname(url);
 
   if (staticExtList.includes(ext.slice(1))) {
+    console.log(resolve(__dirname, base.slice(1), url.slice(1)))
     // 静态资源
-    readFile(resolve(__dirname, url.slice(1)), (err, content) => {
+    readFile(resolve(__dirname, base.slice(1), url.slice(1)), (err, content) => {
       if (err) {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
