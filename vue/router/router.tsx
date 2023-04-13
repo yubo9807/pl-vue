@@ -16,7 +16,7 @@ type Props = {
  * @param props 
  * @returns 
  */
-function watchRoutePath(props: Props, isBrowser = true) {
+function watchRoutePath(props: StaticRouterProps, isBrowser = true) {
   const CurrentComp = ref(null);
 
   watch(() => currentRoute.path, value => {
@@ -108,7 +108,7 @@ function StaticRouter(props: StaticRouterProps) {
   }
 
   analysisRoute('http://0.0.0.0' + url);
-  const { CurrentComp } = watchRoutePath(props, false);
+  const { CurrentComp } = watchRoutePath({ children: props.children, url }, false);
 
   return <>
     {() => <CurrentComp.value />}

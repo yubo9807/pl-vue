@@ -5,7 +5,7 @@ import About from '@/pages/about';
 import NotFound from "./pages/not-found";
 import style from './module.scss';
 
-export const base = '/dist';
+export const base = '';
 
 type Props = {
   isBrowser: boolean  // 是否为浏览器环境
