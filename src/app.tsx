@@ -1,11 +1,11 @@
-import { h, Fragment } from "~/vue";
+import { h, Fragment, onMounted } from "~/vue";
 import { Router, Route, Link, createRouter } from "~/vue/router";
 import Home from '@/pages/home';
 import About from '@/pages/about';
 import NotFound from "./pages/not-found";
 import style from './module.scss';
 
-export const base = '';
+export const base = '/dist';
 
 type Props = {
   isBrowser: boolean  // 是否为浏览器环境
@@ -15,7 +15,7 @@ function App(props: Props) {
 
   createRouter({
     base,
-    mode: 'history',
+    mode: 'hash',
     isBrowser: props.isBrowser,
   })
 

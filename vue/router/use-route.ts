@@ -14,7 +14,7 @@ export const currentRoute = reactive({
  * @param url 
  */
 export function analysisRoute(url: string) {
-  const newUrl = new URL(url);
+  const newUrl = new URL('http://0.0.0.0' + url);
   currentRoute.path = newUrl.pathname.replace(base, '');
   currentRoute.query = getQueryAll(newUrl.search);
   currentRoute.hash = newUrl.hash;

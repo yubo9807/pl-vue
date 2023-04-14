@@ -63,23 +63,17 @@ function BrowserRouter(props: Props) {
 
   function getUrl() {
     if (mode === 'history') {
-      return location.href.replace(base, '');
+      return location.href.replace(location.origin + base, '');
     } else {
-      return location.origin + location.hash.slice(1);
+      return location.hash.slice(1);
     }
   }
 
   analysisRoute(getUrl());
 
-  if (mode === 'history') {
-    window.addEventListener('popstate', () => {
-      analysisRoute(getUrl());
-    })
-  } else {
-    window.addEventListener('hashchange', () => {
-      analysisRoute(getUrl());
-    })
-  }
+  window.addEventListener('popstate', () => {
+    analysisRoute(getUrl());
+  })
 
   const { CurrentComp } = watchRoutePath(props);
 
@@ -107,7 +101,7 @@ function StaticRouter(props: StaticRouterProps) {
     url = match ? match[0] : '';
   }
 
-  analysisRoute('http://0.0.0.0' + url);
+  analysisRoute(url);
   const { CurrentComp } = watchRoutePath({ children: props.children, url }, false);
 
   return <>
@@ -118,7 +112,7 @@ function StaticRouter(props: StaticRouterProps) {
 export function Router(props: StaticRouterProps) {
   return <>{
     isBrowser
-      ? <BrowserRouter children={props.children}></BrowserRouter>
-      : <StaticRouter {...props}></StaticRouter>
+      ? <BrowserRouter children={props.children} />
+      : <StaticRouter {...props} />
   }</>
 }

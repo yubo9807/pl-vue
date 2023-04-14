@@ -1,25 +1,20 @@
 import { Config, formatPath, splicingUrl } from './utils';
 import { base, mode } from './init-router';
-import { analysisRoute } from './use-route';
+import { analysisRoute, currentRoute } from './use-route';
 
 /**
  * 向前 push 一个路由
  * @param option 
  */
 function push(option: Config | string) {
-  let path = '';
-  if (typeof option === 'string') {
-    path = mode === 'history' ? formatPath(base + option) : option;
-  } else {
-    path = splicingUrl(option);
-  }
+  const path = typeof option === 'string' ? option : splicingUrl(option);
 
   if (mode === 'history') {
-    history.pushState({}, '', path);
+    history.pushState({}, '', formatPath(base + '/' + path));
   } else {
     location.hash = path;
   }
-  analysisRoute(location.href);
+  analysisRoute(path);
 }
 
 /**
@@ -27,24 +22,18 @@ function push(option: Config | string) {
  * @param option 
  */
 function replace(option: Config | string) {
-  let path = '';
-  if (typeof option === 'string') {
-    path = mode === 'history' ? formatPath(base + option) : option;
-  } else {
-    path = splicingUrl(option);
-  }
+  const path = typeof option === 'string' ? option : splicingUrl(option);
 
   if (mode === 'history') {
-    history.pushState({}, '', path);
+    history.replaceState({}, '', formatPath(base + '/' + path));
   } else {
     location.hash = path;
   }
-  analysisRoute(location.href);
+  analysisRoute(path);
 }
 
 function go(num: number) {
   history.go(num);
-  analysisRoute(location.href);
 }
 
 export function useRouter() {

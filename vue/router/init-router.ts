@@ -1,6 +1,6 @@
 type Mode = 'history' | 'hash'
 
-export let base = '/';
+export let base = '';
 export let mode: Mode = 'history';
 export let isBrowser = true;
 
