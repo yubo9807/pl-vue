@@ -27,7 +27,7 @@ function watchRoutePath(props: StaticRouterProps, isBrowser = true) {
       if (tree.attrs.exact) {
         return value === tree.attrs.path;
       } else {
-        return ((value as string) + '/').startsWith(tree.attrs.path + '/');
+        return (value + '/').startsWith(tree.attrs.path + '/');
       }
     });
 

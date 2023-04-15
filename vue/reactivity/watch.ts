@@ -3,12 +3,10 @@ import { reactive } from "./reactive";
 import { isEquals } from "../utils/judge";
 import { clone } from "../utils/object";
 
-type Source = () => {}
 type Option = {
   immediate?: boolean
   deep?:      boolean
 }
-type Cb = <T>(newValue: T, oldValue: T) => void
 
 /**
  * 侦听器
@@ -17,7 +15,7 @@ type Cb = <T>(newValue: T, oldValue: T) => void
  * @param option  配置参数
  * @returns unwatch() 取消监听
  */
-export function watch<T>(source: Source, cb: Cb, option: Option = {}): Function {
+export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void, option: Option = {}): Function {
   let cleanup = false;
   if (cleanup) return;  // 侦听器被取消
 
