@@ -1,5 +1,5 @@
 import { h, renderToString } from "~/vue";
-import App, { base } from "./app";
+import App, { base, routes } from "./app";
 import { createServer } from 'http';
 import { readFileSync, readFile } from 'fs';
 import { resolve, extname } from 'path';
@@ -13,7 +13,28 @@ const staticExtList = [
   'gz',
 ];
 
-const server = createServer((req, res) => {
+/**
+ * 生成节点前执行组件的 getInitialProps 方法
+ * @param url 
+ * @returns 
+ */
+async function getInitialProps(url: string) {
+  url = url.replace(base, '');
+  const route = routes.find(val => {
+    if (val.exact) {
+      return url === val.path;
+    } else {
+      return (url + '/').startsWith(val.path + '/');
+    }
+  });
+  if (route && typeof route.component.prototype.getInitialProps === 'function') {
+    return await route.component.prototype.getInitialProps();
+  } else {
+    return void 0;
+  }
+}
+
+const server = createServer(async (req, res) => {
 
   const url = req.url;
   const ext = extname(url);
@@ -31,7 +52,8 @@ const server = createServer((req, res) => {
     });
   } else {
     // 服务端渲染
-    const content = renderToString(<App isBrowser={false} url={url} />);
+    const data = await getInitialProps(url);
+    const content = renderToString(<App isBrowser={false} url={url} data={data} />);
     const newHTML = html.replace('loading', content);
     res.write(newHTML);
     res.end();

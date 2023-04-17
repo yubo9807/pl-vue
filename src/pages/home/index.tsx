@@ -2,13 +2,10 @@ import { createColor } from "@/utils/string";
 import { h, onUnmounted, ref, computed } from "~/vue";
 import style from './module.scss';
 
-function Home() {
+function Home(props) {
+  console.log('Home', props.data)
   const count = ref(0);
   const elTitle = ref(null);
-
-  // onMounted(() => {
-  //   console.log(elTitle.value);
-  // })
 
   onUnmounted(Home, () => {
     console.log('Home 组件被卸载');
@@ -21,7 +18,16 @@ function Home() {
     </h1>
     <button onclick={() => count.value++}>count++</button>
     <Comp count={() => count.value} />
+    <p>{props.data}</p>
   </div>
+}
+
+Home.prototype.getInitialProps = async () => {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve(123);
+    }, 300)
+  })
 }
 
 

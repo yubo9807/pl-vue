@@ -1,21 +1,28 @@
-import { h, Fragment, onMounted } from "~/vue";
+import { h, Fragment } from "~/vue";
 import { Router, Route, Link, createRouter } from "~/vue/router";
 import Home from '@/pages/home';
 import About from '@/pages/about';
 import NotFound from "./pages/not-found";
 import style from './module.scss';
 
-export const base = '/dist';
+export const base = '';
+
+export const routes = [
+  { path: '/', component: Home, exact: true },
+  { path: '/about', component: About },
+  { component: NotFound },
+]
 
 type Props = {
   isBrowser: boolean  // 是否为浏览器环境
   url?:      string   // 服务端渲染请求路径
+  data?:     any      // 渲染之前数据（getInitialProps）
 }
 function App(props: Props) {
 
   createRouter({
     base,
-    mode: 'hash',
+    mode: 'history',
     isBrowser: props.isBrowser,
   })
 
@@ -27,10 +34,8 @@ function App(props: Props) {
       <a className={style.github} href="https://github.com/yubo9807/mvvm_vue3" target="_blank">GitHub</a>
     </nav>
 
-    <Router url={props.url}>
-      <Route path='/' component={Home} exact={true} />
-      <Route path='/about' component={About} />
-      <Route component={NotFound} />
+    <Router url={props.url} data={props.data}>
+      {...routes.map(item => <Route {...item} />)}
     </Router>
   </>
 }

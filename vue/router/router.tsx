@@ -9,6 +9,7 @@ import { analysisRoute, currentRoute } from './use-route';
 
 type Props = {
   children?: []
+  data?:     any  // 服务端获取数据
 }
 
 /**
@@ -18,6 +19,7 @@ type Props = {
  */
 function watchRoutePath(props: StaticRouterProps, isBrowser = true) {
   const CurrentComp = ref(null);
+  const data = ref(void 0);
 
   watch(() => currentRoute.path, value => {
     const routes = props.children.filter((tree: Tree) =>
@@ -33,9 +35,21 @@ function watchRoutePath(props: StaticRouterProps, isBrowser = true) {
 
     if (tree) {
       // 能匹配到响应路径
-      isBrowser
-        ? nextTick(() => CurrentComp.value = tree.attrs.component)  // 等待组件创建完 id
-        : CurrentComp.value = tree.attrs.component;
+      if (isBrowser){  // 客户端组件渲染
+        nextTick(async () => {  // 等待组件创建完 id
+          const Comp = tree.attrs.component;
+          if (typeof Comp.prototype.getInitialProps === 'function') {
+            const backupId = Comp.prototype._id;
+            data.value = await Comp.prototype.getInitialProps();
+            Comp.prototype._id = backupId;
+          } else {
+            data.value = void 0;
+          }
+          CurrentComp.value = Comp;
+        })
+      } else {  // 服务端组件渲染
+        CurrentComp.value = tree.attrs.component;
+      }
     } else {
       const tree: Tree = routes[routes.length - 1];
       // 设置了 NotFound 组件
@@ -49,6 +63,7 @@ function watchRoutePath(props: StaticRouterProps, isBrowser = true) {
 
   return {
     CurrentComp,
+    data,
   }
 }
 
@@ -75,10 +90,10 @@ function BrowserRouter(props: Props) {
     analysisRoute(getUrl());
   })
 
-  const { CurrentComp } = watchRoutePath(props);
+  const { CurrentComp, data } = watchRoutePath(props);
 
   return <>
-    {() => CurrentComp.value ? <CurrentComp.value /> : null}
+    {() => CurrentComp.value ? <CurrentComp.value data={data.value} /> : null}
   </>
 }
 
@@ -105,7 +120,7 @@ function StaticRouter(props: StaticRouterProps) {
   const { CurrentComp } = watchRoutePath({ children: props.children, url }, false);
 
   return <>
-    {() => <CurrentComp.value />}
+    {() => <CurrentComp.value data={props.data} />}
   </>
 }
 
