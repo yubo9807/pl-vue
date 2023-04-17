@@ -8,9 +8,10 @@ type Props = {
   children?: []
   type?:     'push' | 'replace'
 }
+const defaultProps = { to: '/', type: 'push' }
 
-export function Link(props: Props = { to: '/', type: 'push' }) {
-  
+export function Link(props: Props) {
+  props = Object.assign({}, defaultProps, props);
   const url = typeof props.to === 'string' ? props.to : splicingUrl(props.to);
   const href = formatPath(base + (mode === 'hash' ? '#' + url : url));
 
