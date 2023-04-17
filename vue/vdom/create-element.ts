@@ -178,9 +178,9 @@ function createElementFragment(children: Children) {
             const node = createNode(val);
             const originTree = backupNodes[index].tree;
 
-            isComponent(originTree.tag) && triggerBeforeUnmount(originTree);  // 组件卸载之前
+            // isComponent(originTree.tag) && triggerBeforeUnmount(originTree);  // 组件卸载之前
             backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
-            isComponent(originTree.tag) && triggerUnmounted(originTree);      // 组件卸载之后
+            // isComponent(originTree.tag) && triggerUnmounted(originTree);      // 组件卸载之后
 
             backupNodes[index].tree = val;
             backupNodes[index].node = node;
@@ -208,9 +208,9 @@ function createElementFragment(children: Children) {
           for (let i = value.length; i < backupNodes.length; i ++) {
             const originTree = backupNodes[i].tree;
 
-            isComponent(originTree.tag) && triggerBeforeUnmount(originTree);  // 组件卸载之前
+            // isComponent(originTree.tag) && triggerBeforeUnmount(originTree);  // 组件卸载之前
             backupNodes[i].node.remove();
-            isComponent(originTree.tag) && triggerUnmounted(originTree);      // 组件卸载之后
+            // isComponent(originTree.tag) && triggerUnmounted(originTree);      // 组件卸载之后
           }
           backupNodes.splice(value.length, backupNodes.length - value.length);
         }
