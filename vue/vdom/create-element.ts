@@ -4,9 +4,8 @@ import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isCo
 import { AnyObj } from "../utils/type";
 import { isFragment } from "./h";
 import { Tag, Attrs, Children } from "./type";
+import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
-
-
 
 /**
  * 创建元素
@@ -25,6 +24,7 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
   if (isComponent(tag)) {  // 组件
     const props = Object.assign({}, attrs, { children });
     const tree = tag(props);
+    compTreeMap.set(tag, filterElement(tree.children));  // 搜集组件
     return createElement(tree.tag, tree.attrs, tree.children);
   }
 }
@@ -178,9 +178,9 @@ function createElementFragment(children: Children) {
             const node = createNode(val);
             const originTree = backupNodes[index].tree;
 
-            // isComponent(originTree.tag) && triggerBeforeUnmount(originTree);  // 组件卸载之前
+            isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag);  // 组件卸载之前
             backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
-            // isComponent(originTree.tag) && triggerUnmounted(originTree);      // 组件卸载之后
+            isComponent(originTree.tag) && triggerUnmounted(originTree.tag);      // 组件卸载之后
 
             backupNodes[index].tree = val;
             backupNodes[index].node = node;
@@ -208,9 +208,9 @@ function createElementFragment(children: Children) {
           for (let i = value.length; i < backupNodes.length; i ++) {
             const originTree = backupNodes[i].tree;
 
-            // isComponent(originTree.tag) && triggerBeforeUnmount(originTree);  // 组件卸载之前
+            isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag);  // 组件卸载之前
             backupNodes[i].node.remove();
-            // isComponent(originTree.tag) && triggerUnmounted(originTree);      // 组件卸载之后
+            isComponent(originTree.tag) && triggerUnmounted(originTree.tag);      // 组件卸载之后
           }
           backupNodes.splice(value.length, backupNodes.length - value.length);
         }
