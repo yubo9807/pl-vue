@@ -1,5 +1,6 @@
-import { Tree } from "../vdom/type";
-import { hookLock, collectCompId } from "./utils";
+import { getSubComponent } from "../vdom/component-tree";
+import { Component } from "../vdom/type";
+import { hookLock } from "./utils";
 
 const map = new Map();
 
@@ -24,13 +25,15 @@ export function onUnmounted(comp: Function, fn: Function) {
  * 执行对应的 onUnmounted 钩子
  * @param comp 组件名
  */
-export function triggerUnmounted(tree: Tree) {
-  const comps = collectCompId(tree);
-  comps.forEach(key => {
-    const funcs = map.get(key) || [];
-    if (funcs.length === 0) return;
-
-    funcs.forEach(func => func());
-    map.delete(key);
+export function triggerUnmounted(comp: Component) {
+  const keys = getSubComponent(comp).map(val => val.compId);
+  keys.unshift(comp.prototype._id);
+  const funcs = [];
+  keys.forEach(key => {
+    const arr = map.get(key) || [];
+    funcs.push(...arr);
+  })
+  funcs.forEach(func => {
+    func();
   })
 }
