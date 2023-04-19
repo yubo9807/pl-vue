@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack --watch --mode=development",
-    "build": "webpack",
+    "dev": "webpack --config=webpack.client.js --watch --mode=development",
+    "build": "webpack --config=webpack.client.js",
     "build:server": "webpack --config=webpack.server.js"
   },
   "keywords": [],

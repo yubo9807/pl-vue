@@ -1,4 +1,5 @@
 import { isType } from "../utils/judge";
+import { Tree } from "../vdom/type";
 import { isComponent } from "../vdom/utils";
 
 /**
@@ -19,7 +20,7 @@ export function setLock(bool: boolean) {
  * @param comp 
  * @param triggerHook 
  */
-export function collectCompId(tree) {
+export function collectCompId(tree: Tree) {
   hookLock = true;
 
   const collect = [];

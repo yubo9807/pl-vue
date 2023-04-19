@@ -3,7 +3,7 @@ import { isType, isEquals } from '../utils/judge';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue } from "./utils"
 import { AnyObj } from "../utils/type";
 import { isFragment } from "./h";
-import { Tag, Attrs, Children } from "./type";
+import { Tag, Attrs, Children, Tree } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
 

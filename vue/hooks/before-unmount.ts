@@ -10,7 +10,7 @@ const map = new Map();
  * @param fn 
  * @returns 
  */
-export function onBeforeUnmount(comp: Function, fn: Function) {
+export function onBeforeUnmount(comp: Component, fn: Function) {
   if (hookLock) return;
   const key = comp.prototype._id;
   const arr = map.get(key) || [];

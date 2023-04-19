@@ -4,7 +4,7 @@ import { isType } from '../utils/judge';
 import { clone } from '../utils/object';
 
 type CompTree = {
-  compId:        string
+  compId:    string
   comp:      Component
   props:     Attrs
   children?: Children

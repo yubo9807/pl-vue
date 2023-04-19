@@ -10,7 +10,7 @@ const map = new Map();
  * @param fn 
  * @returns 
  */
-export function onUnmounted(comp: Function, fn: Function) {
+export function onUnmounted(comp: Component, fn: Function) {
   if (hookLock) return;
   const key = comp.prototype._id;  // 在微队列之前与微队列之后拿到的 id 不一致
   const arr = map.get(key) || [];
