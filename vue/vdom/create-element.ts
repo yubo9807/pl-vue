@@ -162,11 +162,13 @@ function createElementFragment(children: Children) {
 
         if (!(value instanceof Array)) {
           value = [value].filter(val => !noRenderValue(val));
+        } else {
+          value = value.filter(val => val);
         }
 
         let i = 0;
         while (i < value.length) {
-          const val = value[i];
+          let val = value[i];
 
           const key = i;
           const index = backupNodes.findIndex(item => item.key === key);
