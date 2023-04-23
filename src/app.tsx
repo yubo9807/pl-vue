@@ -34,10 +34,14 @@ function App(props: Props) {
       <a className={style.github} href="https://github.com/yubo9807/mvvm_vue3" target="_blank">GitHub</a>
     </nav>
 
-    <Router url={props.url} data={props.data}>
+    <Router url={props.url} data={props.data} Loading={Loading}>
       {...routes.map(item => <Route {...item} />)}
     </Router>
   </>
+}
+
+function Loading() {
+  return <div>loading...</div>
 }
 
 export default App;

@@ -1,15 +1,20 @@
 import { ref } from '../reactivity/ref';
 import { watch } from '../reactivity/watch';
-import { nextTick } from '../utils/next-tick';
 import { Fragment, h } from '../vdom/h';
-import { Tree } from '../vdom/type';
+import { Component, Tree } from '../vdom/type';
 import { base, isBrowser, mode } from './init-router';
 import { isRoute } from './route';
 import { analysisRoute, currentRoute } from './use-route';
 
 type Props = {
   children?: []
-  data?:     any  // 服务端获取数据
+}
+interface BrowserRouterProps extends Props {
+  Loading?: Component
+}
+interface StaticRouterProps extends Props {
+  url?:  string  // 渲染路径
+  data?: any     // 服务端获取数据
 }
 
 /**
@@ -17,7 +22,7 @@ type Props = {
  * @param props 
  * @returns 
  */
-function watchRoutePath(props: StaticRouterProps, isBrowser = true) {
+function watchRoutePath(props: StaticRouterProps & BrowserRouterProps, isBrowser = true) {
   const CurrentComp = ref(null);
   const data = ref(void 0);
 
@@ -38,6 +43,7 @@ function watchRoutePath(props: StaticRouterProps, isBrowser = true) {
       if (isBrowser){  // 客户端组件渲染
         const Comp = tree.attrs.component;
         if (typeof Comp.prototype.getInitialProps === 'function') {
+          if (props.Loading) CurrentComp.value = props.Loading;
           data.value = await Comp.prototype.getInitialProps();
         } else {
           data.value = void 0;
@@ -66,11 +72,11 @@ function watchRoutePath(props: StaticRouterProps, isBrowser = true) {
 
 
 /**
- * history 模式路由
+ * 浏览器端路由渲染
  * @param props 
  * @returns 
  */
-function BrowserRouter(props: Props) {
+function BrowserRouter(props: BrowserRouterProps) {
 
   function getUrl() {
     if (mode === 'history') {
@@ -94,9 +100,7 @@ function BrowserRouter(props: Props) {
 }
 
 
-interface StaticRouterProps extends Props {
-  url?: string
-}
+
 /**
  * 服务端渲染
  * @param props 
@@ -120,10 +124,10 @@ function StaticRouter(props: StaticRouterProps) {
   </>
 }
 
-export function Router(props: StaticRouterProps) {
+export function Router(props: StaticRouterProps & BrowserRouterProps) {
   return <>{
     isBrowser
-      ? <BrowserRouter children={props.children} />
+      ? <BrowserRouter {...props} />
       : <StaticRouter {...props} />
   }</>
 }
