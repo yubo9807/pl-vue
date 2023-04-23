@@ -6,6 +6,7 @@ import { isFragment } from "./h";
 import { Tag, Attrs, Children, Tree } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
+import { createId } from "../utils/string";
 
 /**
  * 创建元素
@@ -23,6 +24,7 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
   }
   if (isComponent(tag)) {  // 组件
     const props = Object.assign({}, attrs, { children });
+    tag.prototype._id = createId();  // 给组件添加一个唯一的值
     const tree = tag(props);
     compTreeMap.set(tag, filterElement(tree.children));  // 搜集组件
     return createElement(tree.tag, tree.attrs, tree.children);

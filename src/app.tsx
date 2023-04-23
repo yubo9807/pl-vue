@@ -5,7 +5,7 @@ import About from '@/pages/about';
 import NotFound from "./pages/not-found";
 import style from './module.scss';
 
-export const base = '';
+export const base = '/dist';
 
 export const routes = [
   { path: '/', component: Home, exact: true },
@@ -22,7 +22,7 @@ function App(props: Props) {
 
   createRouter({
     base,
-    mode: 'history',
+    mode: 'hash',
     isBrowser: props.isBrowser,
   })
 

@@ -21,7 +21,7 @@ function watchRoutePath(props: StaticRouterProps, isBrowser = true) {
   const CurrentComp = ref(null);
   const data = ref(void 0);
 
-  watch(() => currentRoute.path, value => {
+  watch(() => currentRoute.path, async value => {
     const routes = props.children.filter((tree: Tree) =>
       typeof tree === 'object' && isRoute(tree.tag as Function));
 
@@ -36,17 +36,13 @@ function watchRoutePath(props: StaticRouterProps, isBrowser = true) {
     if (tree) {
       // 能匹配到响应路径
       if (isBrowser){  // 客户端组件渲染
-        nextTick(async () => {  // 等待组件创建完 id
-          const Comp = tree.attrs.component;
-          if (typeof Comp.prototype.getInitialProps === 'function') {
-            const backupId = Comp.prototype._id;
-            data.value = await Comp.prototype.getInitialProps();
-            Comp.prototype._id = backupId;
-          } else {
-            data.value = void 0;
-          }
-          CurrentComp.value = Comp;
-        })
+        const Comp = tree.attrs.component;
+        if (typeof Comp.prototype.getInitialProps === 'function') {
+          data.value = await Comp.prototype.getInitialProps();
+        } else {
+          data.value = void 0;
+        }
+        CurrentComp.value = Comp;
       } else {  // 服务端组件渲染
         CurrentComp.value = tree.attrs.component;
       }
