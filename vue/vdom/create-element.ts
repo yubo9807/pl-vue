@@ -3,10 +3,12 @@ import { isType, isEquals } from '../utils/judge';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue } from "./utils"
 import { AnyObj } from "../utils/type";
 import { isFragment } from "./h";
-import { Tag, Attrs, Children, Tree } from "./type";
+import { Tag, Attrs, Children } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
 import { createId } from "../utils/string";
+
+
 
 /**
  * 创建元素
@@ -50,6 +52,8 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
   const el = document.createElement(tag as string);
 
   children.forEach(val => {
+
+    if (noRenderValue(val)) return;
 
     // 原始值
     if (isAssignmentValueToNode(val)) {
@@ -136,6 +140,8 @@ function createElementFragment(children: Children) {
 
   children.forEach(val => {
 
+    if (noRenderValue(val)) return;
+
     // 原始值
     if (isAssignmentValueToNode(val)) {
       const textNode = document.createTextNode(val);
@@ -146,82 +152,7 @@ function createElementFragment(children: Children) {
 
     // 响应式数据
     if (typeof val === 'function') {
-      let backupNodes = [];
-      let lockFirstRun = true;  // 锁：第一次运行
-      let parent = null;
-
-      const textNode = document.createTextNode('');  // 用于记录添加位置
-      fragment.appendChild(textNode);
-
-      binding(() => {
-        let value = val();
-        if (value && isType(value) && isFragment(value.tag)) {
-          console.warn('不支持响应式节点片段渲染');
-          return;
-        }
-
-        if (!(value instanceof Array)) {
-          value = [value].filter(val => !noRenderValue(val));
-        } else {
-          value = value.filter(val => val);
-        }
-
-        let i = 0;
-        while (i < value.length) {
-          let val = value[i];
-
-          const key = i;
-          const index = backupNodes.findIndex(item => item.key === key);
-          if (index >= 0) {  // 节点已经存在
-            if (isEquals(val, backupNodes[index].tree)) {  // 任何数据都没有变化
-              i++;
-              continue;
-            }
-
-            // 节点替换，重新备份
-            const node = createNode(val);
-            const originTree = backupNodes[index].tree;
-
-            isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag);  // 组件卸载之前
-            backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
-            isComponent(originTree.tag) && triggerUnmounted(originTree.tag);      // 组件卸载之后
-
-            backupNodes[index].tree = val;
-            backupNodes[index].node = node;
-          } else {  // 节点不存在，追加节点
-            const node = createNode(val);
-
-            if (lockFirstRun) {
-              fragment.appendChild(node);
-            } else if (backupNodes.length === 0) {
-              parent ??= textNode.parentElement;
-              parent.insertBefore(node, textNode.nextSibling);
-            } else {
-              const prevNode = backupNodes[backupNodes.length - 1].node;
-              const lastNode = prevNode.nextSibling;
-              prevNode.parentElement.insertBefore(node, lastNode);
-            }
-            backupNodes.push({ key, tree: val, node });
-          }
-
-          i++;
-        }
-
-        // 检查有没有要删除的节点
-        if (backupNodes.length > value.length) {
-          for (let i = value.length; i < backupNodes.length; i ++) {
-            const originTree = backupNodes[i].tree;
-
-            isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag);  // 组件卸载之前
-            backupNodes[i].node.remove();
-            isComponent(originTree.tag) && triggerUnmounted(originTree.tag);      // 组件卸载之后
-          }
-          backupNodes.splice(value.length, backupNodes.length - value.length);
-        }
-
-        lockFirstRun = false;
-      })
-
+      reactivityNode(fragment, val);
       return;
     }
   
@@ -278,4 +209,88 @@ function createNode(value) {
     return createElement(value.tag, value.attrs, value.children);
   }
 
+}
+
+
+
+/**
+ * 响应式节点变化
+ * @param fragment 
+ * @param val 
+ */
+function reactivityNode(fragment: DocumentFragment, val: () => any) {
+  let backupNodes = [];
+  let lockFirstRun = true;  // 锁：第一次运行
+  let parent = null;
+
+  const textNode = document.createTextNode('');  // 用于记录添加位置
+  fragment.appendChild(textNode);
+
+  binding(() => {
+    let value = val();
+    if (value && isType(value) === 'object' && isFragment(value.tag)) {
+      console.warn('不支持响应式节点片段渲染');
+      return;
+    }
+
+    if (!(value instanceof Array)) {
+      value = [value];
+    }
+    value = value.filter(val => !noRenderValue(val));
+
+    let i = 0;
+    while (i < value.length) {
+      let val = value[i];
+
+      const key = i;
+      const index = backupNodes.findIndex(item => item.key === key);
+      if (index >= 0) {  // 节点已经存在
+        if (isEquals(val, backupNodes[index].tree)) {  // 任何数据都没有变化
+          i++;
+          continue;
+        }
+
+        // 节点替换，重新备份
+        const node = createNode(val);
+        const originTree = backupNodes[index].tree;
+
+        isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag);  // 组件卸载之前
+        backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
+        isComponent(originTree.tag) && triggerUnmounted(originTree.tag);      // 组件卸载之后
+
+        backupNodes[index].tree = val;
+        backupNodes[index].node = node;
+      } else {  // 节点不存在，追加节点
+        const node = createNode(val);
+
+        if (lockFirstRun) {
+          fragment.appendChild(node);
+        } else if (backupNodes.length === 0) {
+          parent ??= textNode.parentElement;
+          parent.insertBefore(node, textNode.nextSibling);
+        } else {
+          const prevNode = backupNodes[backupNodes.length - 1].node;
+          const lastNode = prevNode.nextSibling;
+          prevNode.parentElement.insertBefore(node, lastNode);
+        }
+        backupNodes.push({ key, tree: val, node });
+      }
+
+      i++;
+    }
+
+    // 检查有没有要删除的节点
+    if (backupNodes.length > value.length) {
+      for (let i = value.length; i < backupNodes.length; i ++) {
+        const originTree = backupNodes[i].tree;
+
+        isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag);  // 组件卸载之前
+        backupNodes[i].node.remove();
+        isComponent(originTree.tag) && triggerUnmounted(originTree.tag);      // 组件卸载之后
+      }
+      backupNodes.splice(value.length, backupNodes.length - value.length);
+    }
+
+    lockFirstRun = false;
+  })
 }
