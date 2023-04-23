@@ -11,14 +11,16 @@ export const ReactiveFlags = {
   IS_READONLY: Symbol('__v_isReadonly'),
 }
 
+
 /**
  * 将数据变为响应式数据（深度）
  * @param target 
  * @returns 
- */
+*/
 export function reactive<T extends AnyObj>(target: T): T {
-
+  
   if (!isObject(target) || rawMap.get(target)) return target;
+  let backupKey = null;  // 备份当前改变的 key
 
   return new Proxy(target, {
 
@@ -59,13 +61,18 @@ export function reactive<T extends AnyObj>(target: T): T {
     // 删除
     deleteProperty(target, key) {
 
+      const oldValue = Reflect.get(target, key);
       const hasKey = hasOwn(target, key);
       const result = Reflect.deleteProperty(target, key);
-
-      if (hasKey && result) {
-        // console.log(`%c delete ${isType(target)}[${key.toString()}]`, 'color: red');
-        distributeUpdates(target);
-      }
+      backupKey = key;
+      
+      nextTick(() => {
+        if (hasKey && result && oldValue !== void 0, key === backupKey) {
+          // console.log(`%c delete ${isType(target)}[${key.toString()}]`, 'color: red');
+          distributeUpdates(target);
+          backupKey = null;
+        }
+      })
 
       return result;
     }
