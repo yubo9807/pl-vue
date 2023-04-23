@@ -23,10 +23,19 @@ class RefImpl {
   }
 
   set value(newValue) {
-    this._rawValue = newValue;
+    if (isObject(newValue)) {
+      const keys = Object.keys(newValue);
+      for (const prop in keys) {
+        this._value[prop] = newValue[prop];  // 给每个键重新赋值（无需担心新键无法赋值）
+      }
+      for (const prop in Object.keys(this._rawValue)) {
+        !keys.includes(prop) && delete this._value[prop];  // 不用的键进行删除
+      }
+    } else {
+      this._value.value = newValue;
+    }
 
-    if (isObject(newValue)) this._value = newValue;
-    else this._value.value = newValue;
+    this._rawValue = newValue;
   }
 
 }
@@ -55,7 +64,7 @@ export function isRef(ref: unknown) {
  * @param ref 
  * @returns 
  */
-export function unref(ref: RefImpl) {
+export function unref<T>(ref: Ref<T>) {
   return isRef(ref) ? ref.value : ref;
 }
 
@@ -89,7 +98,7 @@ class ObjectRefImpl {
  * @param defaultValue 
  * @returns 
  */
-export function toRef(target: AnyObj, key: Key, defaultValue = void 0) {
+export function toRef<T>(target: T, key: Key, defaultValue = void 0) {
   return new ObjectRefImpl(target, key, defaultValue);
 };
 
@@ -98,8 +107,8 @@ export function toRef(target: AnyObj, key: Key, defaultValue = void 0) {
  * @param target 
  * @returns 
  */
-export function toRefs(target: AnyObj) {
-  const obj = {};
+export function toRefs<T>(target: T) {
+  const obj: AnyObj = {};
   for (const key in target) {
     obj[key] = new ObjectRefImpl(target, key);
   }
