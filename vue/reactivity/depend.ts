@@ -20,8 +20,10 @@ export function binding(fn: Function) {
 export function dependencyCollection(key: object) {
   const funcs = funcsMap.get(key) || [];
   const bool = funcs.some(fn => func === fn);  // 是否有重复存在的函数
-  func && !bool && funcs.push(func);
-  funcsMap.set(key, funcs);
+  if (func && !bool) {
+    funcs.push(func);
+    funcsMap.set(key, funcs);
+  }
 }
 
 /**
