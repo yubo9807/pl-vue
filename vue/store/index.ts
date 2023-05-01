@@ -18,7 +18,7 @@ class Stroe<S, A> {
 
     // 监听数据：若通过直接赋值的方式，恢复到原先的值
     watch(() => this.state, (value, oldValue) => {
-      if (this.#lock) {
+      if (this.#lock) {  // 上锁，不允许改变任何值
         for (const prop in oldValue) {
           this.state[prop] = oldValue[prop];
         }
@@ -34,10 +34,18 @@ class Stroe<S, A> {
     for (const key in actions) {
       const self = this;
       function func(...args) {
-        self.#lock = false;                 // 解锁
-        const newState = (actions[key] as Function)(...args);
-        newState ? self.#merge(newState) : self.#merge(state);
-        nextTick(() => self.#lock = true);  // 重新上锁
+        self.#lock = false;                   // 解锁
+        const result = (actions[key] as Function)(...args);
+        self.#merge(state);
+        if (typeof result === 'object' && result[Symbol.toStringTag] === 'Promise') {
+          result.then(res => {
+            self.#merge(state);
+            nextTick(() => self.#lock = true);
+          })
+        } else {
+          self.#merge(state);
+          nextTick(() => self.#lock = true);  // 重新上锁
+        }
       }
       func.prototype[actionFlag] = actionFlag;
       this.actions[key as string] = func;
@@ -70,7 +78,7 @@ class Stroe<S, A> {
 
 const map = new WeakMap();
 
-export function createStore<S, A>(state: S, actions: A) {
+export function createStore<S, A>(state: S, actions: A): () => S & A {
   return () => {
     if (typeof state !== 'object') {
       console.warn(`state 类型必须为 object`);
