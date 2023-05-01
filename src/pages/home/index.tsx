@@ -1,24 +1,29 @@
 import { createColor } from "@/utils/string";
 import { h, onUnmounted, ref, computed } from "~/vue";
 import style from './module.scss';
+import useStore from '@/store/count';
 
 function Home(props) {
-  console.log('Home', props.data)
+  const store = useStore();
   const count = ref(0);
   const elTitle = ref(null);
 
   onUnmounted(Home, () => {
-    console.log('Home 组件被卸载');
+    console.log(Home.name, '组件被卸载');
   })
 
   return <div className={style['page-home']}>
+    <h1>
+      Store: {() => store.count }
+    </h1>
+    <button onclick={() => store.setCount(++store.count)}>Store change</button>
     <h1 ref={elTitle}>
-      count&nbsp;
+      Ref: count&nbsp;
       <span className={style['red-font']}>{() => count.value}</span>
     </h1>
     <button onclick={() => count.value++}>count++</button>
     <Comp count={() => count.value} />
-    <p>{props.data}</p>
+    <h1>Page.getInitialProps: {props.data}</h1>
   </div>
 }
 
@@ -38,9 +43,9 @@ type CompProps = {
 function Comp(props: CompProps) {
   const color = computed(() => createColor().slice(0, -1) + props.count().toString().slice(0, 1));
 
-  return <div style={{ color: () => color.value }}>
+  return <h1 style={{ color: () => color.value }}>
     子组件 {props.count}
-  </div>
+  </h1>
 }
 
 export default Home;

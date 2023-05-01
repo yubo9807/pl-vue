@@ -6,10 +6,8 @@ const state = {
 
 const actions = {
   setCount(num: number) {
-    // state.count ++;
-    return Object.assign({}, state, { count: num });
-  }
+    state.count = num;
+  },
 }
 
 export default createStore(state, actions);
-
