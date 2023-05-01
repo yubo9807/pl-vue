@@ -1,6 +1,6 @@
 import { binding } from "./depend";
 import { reactive } from "./reactive";
-import { isEquals } from "../utils/judge";
+import { isEquals, isObject } from "../utils/judge";
 import { clone } from "../utils/object";
 
 type Option = {
@@ -28,12 +28,20 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
     if (cleanup) return true;  // 被取消监听
 
     const value = source();
-    const bool = option.deep ? isEquals(value, backup) : value === backup;
 
-    if (!bool) {
-      cb(value, reactive(backup));  // 源码中是将 oldValue 返回的
-      backup = clone(value);
+    if (isObject(oldValue)) {
+      if (option.deep && !isEquals(value, backup)) {
+        cb(value, reactive(backup));
+        backup = clone(value);
+      }
+    } else {
+      if (value !== backup) {
+        cb(value, reactive(backup));  // 源码中是将 oldValue 返回的
+        backup = clone(value);
+      }
     }
+
+    
   });
 
   // 取消监听
