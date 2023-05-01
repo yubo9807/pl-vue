@@ -28,7 +28,7 @@ class RefImpl {
       for (const prop in keys) {
         this._value[prop] = newValue[prop];  // 给每个键重新赋值（无需担心新键无法赋值）
       }
-      for (const prop in Object.keys(this._rawValue)) {
+      for (const prop in this._rawValue) {
         !keys.includes(prop) && delete this._value[prop];  // 不用的键进行删除
       }
     } else {
@@ -40,7 +40,7 @@ class RefImpl {
 
 }
 
-type Ref<T> = { value: T }
+export type Ref<T> = { value: T }
 /**
  * 原始值转为响应式数据
  * @param value 
