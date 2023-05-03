@@ -113,7 +113,7 @@ function Page() {
 > 其中 `onBeforeUnmount`、`onUnmounted` 需传递组件名，否则不知道是谁卸载了。若有大神有别的方法，还请告知，万分感谢🙏。
 
 | 钩子 | 执行时间 |
-| --- | --- | --- |
+| --- | --- |
 | onBeforeMount | 已创建实例，但组件还未渲染 |
 | onMounted | 组件渲染后执行 |
 | onBeforeUnmount | 组件卸载前执行 |
