@@ -17,9 +17,9 @@ import { useRouter } from './router/use-router';
   readonly,
   computed,
   watch, watchEffect,
-  autoRun: binding,
+  binding,
   nextTick,
-  createRouter: initRouter,
+  initRouter,
   useRoute,
   useRouter,
 }
