@@ -2,6 +2,7 @@ import { binding } from "./depend";
 import { reactive } from "./reactive";
 import { isEquals, isObject } from "../utils/judge";
 import { clone } from "../utils/object";
+import { AnyObj } from "../utils/type";
 
 type Option = {
   immediate?: boolean
@@ -25,7 +26,13 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
 
   // 数据被调用，自执行
   binding(() => {
-    if (cleanup) return true;  // 被取消监听
+    const deepWatchList = [];
+    if (cleanup) {  // 被取消监听
+      if (deepWatchList.length > 0) {
+        deepWatchList.forEach(unwatch => unwatch());
+      }
+      return true;
+    }
 
     const value = source();
 
@@ -33,21 +40,41 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
       if (option.deep && !isEquals(value, backup)) {
         cb(value, reactive(backup));
         backup = clone(value);
+
+        getReferenceValue(value).forEach(obj => {
+          const unwatch = watch(() => obj, (value, oldValue) => {
+            cb(value, oldValue);
+          }, { deep: true })
+          deepWatchList.push(unwatch);
+        })
+
       }
     } else {
       if (value !== backup) {
-        cb(value, reactive(backup));  // 源码中是将 oldValue 返回的
+        cb(value, backup);  // 源码中是将 oldValue 返回的
         backup = clone(value);
       }
     }
-
-    
   });
 
   // 取消监听
   return () => {
     cleanup = true;
   }
+}
+
+/**
+ * 获取一个对象下的所有引用值，不包括自己
+ * @param obj 
+ */
+function getReferenceValue(obj: AnyObj, collect = []) {
+  for (const prop in obj) {
+    if (isObject(obj[prop])) {
+      collect.push(obj[prop]);
+      getReferenceValue(obj[prop], collect);
+    }
+  }
+  return collect;
 }
 
 type OnCleanup = (cleanupFn: () => void) => void
