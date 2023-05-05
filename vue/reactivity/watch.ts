@@ -42,8 +42,8 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
         backup = clone(value);
 
         getReferenceValue(value).forEach(obj => {
-          const unwatch = watch(() => obj, (value, oldValue) => {
-            cb(value, oldValue);
+          const unwatch = watch(() => obj, () => {
+            cb(value, reactive(backup));
           }, { deep: true })
           deepWatchList.push(unwatch);
         })
