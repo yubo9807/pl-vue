@@ -15,7 +15,7 @@ export function isAssignmentValueToNode(value: any) {
  * @param attr
  */
 export function isReactiveChangeAttr(attr: string) {
-  return ['className', 'innerHTML', 'innerText', 'textContent'].includes(attr);
+  return !/^on/.test(attr);
 }
 
 /**
