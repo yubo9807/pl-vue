@@ -1,40 +1,32 @@
-import { isObject } from "../utils/judge";
 import { AnyObj, Key } from "../utils/type";
-import { reactive } from "./reactive";
+import { createSignal } from "./signal";
 
 export const ISREF = '__v_isRef';
 
-class RefImpl {
+class RefImpl<T> {
 
   [ISREF]       = true
   __v_isShallow = false
 
-  _rawValue: any
-  _value:    any
+  _rawValue: T
+  _value:    T
+  getSignal: () => T
+  setSignal: (newValue: T) => void
 
-  constructor(value: any) {
+  constructor(value: T) {
     this._rawValue = value;
-    this._value    = isObject(value) ? reactive(value) : reactive({ value });
+    const [ getSignal, setSignal ] = createSignal(value);
+    this.getSignal = getSignal;
+    this.setSignal = setSignal;
+    this._value = getSignal();
   }
 
-
   get value() {
-    return isObject(this._rawValue) ? this._value : this._value.value;
+    return this.getSignal();
   }
 
   set value(newValue) {
-    if (isObject(newValue)) {
-      const keys = Object.keys(newValue);
-      for (const prop in keys) {
-        this._value[prop] = newValue[prop];  // 给每个键重新赋值（无需担心新键无法赋值）
-      }
-      for (const prop in this._rawValue) {
-        !keys.includes(prop) && delete this._value[prop];  // 不用的键进行删除
-      }
-    } else {
-      this._value.value = newValue;
-    }
-
+    this.setSignal(newValue);
     this._rawValue = newValue;
   }
 
@@ -46,7 +38,7 @@ export type Ref<T> = { value: T }
  * @param value 
  * @returns 
  */
-export function ref<T>(value: T): Ref<T> {
+export function ref<T>(value: T) {
   return new RefImpl(value);
 }
 
@@ -92,7 +84,6 @@ class ObjectRefImpl {
 }
 
 /**
- * 将 reactive 某一项转为 ref
  * @param target 
  * @param key 
  * @param defaultValue 
@@ -103,7 +94,6 @@ export function toRef<T>(target: T, key: Key, defaultValue = void 0) {
 };
 
 /**
- * 将 reactive 每一项转为 ref
  * @param target 
  * @returns 
  */
@@ -119,7 +109,7 @@ export function toRefs<T>(target: T) {
 
 type CustomRefCallback = (track: Function, trigger: Function) => ({ get: Function, set: Function})
 
-class CustomRefImpl extends RefImpl {
+class CustomRefImpl<T> extends RefImpl<T> {
   _get: Function
   _set: Function
   constructor(callback: CustomRefCallback) {

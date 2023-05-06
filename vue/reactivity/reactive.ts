@@ -18,8 +18,13 @@ export const ReactiveFlags = {
  * @returns 
 */
 export function reactive<T extends AnyObj>(target: T): T {
-  
-  if (!isObject(target) || rawMap.get(target)) return target;
+
+  if (!isObject(target)) {
+    console.warn(`lue cannot be made reactive: ${target}`);
+    return target;
+  }
+  if (rawMap.get(target)) return target;
+
   let backupKey = null;  // 备份当前改变的 key
 
   return new Proxy(target, {
