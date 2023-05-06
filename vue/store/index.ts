@@ -5,7 +5,7 @@ import { clone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 
 const actionFlag = Symbol('action');
-function isAction(func) {
+function isAction(func: unknown) {
   return typeof func === 'function' && func.prototype[actionFlag] === actionFlag;
 }
 
@@ -17,15 +17,10 @@ class Stroe<S, A> {
     this.state = reactive(clone(state));
 
     // 监听数据：若通过直接赋值的方式，恢复到原先的值
-    watch(() => this.state, (value, oldValue) => {
-      if (this.#lock) {  // 上锁，不允许改变任何值
-        for (const prop in oldValue) {
-          this.state[prop] = oldValue[prop];
-        }
-        const keys = Object.keys(oldValue);
-        for (const prop in value) {
-          !keys.includes(prop) && delete this.state[prop];
-        }
+    watch(() => this.state, () => {
+      if (this.#lock) {  // 上锁时不允许改变任何值
+        // 这里也可重置为 watch 回掉中的 oldValue，但在原 vue 中不可以
+        this._merge(state);
       }
     }, { deep: true });
 
@@ -33,17 +28,17 @@ class Stroe<S, A> {
     (this.actions as AnyObj) = {};
     for (const key in actions) {
       const self = this;
-      function func(...args) {
+      function func(...args: unknown[]) {
         self.#lock = false;                   // 解锁
-        const result = (actions[key] as Function)(...args);
-        self.#merge(state);
+        const result = actions[key as string](...args);
+        self._merge(state);
         if (typeof result === 'object' && result[Symbol.toStringTag] === 'Promise') {
-          result.then(res => {
-            self.#merge(state);
+          result.then(() => {
+            self._merge(state);
             nextTick(() => self.#lock = true);
           })
         } else {
-          self.#merge(state);
+          self._merge(state);
           nextTick(() => self.#lock = true);  // 重新上锁
         }
       }
@@ -56,7 +51,7 @@ class Stroe<S, A> {
    * 合并 state 数据
    * @param state 
    */
-  #merge(state: S) {
+  _merge(state: S) {
     const targetKsys = Object.keys(state);
     for (const prop in state) {
       this.state[prop] = state[prop];
@@ -76,21 +71,16 @@ class Stroe<S, A> {
 
 }
 
-const map = new WeakMap();
 
-export function createStore<S, A>(state: S, actions: A): () => S & A {
+/**
+ * 创建一个 Store
+ * @param state 
+ * @param actions 
+ * @returns 
+ */
+export function createStore<S extends object, A extends object>(state: S, actions: A): () => S & A {
   return () => {
-    if (typeof state !== 'object') {
-      console.warn(`state 类型必须为 object`);
-      return {}
-    };
-    const store = map.get(state);
-    if (store) {
-      return store;
-    } else {
-      const s = new Stroe(state, actions);
-      map.set(state, s.store);
-      return s.store;
-    }
+    const s = new Stroe(state, actions);
+    return s.store;
   }
 }
