@@ -28,6 +28,9 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
     const props = Object.assign({}, attrs, { children });
     tag.prototype._id = createId();  // 给组件添加一个唯一的值
     const tree = tag(props);
+    if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
+      return document.createTextNode(tree.toString());
+    }
     compTreeMap.set(tag, filterElement(tree.children));  // 搜集组件
     return createElement(tree.tag, tree.attrs, tree.children);
   }
