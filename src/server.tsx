@@ -54,8 +54,10 @@ const server = createServer(async (req, res) => {
     // 服务端渲染
     const data = await getInitialProps(url);
     const content = renderToString(<App isBrowser={false} url={url} data={data} />);
-    const newHTML = html.replace('loading', content);
-    res.write(newHTML);
+    const index = html.search('</body>');
+    const script = `<script>window.g_initialProps=${JSON.stringify(data)}</script>`;
+    const newHtml = html.slice(0, index) + script + html.slice(index, html.length);
+    res.write(newHtml.replace('loading', content));
     res.end();
   }
 

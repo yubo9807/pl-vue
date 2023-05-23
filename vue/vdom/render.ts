@@ -33,7 +33,7 @@ export function render({ tag, attrs, children }) {
  * @param param0 
  * @returns 
  */
-export function renderToString({ tag, attrs, children }) {
+export function renderToString({ tag, attrs, children }): string {
   setLock(true);
   const html = createHTML(tag, attrs, children);
   setLock(false);

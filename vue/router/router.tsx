@@ -2,7 +2,7 @@ import { ref } from '../reactivity/ref';
 import { watch } from '../reactivity/watch';
 import { Fragment, h } from '../vdom/h';
 import { Component, Tree } from '../vdom/type';
-import { base, isBrowser, mode } from './init-router';
+import { base, isBrowser, mode, ssrDataKey } from './init-router';
 import { isRoute } from './route';
 import { analysisRoute, currentRoute } from './use-route';
 
@@ -16,6 +16,8 @@ interface StaticRouterProps extends Props {
   url?:  string  // 渲染路径
   data?: any     // 服务端获取数据
 }
+
+let isFirstRender = true;  // 是否为第一次渲染
 
 /**
  * 监听路由变化
@@ -43,8 +45,14 @@ function watchRoutePath(props: StaticRouterProps & BrowserRouterProps, isBrowser
       if (isBrowser){  // 客户端组件渲染
         const Comp = tree.attrs.component;
         if (typeof Comp.prototype.getInitialProps === 'function') {
-          if (props.Loading) CurrentComp.value = props.Loading;
-          data.value = await Comp.prototype.getInitialProps();
+          if (isFirstRender && window[ssrDataKey]) {
+            data.value = window[ssrDataKey];
+            delete window[ssrDataKey];
+            isFirstRender = false;
+          } else {
+            if (props.Loading) CurrentComp.value = props.Loading;
+            data.value = await Comp.prototype.getInitialProps();
+          }
         } else {
           data.value = void 0;
         }

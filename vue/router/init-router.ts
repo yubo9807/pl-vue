@@ -1,14 +1,16 @@
 type Mode = 'history' | 'hash'
 
 export let base = '';
-export let mode: Mode = 'history';
+export let mode: Mode;
 export let isBrowser = true;
+export let ssrDataKey = '';
 
 
 type Option = {
-  base:       string
-  mode?:      Mode
-  isBrowser?: boolean
+  base:          string
+  mode?:         Mode
+  isBrowser?:    boolean
+  SSR_DATA_KEY?: string
 }
 /**
  * 创建路由
@@ -16,6 +18,7 @@ type Option = {
  */
 export function initRouter(option: Option) {
   base = option.base;
-  mode = option.mode;
+  mode = option.mode || 'history';
   isBrowser = option.isBrowser;
+  ssrDataKey = option.SSR_DATA_KEY || 'g_initialProps';
 }
