@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack --config=webpack.client.js --watch --mode=development",
-    "build": "webpack --config=webpack.client.js",
-    "build:server": "webpack --config=webpack.server.js",
+    "dev": "webpack --config=build/webpack.client.js --watch --mode=development",
+    "build": "webpack --config=build/webpack.client.js",
+    "build:server": "webpack --config=build/webpack.server.js",
     "build:simple": "node esbuild"
   },
   "keywords": [],

@@ -6,8 +6,8 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx"],
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      '~': path.resolve(__dirname),
+      '@': path.resolve(__dirname, '../src'),
+      '~': path.resolve(__dirname, '../'),
     },
   },
   mode: 'production',
