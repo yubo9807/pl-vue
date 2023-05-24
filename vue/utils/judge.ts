@@ -1,4 +1,3 @@
-import { isFragment } from "../vdom/h";
 import { Key } from "./type";
 
 export type Type = 'string'    | 'number'  | 'boolean' |
@@ -43,7 +42,7 @@ export function hasOwn(target: object | any[], key: Key) {
  * @returns 
  */
 export function isEquals(val1: any, val2: any) {
-  if (typeof val1 === 'object' && typeof val2 === 'object') {
+  if (['object', 'array'].includes(isType(val1)) && ['object', 'array'].includes(isType(val2))) {
     const keys1 = Object.keys(val1), keys2 = Object.keys(val2);
     if (keys1.length !== keys2.length) return false;
     for (const key of keys1) {
