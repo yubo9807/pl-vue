@@ -7,7 +7,7 @@
     "dev": "webpack --config=build/webpack.client.js --watch --mode=development",
     "build": "webpack --config=build/webpack.client.js",
     "build:server": "webpack --config=build/webpack.server.js",
-    "build:simple": "node esbuild"
+    "build:simple": "node build/esbuild.js"
   },
   "keywords": [],
   "author": "",
