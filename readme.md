@@ -127,6 +127,8 @@ function Page() {
 
 基于 reactive、watch、nextTick 实现，同样适用于 vue@2.7 | vue@3 中。
 
+> 更为轻量，只包含 `state` `actions`。无需注册
+
 ## 服务端渲染
 
-服务端字符串输出，页面组件渲染前数据请求。
+服务端字符串输出，并塞到页面中。客户端页面组件渲染前从 window 上获取数据。
