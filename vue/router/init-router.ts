@@ -17,8 +17,8 @@ type Option = {
  * @param option 
  */
 export function initRouter(option: Option) {
-  base = option.base;
+  base = option.base || '';
   mode = option.mode || 'history';
-  isBrowser = option.isBrowser;
+  isBrowser = option.isBrowser ?? true;
   ssrDataKey = option.SSR_DATA_KEY || 'g_initialProps';
 }

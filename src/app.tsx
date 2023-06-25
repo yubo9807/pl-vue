@@ -1,5 +1,5 @@
 import { h, Fragment } from "~/vue";
-import { Router, Route, Link, createRouter } from "~/vue/router";
+import { Router, Route, Link, initRouter, useRoute } from "~/vue/router";
 import Home from '@/pages/home';
 import About from '@/pages/about';
 import NotFound from "./pages/not-found";
@@ -20,7 +20,7 @@ type Props = {
 }
 function App(props: Props) {
 
-  createRouter({
+  initRouter({
     base,
     mode: 'hash',
     isBrowser: props.isBrowser,
