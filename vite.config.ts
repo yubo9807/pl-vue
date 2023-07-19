@@ -15,4 +15,13 @@ export default defineConfig({
       scopeBehaviour: 'local',
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(url) {
+          if (url.includes('/vue/')) return 'vue';
+        }
+      }
+    },
+  }
 })
