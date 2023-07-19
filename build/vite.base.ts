@@ -4,8 +4,8 @@ import { resolve } from 'path';
 export default defineConfig({
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
-      '~': resolve(__dirname, './')
+      '@': resolve(__dirname, '../src'),
+      '~': resolve(__dirname, '../')
     }
   },
   css: {
@@ -15,13 +15,4 @@ export default defineConfig({
       scopeBehaviour: 'local',
     },
   },
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks(url) {
-          if (url.includes('/vue/')) return 'vue';
-        }
-      }
-    },
-  }
 })
