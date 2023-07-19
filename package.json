@@ -4,28 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack --config=build/webpack.client.js --watch --mode=development",
-    "build": "webpack --config=build/webpack.client.js",
-    "build:server": "webpack --config=build/webpack.server.js",
-    "build:simple": "node build/esbuild.js"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/generator": "^7.21.9",
-    "@babel/parser": "^7.21.9",
-    "@babel/traverse": "^7.21.5",
-    "clean-webpack-plugin": "^4.0.0",
-    "css-loader": "^6.7.3",
-    "esbuild": "^0.17.18",
-    "html-webpack-plugin": "^5.5.0",
-    "mini-css-extract-plugin": "^2.7.5",
-    "node-sass": "^8.0.0",
-    "sass-loader": "^13.2.1",
-    "ts-loader": "^9.4.2",
-    "typescript": "^4.8.4",
-    "webpack": "^5.76.2",
-    "webpack-cli": "^5.0.1"
+    "@types/node": "^20.4.2",
+    "sass": "^1.58.3",
+    "vite": "^4.4.4"
   }
 }
