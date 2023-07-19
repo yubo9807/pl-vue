@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@babel/core": "^7.22.9",
     "@types/node": "^20.4.2",
     "sass": "^1.58.3",
     "vite": "^4.4.4"
