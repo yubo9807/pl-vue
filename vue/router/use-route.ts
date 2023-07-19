@@ -1,6 +1,6 @@
 import { reactive } from '../reactivity/reactive';
 import { base, isBrowser, mode } from './init-router';
-import { getQueryAll } from './utils';
+import { formatPath, getQueryAll } from './utils';
 
 export const currentRoute = reactive({
   path:  '',
@@ -14,8 +14,8 @@ export const currentRoute = reactive({
  * @param url 
  */
 export function analysisRoute(url: string) {
-  const newUrl = new URL('http://0.0.0.0' + url);
-  currentRoute.path = newUrl.pathname.replace(base, '');
+  const newUrl = new URL(formatPath('http://0.0.0.0/' + url));
+  currentRoute.path = newUrl.pathname.replace(base, '/');
   currentRoute.query = getQueryAll(newUrl.search);
   currentRoute.hash = newUrl.hash;
 }
