@@ -1,7 +1,7 @@
 import { h } from "~/vue";
 import * as vue from '~/vue';
 import * as router from '~/vue/router';
-import style from './module.scss';
+import style from './style.module.scss';
 
 export default function About() {
   return <div className={style['page-about']}>

@@ -1,6 +1,6 @@
 import { createColor } from "@/utils/string";
 import { h, onUnmounted, ref, computed } from "~/vue";
-import style from './module.scss';
+import style from './style.module.scss';
 import useStore from '@/store/count';
 
 function Home(props) {

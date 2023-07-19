@@ -1,5 +1,5 @@
 import { h } from "~/vue";
-import style from './module.scss';
+import style from './style.module.scss';
 
 export default function NotFound() {
   // return <Redirect to="/" />

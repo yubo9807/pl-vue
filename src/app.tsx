@@ -3,9 +3,9 @@ import { Router, Route, Link, initRouter, useRoute } from "~/vue/router";
 import Home from '@/pages/home';
 import About from '@/pages/about';
 import NotFound from "./pages/not-found";
-import style from './module.scss';
+import style from './style.module.scss';
 
-export const base = '/dist';
+export const base = '/';
 
 export const routes = [
   { path: '/', component: Home, exact: true },
@@ -22,7 +22,7 @@ function App(props: Props) {
 
   initRouter({
     base,
-    mode: 'hash',
+    mode: 'history',
     isBrowser: props.isBrowser,
   })
 
