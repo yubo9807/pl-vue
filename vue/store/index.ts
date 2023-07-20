@@ -1,7 +1,7 @@
 import { reactive } from "../reactivity/reactive";
 import { watch } from "../reactivity/watch";
 import { nextTick } from "../utils/next-tick";
-import { clone } from "../utils/object";
+import { clone, objectAssign } from "../utils/object";
 import { AnyObj } from "../utils/type";
 
 const actionFlag = Symbol('action');

@@ -1,6 +1,7 @@
 import { binding } from "../reactivity/depend";
-import { isType, isEquals } from '../utils/judge';
-import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue } from "./utils"
+import { isEquals, isObject, isString } from '../utils/judge';
+import { objectAssign } from '../utils/object';
+import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode } from "./utils"
 import { AnyObj } from "../utils/type";
 import { isFragment } from "./h";
 import { Tag, Attrs, Children } from "./type";
@@ -18,20 +19,20 @@ import { createId } from "../utils/string";
  * @returns 
  */
 export function createElement(tag: Tag, attrs: Attrs, children: Children) {
-  if (typeof tag === 'string') {  // 节点
+  if (isString(tag)) {  // 节点
     return createElementReal(tag, attrs, children);
   }
   if (isFragment(tag)) {  // 节点片段
     return createElementFragment(children);
   }
   if (isComponent(tag)) {  // 组件
-    const props = Object.assign({}, attrs, { children });
-    tag.prototype._id = createId();  // 给组件添加一个唯一的值
-    const tree = tag(props);
+    const props = objectAssign(attrs, { children });
+    (tag as Function).prototype._id = createId();  // 给组件添加一个唯一的值
+    const tree = (tag as Function)(props);
     if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
-      return document.createTextNode(tree.toString());
+      return createTextNode(tree);
     }
-    compTreeMap.set(tag, filterElement(tree.children));  // 搜集组件
+    compTreeMap.set(tag as Function, filterElement(tree.children));  // 搜集组件
     return createElement(tree.tag, tree.attrs, tree.children);
   }
 }
@@ -60,7 +61,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
 
     // 原始值
     if (isAssignmentValueToNode(val)) {
-      const textNode = document.createTextNode(val);
+      const textNode = createTextNode(val);
       textNode.nodeValue = val;
       el.appendChild(textNode);
       return;
@@ -87,7 +88,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
       return;
     }
 
-    if (isType(val) === 'object' && isComponent(val.tag)) {
+    if (isObject(val) && isComponent(val.tag)) {
       const node = createElement(val.tag, val.attrs, val.children);
       el.appendChild(node);
       return;
@@ -147,7 +148,7 @@ function createElementFragment(children: Children) {
 
     // 原始值
     if (isAssignmentValueToNode(val)) {
-      const textNode = document.createTextNode(val);
+      const textNode = createTextNode(val);
       textNode.nodeValue = val;
       fragment.appendChild(textNode);
       return;
@@ -174,7 +175,7 @@ function createElementFragment(children: Children) {
     }
 
     // 组件
-    if (isType(val) === 'object' && isComponent(val.tag)) {
+    if (isObject(val) && isComponent(val.tag)) {
       const node = createElement(val.tag, val.attrs, val.children);
       fragment.appendChild(node);
       return;
@@ -199,7 +200,7 @@ function createNode(value) {
 
   // 文本节点
   if (isAssignmentValueToNode(value)) {
-    return document.createTextNode(value.toString());
+    return createTextNode(value);
   }
 
   // 节点
@@ -208,7 +209,7 @@ function createNode(value) {
   }
 
   // 组件
-  if (isType(value) === 'object' && isComponent(value.tag)) {
+  if (isObject(value) && isComponent(value.tag)) {
     return createElement(value.tag, value.attrs, value.children);
   }
 
@@ -226,12 +227,12 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
   let lockFirstRun = true;  // 锁：第一次运行
   let parent = null;
 
-  const textNode = document.createTextNode('');  // 用于记录添加位置
+  const textNode = createTextNode('');  // 用于记录添加位置
   fragment.appendChild(textNode);
 
   binding(() => {
     let value = val();
-    if (value && isType(value) === 'object' && isFragment(value.tag)) {
+    if (value && isObject(value) && isFragment(value.tag)) {
       console.warn('不支持响应式节点片段渲染');
       return;
     }

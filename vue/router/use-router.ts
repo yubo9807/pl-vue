@@ -1,13 +1,13 @@
 import { Config, formatPath, splicingUrl } from './utils';
 import { base, mode } from './init-router';
-import { analysisRoute, currentRoute } from './use-route';
+import { analysisRoute } from './use-route';
 
 /**
  * 向前 push 一个路由
  * @param option 
  */
 function push(option: Config | string) {
-  const path = typeof option === 'string' ? option : splicingUrl(option);
+  const path = splicingUrl(option);
 
   if (mode === 'history') {
     history.pushState({}, '', formatPath(base + '/' + path));
@@ -22,7 +22,7 @@ function push(option: Config | string) {
  * @param option 
  */
 function replace(option: Config | string) {
-  const path = typeof option === 'string' ? option : splicingUrl(option);
+  const path = splicingUrl(option);
 
   if (mode === 'history') {
     history.replaceState({}, '', formatPath(base + '/' + path));

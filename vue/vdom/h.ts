@@ -1,4 +1,3 @@
-import { createId } from "../utils/string";
 import { Attrs, Children, Tag } from "./type";
 import { isComponent } from "./utils";
 

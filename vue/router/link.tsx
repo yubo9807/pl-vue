@@ -1,3 +1,5 @@
+import { isString } from "../utils/judge";
+import { objectAssign } from "../utils/object";
 import { h } from "../vdom/h";
 import { base, mode } from "./init-router";
 import { useRouter } from "./use-router";
@@ -11,8 +13,8 @@ type Props = {
 const defaultProps = { to: '/', type: 'push' }
 
 export function Link(props: Props) {
-  props = Object.assign({}, defaultProps, props);
-  const url = typeof props.to === 'string' ? props.to : splicingUrl(props.to);
+  props = objectAssign(defaultProps, props);
+  const url = isString(props.to) ? props.to : splicingUrl(props.to as Config);
   const href = formatPath(base + (mode === 'hash' ? '#' + url : url));
 
   const router = useRouter();

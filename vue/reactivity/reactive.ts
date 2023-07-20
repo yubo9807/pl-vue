@@ -1,4 +1,4 @@
-import { hasOwn, isObject } from "../utils/judge";
+import { hasOwn, isMemoryObject } from "../utils/judge";
 import { nextTick } from "../utils/next-tick";
 import { AnyObj } from "../utils/type";
 import { dependencyCollection, distributeUpdates } from "./depend";
@@ -19,7 +19,7 @@ export const ReactiveFlags = {
 */
 export function reactive<T extends AnyObj>(target: T): T {
 
-  if (!isObject(target)) {
+  if (!isMemoryObject(target)) {
     console.warn(`lue cannot be made reactive: ${target}`);
     return target;
   }
@@ -35,7 +35,7 @@ export function reactive<T extends AnyObj>(target: T): T {
 
       dependencyCollection(target);
       const result = Reflect.get(target, key, receiver);
-      return isObject(result) ? reactive(result) : result;
+      return isMemoryObject(result) ? reactive(result) : result;
     },
 
 
@@ -119,6 +119,6 @@ export function isProxy<T extends AnyObj>(proxy: T): boolean {
  * @returns 
  */
 export function markRaw<T extends AnyObj>(obj: T): T {
-  if (isObject(obj)) rawMap.set(obj, true);
+  if (isMemoryObject(obj)) rawMap.set(obj, true);
   return obj;
 }

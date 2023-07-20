@@ -1,4 +1,4 @@
-import { Key } from "./type";
+import { AnyObj, Key } from "./type";
 
 export type Type = 'string'    | 'number'  | 'boolean' |
                    'symbol'    | 'bigint'  |
@@ -21,7 +21,7 @@ export function isType(o: any): Type {
  * 从内存上看是否是一个对象
  * @param o
  */
-export function isObject(o: any) {
+export function isMemoryObject(o: any) {
   return ['object', 'array'].includes(isType(o));
 }
 
@@ -55,3 +55,25 @@ export function isEquals(val1: any, val2: any) {
     return val1 === val2;
   }
 }
+
+
+
+// #region 减少打包代码体积
+/**
+ * 是 object 类型
+ * @param obj 
+ * @returns 
+ */
+export function isObject(obj: AnyObj) {
+  return isType(obj) === 'object';
+}
+
+/**
+ * 是 string 类型
+ * @param obj 
+ * @returns 
+ */
+export function isString(text: any) {
+  return typeof text === 'string';
+}
+// #region

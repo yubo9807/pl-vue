@@ -1,3 +1,4 @@
+import { isString } from "../utils/judge";
 import { AnyObj } from "../utils/type";
 
 export type Config = {
@@ -10,9 +11,11 @@ export type Config = {
  * 组织 url
  * @param option
  */
-export function splicingUrl(option: Config) {
-  const pathname = option.path;
+export function splicingUrl(option: Config | string): string {
+  if (isString(option)) return option as string;
 
+  option = option as Config
+  const pathname = option.path;
   let queryStr = '';
   for (const key in option.query) {
     queryStr += `&${key}=${option.query[key]}`;

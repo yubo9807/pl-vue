@@ -1,7 +1,8 @@
 import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr } from "./utils";
 import { isFragment } from "./h";
 import { Attrs, Children, Tag } from "./type";
-import { isType } from "../utils/judge";
+import { isObject } from "../utils/judge";
+import { objectAssign } from "../utils/object";
 
 
 /**
@@ -13,14 +14,14 @@ import { isType } from "../utils/judge";
 export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = ['']) {
   // 节点片段
   if (isFragment(tag)) {
-    const props = Object.assign({}, attrs, { children });
+    const props = objectAssign(attrs, { children });
     const h = (tag as Function)(props);
     return createHTMLFragment(h);
   }
 
   // 组件
   if (isComponent(tag)) {
-    const props = Object.assign({}, attrs, { children });
+    const props = objectAssign(attrs, { children });
     const h = (tag as Function)(props);
     return createHTML(h.tag, h.attrs, h.children);
   } 
@@ -39,7 +40,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
     }
 
     // 对样式单独做下处理
-    if (attr === 'style' && isType(value) === 'object') {
+    if (attr === 'style' && isObject(value)) {
       for (const key in value) {
         if (typeof value[key] === 'function') {  // 响应式数据
           value[key] = value[key]();
@@ -89,7 +90,7 @@ function createHTMLFragment(children: Children) {
     }
 
     // 节点 || 组件 || 虚拟节点
-    if (isType(val) === 'object') {
+    if (isObject(val)) {
       text += createHTML(val.tag, val.attrs, val.children);
       return;
     }

@@ -1,6 +1,6 @@
 import { binding } from "./depend";
 import { reactive } from "./reactive";
-import { isEquals, isObject } from "../utils/judge";
+import { isEquals, isMemoryObject } from "../utils/judge";
 import { clone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 
@@ -36,7 +36,7 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
 
     const value = source();
 
-    if (isObject(oldValue)) {
+    if (isMemoryObject(oldValue)) {
       if (option.deep && !isEquals(value, backup)) {
         cb(value, reactive(backup));
         backup = clone(value);
@@ -69,7 +69,7 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
  */
 function getReferenceValue(obj: AnyObj, collect = []) {
   for (const prop in obj) {
-    if (isObject(obj[prop])) {
+    if (isMemoryObject(obj[prop])) {
       collect.push(obj[prop]);
       getReferenceValue(obj[prop], collect);
     }

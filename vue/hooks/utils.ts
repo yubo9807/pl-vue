@@ -1,4 +1,5 @@
-import { isType } from "../utils/judge";
+import { isObject } from "../utils/judge";
+import { objectAssign } from "../utils/object";
 import { Tree } from "../vdom/type";
 import { isComponent } from "../vdom/utils";
 
@@ -26,10 +27,10 @@ export function collectCompId(tree: Tree) {
   const collect = [];
 
   function recursion(tree) {
-    if (isType(tree) !== 'object') return;
+    if (!isObject(tree)) return;
 
     const { tag, attrs, children } = tree;
-    const props = Object.assign({}, attrs, { children });
+    const props = objectAssign(attrs, { children });
     if (isComponent(tag)) {
       collect.push(tag.prototype._id);
       const newTree = tag(props);

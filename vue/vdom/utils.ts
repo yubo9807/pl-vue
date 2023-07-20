@@ -1,4 +1,4 @@
-import { isType } from "../utils/judge";
+import { isObject, isString } from "../utils/judge";
 import { isFragment } from "./h";
 
 /**
@@ -24,7 +24,7 @@ export function isReactiveChangeAttr(attr: string) {
  * @returns 
  */
 export function isVirtualDomObject(o) {
-  return isType(o) === 'object' && (typeof o.tag === 'string' || isFragment(o.tag));
+  return isObject(o) && (isString(o.tag) || isFragment(o.tag));
 }
 
 /**
@@ -44,3 +44,16 @@ export function isComponent(tag) {
 export function noRenderValue(value: any) {
   return [void 0, null, '', true, false].includes(value);
 }
+
+
+
+// #region 减少打包代码体积
+/**
+ * 创建文本节点
+ * @param text
+ * @returns
+ */
+export function createTextNode(text: string) {
+  return document.createTextNode(text);
+}
+// #endregion

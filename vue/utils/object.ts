@@ -1,4 +1,4 @@
-import { isType } from "./judge";
+import { isObject } from "./judge";
 
 /**
  * 深度克隆对象
@@ -6,7 +6,7 @@ import { isType } from "./judge";
  */
 export function clone(obj: any) {
   if (obj instanceof Array) return cloneArray(obj);
-  else if (isType(obj) === 'object') return cloneObject(obj);
+  else if (isObject(obj)) return cloneObject(obj);
   else return obj;
 }
 
@@ -26,3 +26,16 @@ function cloneArray(obj: any) {
   }
   return result;
 }
+
+
+// #region 减少打包代码体积
+/**
+ * 合并对象
+ * @param obj1 
+ * @param obj2 
+ * @returns 
+ */
+export function objectAssign<O1, O2>(obj1: O1, obj2: O2) {
+  return Object.assign({}, obj1, obj2);
+}
+// #region 

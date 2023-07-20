@@ -1,7 +1,7 @@
 import { Attrs, Children, Component } from './type';
 import { isAssignmentValueToNode, isComponent } from './utils';
-import { isType } from '../utils/judge';
-import { clone } from '../utils/object';
+import { isObject } from '../utils/judge';
+import { clone, objectAssign } from '../utils/object';
 
 type CompTree = {
   compId:    string
@@ -19,9 +19,9 @@ export const compTreeMap: WeakMap<Component, CompTree[]> = new WeakMap();
  */
 export function filterElement(children: Children, collect: CompTree[] = []) {
   children.forEach(tree => {
-    if (isType(tree) === 'object') {
+    if (isObject(tree)) {
       if (isComponent(tree.tag)) {
-        collect.push({ comp: tree.tag, compId: tree.tag.prototype._id, props: Object.assign({}, tree.attrs, { children }) });
+        collect.push({ comp: tree.tag, compId: tree.tag.prototype._id, props: objectAssign(tree.attrs, { children }) });
       } else if (isAssignmentValueToNode(tree.tag)) {
         filterElement(tree.children, collect);
       }
