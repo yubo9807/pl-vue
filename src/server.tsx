@@ -3,48 +3,7 @@ import App, { base, routes } from "./app";
 import { createServer } from 'http';
 import { readFileSync, readFile } from 'fs';
 import { resolve, extname } from 'path';
-
-const mimeTypes = {
-  'text/html': ['.html'],
-  'text/css': ['.css'],
-  'application/javascript;': ['.js'],
-  'application/json': ['.json'],
-  'image/vnd.microsoft.icon': ['.ico'],
-  'image/jpeg': ['.jpg', '.jpeg'],
-  'image/png': ['.png'],
-  'image/gif': ['.gif'],
-  'application/pdf': ['.pdf'],
-  'font/woff2': ['.worf2'],
-  'font/woff': ['.worf'],
-  'font/ttf': ['.ttf'],
-  'application/octet-stream': ['.mp4', '.avi'],
-}
-
-/**
- * 获取所有静态文件的后缀
- * @returns 
- */
-function getStaticFileExts() {
-  const exts = Object.values(mimeTypes).flat();
-  return ['.gz'].concat(exts);
-}
-
-/**
- * 获取文件 content-type 类型
- * @param filename 
- * @returns 
- */
-function getMimeType(filename: string) {
-  const ext = extname(filename).toLowerCase();
-  let type: string = null;
-  for (const key in mimeTypes) {
-    if (mimeTypes[key].includes(ext)) {
-      type = key;
-      break;
-    }
-  }
-  return type;
-}
+import { getMimeType, getStaticFileExts } from "./utils/string";
 
 // html 模版
 const html = readFileSync(resolve(__dirname, base.slice(1), './index.html'), 'utf-8');
@@ -83,7 +42,7 @@ const server = createServer(async (req, res) => {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
       } else {
-        const contentType = getMimeType(filename);
+        const contentType = getMimeType(ext);
         contentType && res.setHeader('Content-Type', contentType);
         res.write(content);
         res.end();
