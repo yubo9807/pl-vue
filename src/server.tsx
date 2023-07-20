@@ -43,7 +43,6 @@ function getMimeType(filename: string) {
       break;
     }
   }
-  type ??= 'text/html;';
   return type;
 }
 
@@ -84,7 +83,8 @@ const server = createServer(async (req, res) => {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
       } else {
-        res.setHeader('Content-Type', getMimeType(filename));
+        const contentType = getMimeType(filename);
+        contentType && res.setHeader('Content-Type', contentType);
         res.write(content);
         res.end();
       }
