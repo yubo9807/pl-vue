@@ -1,5 +1,6 @@
 import { ref } from '../reactivity/ref';
 import { watch } from '../reactivity/watch';
+import { isObject } from '../utils/judge';
 import { Fragment, h } from '../vdom/h';
 import { Component, Tree } from '../vdom/type';
 import { base, isBrowser, mode, ssrDataKey } from './init-router';
@@ -30,7 +31,7 @@ function watchRoutePath(props: StaticRouterProps & BrowserRouterProps, isBrowser
 
   watch(() => currentRoute.path, async value => {
     const routes = props.children.filter((tree: Tree) =>
-      typeof tree === 'object' && isRoute(tree.tag as Function));
+      isObject(tree) && isRoute(tree.tag as Function));
 
     const tree: Tree = routes.find((tree: Tree) => {
       if (tree.attrs.exact) {
@@ -63,7 +64,7 @@ function watchRoutePath(props: StaticRouterProps & BrowserRouterProps, isBrowser
     } else {
       const tree: Tree = routes[routes.length - 1];
       // 设置了 NotFound 组件
-      if (typeof tree === 'object' && isRoute(tree.tag as Function) && !tree.attrs.path) {
+      if (isObject(tree) && isRoute(tree.tag as Function) && !tree.attrs.path) {
         CurrentComp.value = tree.attrs.component;
       } else {
         CurrentComp.value = null;

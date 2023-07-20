@@ -1,7 +1,7 @@
 import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr } from "./utils";
 import { isFragment } from "./h";
 import { Attrs, Children, Tag } from "./type";
-import { isObject } from "../utils/judge";
+import { isArray, isObject } from "../utils/judge";
 import { objectAssign } from "../utils/object";
 
 
@@ -77,7 +77,7 @@ function createHTMLFragment(children: Children) {
     }
 
     // 节点片段
-    if (val instanceof Array) {
+    if (isArray(val)) {
       text += createHTMLFragment(val);
       return;
     }

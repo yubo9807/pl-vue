@@ -1,11 +1,11 @@
-import { isObject } from "./judge";
+import { isArray, isObject } from "./judge";
 
 /**
  * 深度克隆对象
  * @param obj 
  */
 export function clone(obj: any) {
-  if (obj instanceof Array) return cloneArray(obj);
+  if (isArray(obj)) return cloneArray(obj);
   else if (isObject(obj)) return cloneObject(obj);
   else return obj;
 }

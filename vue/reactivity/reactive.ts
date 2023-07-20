@@ -19,7 +19,7 @@ export const ReactiveFlags = {
 */
 export function reactive<T extends AnyObj>(target: T): T {
 
-  if (!isMemoryObject(target)) {
+  if (!isMemoryObject(target) || Object.isFrozen(target)) {
     console.warn(`lue cannot be made reactive: ${target}`);
     return target;
   }

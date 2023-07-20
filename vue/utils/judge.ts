@@ -42,7 +42,7 @@ export function hasOwn(target: object | any[], key: Key) {
  * @returns 
  */
 export function isEquals(val1: any, val2: any) {
-  if (['object', 'array'].includes(isType(val1)) && ['object', 'array'].includes(isType(val2))) {
+  if (isMemoryObject(val1) && isMemoryObject(val2)) {
     const keys1 = Object.keys(val1), keys2 = Object.keys(val2);
     if (keys1.length !== keys2.length) return false;
     for (const key of keys1) {
@@ -66,6 +66,15 @@ export function isEquals(val1: any, val2: any) {
  */
 export function isObject(obj: AnyObj) {
   return isType(obj) === 'object';
+}
+
+/**
+ * 是 array 类型
+ * @param obj 
+ * @returns 
+ */
+export function isArray(arr: AnyObj) {
+  return arr instanceof Array;
 }
 
 /**

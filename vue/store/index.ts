@@ -1,7 +1,8 @@
 import { reactive } from "../reactivity/reactive";
 import { watch } from "../reactivity/watch";
+import { isMemoryObject } from "../utils/judge";
 import { nextTick } from "../utils/next-tick";
-import { clone, objectAssign } from "../utils/object";
+import { clone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 
 const actionFlag = Symbol('action');
@@ -9,7 +10,9 @@ function isAction(func: unknown) {
   return typeof func === 'function' && func.prototype[actionFlag] === actionFlag;
 }
 
-class Stroe<S, A> {
+type Obj = Record<string, any>
+
+class Stroe<S extends Obj, A extends Obj> {
   state:   S
   actions: A
   #lock = true;
@@ -30,9 +33,9 @@ class Stroe<S, A> {
       const self = this;
       function func(...args: unknown[]) {
         self.#lock = false;                   // 解锁
-        const result = actions[key as string](...args);
+        const result = actions[key](...args);
         self._merge(state);
-        if (typeof result === 'object' && result[Symbol.toStringTag] === 'Promise') {
+        if (isMemoryObject(result) && result[Symbol.toStringTag] === 'Promise') {
           result.then(() => {
             self._merge(state);
             nextTick(() => self.#lock = true);
@@ -43,7 +46,7 @@ class Stroe<S, A> {
         }
       }
       func.prototype[actionFlag] = actionFlag;
-      this.actions[key as string] = func;
+      this.actions[key] = func as any;
     }
   }
 
@@ -78,7 +81,7 @@ class Stroe<S, A> {
  * @param actions 
  * @returns 
  */
-export function createStore<S extends object, A extends object>(state: S, actions: A): () => S & A {
+export function createStore<S extends Obj, A extends Obj>(state: S, actions: A): () => S & A {
   return () => {
     const s = new Stroe(state, actions);
     return s.store;

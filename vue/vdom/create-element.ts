@@ -1,5 +1,5 @@
 import { binding } from "../reactivity/depend";
-import { isEquals, isObject, isString } from '../utils/judge';
+import { isArray, isEquals, isObject, isString } from '../utils/judge';
 import { objectAssign } from '../utils/object';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode } from "./utils"
 import { AnyObj } from "../utils/type";
@@ -75,7 +75,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
     }
 
     // 节点片段
-    if (val instanceof Array) {
+    if (isArray(val)) {
       const fragment = createElementFragment(val);
       el.appendChild(fragment);
       return;
@@ -115,7 +115,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
   }
 
   // 对样式单独处理
-  if (attrs.style && attrs.style instanceof Object) {
+  if (attrs.style && isObject(attrs.style)) {
     for (const prop in attrs.style) {
       const value = attrs.style[prop];
       if (typeof value === 'function') {
@@ -161,7 +161,7 @@ function createElementFragment(children: Children) {
     }
   
     // 节点片段
-    if (val instanceof Array) {
+    if (isArray(val)) {
       const fragmentNode = createElementFragment(val);
       fragment.appendChild(fragmentNode);
       return;
@@ -237,7 +237,7 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
       return;
     }
 
-    if (!(value instanceof Array)) {
+    if (!isArray(value)) {
       value = [value];
     }
     value = value.filter(val => !noRenderValue(val));
