@@ -3,6 +3,7 @@ import baseConfig from './vite.base';
 
 const config = defineConfig({
   build: {
+    outDir: 'dist/client',
     rollupOptions: {
       output: {
         manualChunks(url) {
