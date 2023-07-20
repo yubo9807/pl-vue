@@ -1,5 +1,6 @@
 import { hasOwn, isMemoryObject } from "../utils/judge";
 import { nextTick } from "../utils/next-tick";
+import { printWarn } from "../utils/string";
 import { AnyObj } from "../utils/type";
 import { dependencyCollection, distributeUpdates } from "./depend";
 import { isReadonly } from "./readonly";
@@ -20,7 +21,7 @@ export const ReactiveFlags = {
 export function reactive<T extends AnyObj>(target: T): T {
 
   if (!isMemoryObject(target) || Object.isFrozen(target)) {
-    console.warn(`lue cannot be made reactive: ${target}`);
+    printWarn(`lue cannot be made reactive: ${target}`);
     return target;
   }
   if (rawMap.get(target)) return target;

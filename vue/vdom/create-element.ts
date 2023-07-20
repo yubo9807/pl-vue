@@ -7,7 +7,7 @@ import { isFragment } from "./h";
 import { Tag, Attrs, Children } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
-import { createId } from "../utils/string";
+import { createId, printWarn } from "../utils/string";
 
 
 
@@ -94,7 +94,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
       return;
     }
 
-    console.warn(`render: 不支持 ${val} 值渲染`);
+    printWarn(`render: 不支持 ${val} 值渲染`);
 
   })
 
@@ -181,7 +181,7 @@ function createElementFragment(children: Children) {
       return;
     }
 
-    console.warn(`render: 不支持 ${val} 值渲染`);
+    printWarn(`render: 不支持 ${val} 值渲染`);
 
   })
 
@@ -233,7 +233,7 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
   binding(() => {
     let value = val();
     if (value && isObject(value) && isFragment(value.tag)) {
-      console.warn('不支持响应式节点片段渲染');
+      printWarn('不支持响应式节点片段渲染');
       return;
     }
 

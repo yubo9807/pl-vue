@@ -3,6 +3,7 @@ import { isFragment } from "./h";
 import { Attrs, Children, Tag } from "./type";
 import { isArray, isObject } from "../utils/judge";
 import { objectAssign } from "../utils/object";
+import { printWarn } from "../utils/string";
 
 
 /**
@@ -95,7 +96,7 @@ function createHTMLFragment(children: Children) {
       return;
     }
 
-    console.warn(`renderToString: 不支持 ${val} 值渲染`);
+    printWarn(`renderToString: 不支持 ${val} 值渲染`);
 
   })
   return text;

@@ -1,5 +1,6 @@
 import { ISREF } from "./ref";
 import { ReactiveEffect } from './effect'
+import { printWarn } from "../utils/string";
 
 type Getter<T> = () => T
 type Setter<T> = (val: T) => void
@@ -28,7 +29,7 @@ class ComputedRefImpl<T> {
   }
 
   set value(val: T) {
-    this._setter ? this._setter(val) : console.warn(`Write operation failed: computed value is readonly`);
+    this._setter ? this._setter(val) : printWarn(`Write operation failed: computed value is readonly`);
   }
 
 }

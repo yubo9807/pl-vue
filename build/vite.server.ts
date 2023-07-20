@@ -6,7 +6,7 @@ import noOutput from './plugins/no-output';
 const config = defineConfig({
   plugins: [
     noOutput((path) => !/.(ts|tsx)$/.test(path)),  // 服务端只用到 js 文件
-    removeFuncs('onMounted', 'onUnmounted', 'onBeforeMount', 'onBeforeUnmount'),  // 一些不可能触发的钩子
+    removeFuncs('onMounted', 'onUnmounted', 'onBeforeMount', 'onBeforeUnmount', 'printWran'),  // 一些不可能触发的钩子
   ],
   build: {
     emptyOutDir: false,

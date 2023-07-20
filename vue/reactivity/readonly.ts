@@ -22,13 +22,13 @@ export function readonly(target: AnyObj) {
 
     set(target, key, value) {
       const oldValue = Reflect.get(target, key);
-      console.warn(`Set operation on key '${key.toString()}' failed: target is readonly.`, { [key.toString()]: oldValue });
+      printWran(`Set operation on key '${key.toString()}' failed: target is readonly.`, { [key.toString()]: oldValue });
       return oldValue;
     },
 
     deleteProperty(target, key) {
       const oldValue = Reflect.get(target, key);
-      console.warn(`Delete operation on key '${key.toString()}' failed: target is readonly.`, { [key.toString()]: oldValue });
+      printWran(`Delete operation on key '${key.toString()}' failed: target is readonly.`, { [key.toString()]: oldValue });
       return oldValue;
     }
 
