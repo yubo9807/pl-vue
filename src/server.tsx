@@ -4,14 +4,51 @@ import { createServer } from 'http';
 import { readFileSync, readFile } from 'fs';
 import { resolve, extname } from 'path';
 
+const mimeTypes = {
+  'text/html': ['.html'],
+  'text/css': ['.css'],
+  'application/javascript;': ['.js'],
+  'application/json': ['.json'],
+  'image/vnd.microsoft.icon': ['.ico'],
+  'image/jpeg': ['.jpg', '.jpeg'],
+  'image/png': ['.png'],
+  'image/gif': ['.gif'],
+  'application/pdf': ['.pdf'],
+  'font/woff2': ['.worf2'],
+  'font/woff': ['.worf'],
+  'font/ttf': ['.ttf'],
+  'application/octet-stream': ['.mp4', '.avi'],
+}
+
+/**
+ * 获取所有静态文件的后缀
+ * @returns 
+ */
+function getStaticFileExts() {
+  const exts = Object.values(mimeTypes).flat();
+  return ['.gz'].concat(exts);
+}
+
+/**
+ * 获取文件 content-type 类型
+ * @param filename 
+ * @returns 
+ */
+function getMimeType(filename: string) {
+  const ext = extname(filename).toLowerCase();
+  let type: string = null;
+  for (const key in mimeTypes) {
+    if (mimeTypes[key].includes(ext)) {
+      type = key;
+      break;
+    }
+  }
+  type ??= 'text/html;';
+  return type;
+}
+
+// html 模版
 const html = readFileSync(resolve(__dirname, base.slice(1), './index.html'), 'utf-8');
-const staticExtList = [
-  'html', 'css', 'js', 'json',
-  'xml', 'txt',
-  'ico', 'png', 'jpg', 'gif',
-  'ttf', 'woff', 'worf2',
-  'gz',
-];
 
 /**
  * 生成节点前执行组件的 getInitialProps 方法
@@ -39,13 +76,15 @@ const server = createServer(async (req, res) => {
   const url = req.url;
   const ext = extname(url);
 
-  if (staticExtList.includes(ext.slice(1))) {
+  if (getStaticFileExts().includes(ext)) {
     // 静态资源
-    readFile(resolve(__dirname, url.slice(1)), (err, content) => {
+    const filename = resolve(__dirname, url.slice(1));
+    readFile(filename, (err, content) => {
       if (err) {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
         res.end('Not Found');
       } else {
+        res.setHeader('Content-Type', getMimeType(filename));
         res.write(content);
         res.end();
       }
@@ -57,7 +96,7 @@ const server = createServer(async (req, res) => {
     const index = html.search('</body>');
     const script = data === void 0 ? '' : `<script>window.g_initialProps=${JSON.stringify(data)}</script>`;
     const newHtml = html.slice(0, index) + script + html.slice(index, html.length);
-    res.write(newHtml.replace('loading', content));
+    res.write(newHtml.replace('<!--ssr-outlet-->', content));
     res.end();
   }
 
