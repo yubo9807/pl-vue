@@ -74,7 +74,7 @@ export function isObject(obj: AnyObj) {
  * @returns 
  */
 export function isArray(arr: AnyObj) {
-  return arr instanceof Array;
+  return Array.isArray(arr);
 }
 
 /**

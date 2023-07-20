@@ -1,7 +1,7 @@
 import { Attrs, Children, Component } from './type';
 import { isAssignmentValueToNode, isComponent } from './utils';
 import { isObject } from '../utils/judge';
-import { clone, objectAssign } from '../utils/object';
+import { deepClone, objectAssign } from '../utils/object';
 
 type CompTree = {
   compId:    string
@@ -51,7 +51,7 @@ export function getSubComponent(comp: Component, collect: CompTree[] = []) {
  * @param comp 组件
  */
 export function getComponentTree(comp: Component): CompTree[] {
-  const arr = clone(compTreeMap.get(comp)) || [];
+  const arr = deepClone(compTreeMap.get(comp)) || [];
   arr.forEach(val => {
     val.children = getComponentTree(val.comp);
   })

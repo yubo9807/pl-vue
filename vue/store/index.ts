@@ -2,7 +2,7 @@ import { reactive } from "../reactivity/reactive";
 import { watch } from "../reactivity/watch";
 import { isMemoryObject } from "../utils/judge";
 import { nextTick } from "../utils/next-tick";
-import { clone } from "../utils/object";
+import { deepClone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 
 const actionFlag = Symbol('action');
@@ -17,7 +17,7 @@ class Stroe<S extends Obj, A extends Obj> {
   actions: A
   #lock = true;
   constructor(state: S, actions: A) {
-    this.state = reactive(clone(state));
+    this.state = reactive(deepClone(state));
 
     // 监听数据：若通过直接赋值的方式，恢复到原先的值
     watch(() => this.state, () => {

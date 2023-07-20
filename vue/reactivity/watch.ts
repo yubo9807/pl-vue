@@ -1,7 +1,7 @@
 import { binding } from "./depend";
 import { reactive } from "./reactive";
 import { isEquals, isMemoryObject } from "../utils/judge";
-import { clone } from "../utils/object";
+import { deepClone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 
 type Option = {
@@ -21,7 +21,7 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
   if (cleanup) return;  // 侦听器被取消
 
   const oldValue = source();
-  let backup = clone(oldValue);
+  let backup = deepClone(oldValue);
   option.immediate && cb(oldValue, void 0);
 
   // 数据被调用，自执行
@@ -39,7 +39,7 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
     if (isMemoryObject(oldValue)) {
       if (option.deep && !isEquals(value, backup)) {
         cb(value, reactive(backup));
-        backup = clone(value);
+        backup = deepClone(value);
 
         getReferenceValue(value).forEach(obj => {
           const unwatch = watch(() => obj, () => {
@@ -52,7 +52,7 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
     } else {
       if (value !== backup) {
         cb(value, backup);  // 源码中是将 oldValue 返回的
-        backup = clone(value);
+        backup = deepClone(value);
       }
     }
   });

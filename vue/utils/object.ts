@@ -1,31 +1,60 @@
-import { isArray, isObject } from "./judge";
+import { isArray, isType } from "./judge";
+import { AnyObj } from "./type";
 
-/**
- * 深度克隆对象
- * @param obj 
- */
-export function clone(obj: any) {
-  if (isArray(obj)) return cloneArray(obj);
-  else if (isObject(obj)) return cloneObject(obj);
-  else return obj;
-}
+export const deepClone = (function () {
+	const cache = new WeakMap();
+	const noCloneTypes = ['null', 'weakset', 'weakmap'];
+	
+	const specialClone = {
+		set(set: Set<any>) {
+			const collect = new Set();
+			for (const value of set) {
+				collect.add(deepClone(value));
+			}
+			return collect;
+		},
+		map(map: Map<any, any>) {
+			const collect = new Map();
+			for (const [ key, val ] of map.entries()) {
+				collect.set(key, deepClone(val));
+			}
+			return collect;
+		},
+	}
 
-function cloneObject(obj: any) {
-  let result = {};
-  let names = Object.getOwnPropertyNames(obj);
-  for (let i = 0; i < names.length; i ++) {
-    result[names[i]] = clone(obj[names[i]]);
-  }
-  return result;
-}
+	/**
+	 * 深度克隆
+	 * @param origin 被克隆对象
+	 */
+	return function<T>(origin: T) {
+		const type = isType(origin);
+		if (typeof origin !== 'object' || noCloneTypes.includes(type)) {
+			return origin;
+		}
 
-function cloneArray(obj: any) {
-  let result = new Array(obj.length);
-  for (let i = 0; i < result.length; i ++) {
-    result[i] = clone(obj[i]);
-  }
-  return result;
-}
+		// 防止环形引用问题（已经克隆过的对象不再进行克隆）
+		if (cache.has(origin)) {
+			return cache.get(origin);
+		}
+
+		// 特殊类型克隆处理
+		if (specialClone[type]) {
+			return specialClone[type](origin);
+		}
+
+		// 创建一个新的对象
+		const target: AnyObj = isArray(origin) ? [] : {};
+		Object.setPrototypeOf(target, Object.getPrototypeOf(origin));
+
+		// 设置缓存，该对象已经被克隆过
+		cache.set(origin, target);
+
+		for (const key in origin) {
+			target[key] = deepClone(origin[key]);
+		}
+		return target as T;
+	}
+}())
 
 
 // #region 减少打包代码体积
