@@ -12,14 +12,14 @@ export default function (...args: string[]) {
     name: 'remove-func',
 
     transform(code: string, id: string) {
-      if (!id.endsWith('.tsx')) return null;
+      if (!/\.(ts|tsx|js|jsx)$/.test(id)) return null;
 
       const ast = parse(code, { sourceType: 'module' });
 
       traverse(ast, {
         CallExpression(path) {
-          const { name } = path.node.callee;
-          if (args.includes(name)) {
+          const { name, type } = path.node.callee;
+          if (type === 'Identifier' && args.includes(name)) {
             path.remove();
           }
         }

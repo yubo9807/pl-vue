@@ -29,7 +29,11 @@ class ComputedRefImpl<T> {
   }
 
   set value(val: T) {
-    this._setter ? this._setter(val) : printWarn(`Write operation failed: computed value is readonly`);
+    if (this._setter) {
+      this._setter(val);
+    } else {
+      printWarn(`Write operation failed: computed value is readonly`);
+    }
   }
 
 }
