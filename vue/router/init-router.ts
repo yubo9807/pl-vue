@@ -1,3 +1,5 @@
+import { printWarn } from "../utils/string";
+
 type Mode = 'history' | 'hash'
 
 export let base = '';
@@ -17,7 +19,10 @@ type Option = {
  * @param option 
  */
 export function initRouter(option: Option) {
-  base = option.base || '';
+  base = option.base || '/';
+  if (!/(^\/$|^\/.+\/$)/.test(base)) {
+    printWarn('base 必须以 / 开头 / 结尾');
+  }
   mode = option.mode || 'history';
   isBrowser = option.isBrowser ?? true;
   ssrDataKey = option.SSR_DATA_KEY || 'g_initialProps';

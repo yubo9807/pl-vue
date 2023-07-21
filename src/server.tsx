@@ -1,12 +1,13 @@
 import { h, renderToString } from "~/vue";
-import App, { base, routes } from "./app";
+import App, { routes } from "./app";
 import { createServer } from 'http';
 import { readFileSync, readFile } from 'fs';
 import { resolve, extname } from 'path';
 import { getMimeType, getStaticFileExts } from "./utils/string";
+import env from "~/config/env";
 
 // html 模版
-const html = readFileSync(resolve(__dirname, base.slice(1), './client/index.html'), 'utf-8');
+const html = readFileSync(resolve(__dirname, './client/index.html'), 'utf-8');
 
 /**
  * 生成节点前执行组件的 getInitialProps 方法
@@ -14,7 +15,6 @@ const html = readFileSync(resolve(__dirname, base.slice(1), './client/index.html
  * @returns 
  */
 async function getInitialProps(url: string) {
-  url = url.replace(base, '');
   const route = routes.find(val => {
     if (val.exact) {
       return url === val.path;
@@ -31,7 +31,7 @@ async function getInitialProps(url: string) {
 
 const server = createServer(async (req, res) => {
 
-  const url = req.url;
+  const url = req.url.replace(env.BASE_URL, '/');
   const ext = extname(url);
 
   if (getStaticFileExts().includes(ext)) {
@@ -63,5 +63,5 @@ const server = createServer(async (req, res) => {
 
 const port = 3000;
 server.listen(port, () => {
-  console.log(`http://localhost:${port}`);
+  console.log(`http://localhost:${port}${env.BASE_URL}`);
 });

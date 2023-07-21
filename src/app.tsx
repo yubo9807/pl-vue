@@ -4,8 +4,7 @@ import Home from '@/pages/home';
 import About from '@/pages/about';
 import NotFound from "./pages/not-found";
 import style from './style.module.scss';
-
-export const base = '/';
+import env from '~/config/env';
 
 export const routes = [
   { path: '/', component: Home, exact: true },
@@ -21,7 +20,7 @@ type Props = {
 function App(props: Props) {
 
   initRouter({
-    base,
+    base: env.BASE_URL,
     mode: 'history',
     isBrowser: props.isBrowser,
   })
