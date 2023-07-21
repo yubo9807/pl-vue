@@ -5,9 +5,7 @@ export default {
 
   BASE_URL: '/',
 
-  MODE: (import.meta as any).env.MODE as Mode,
-
-  SSR: (import.meta as any).env.SSR as boolean,
+  NODE_ENV: process.env.NODE_ENV as Mode,
 
   BASE_API: '/api',
 
