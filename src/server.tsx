@@ -6,8 +6,10 @@ import { resolve, extname } from 'path';
 import { getMimeType, getStaticFileExts } from "./utils/string";
 import env from "~/config/env";
 
+const deployUrl = env.DEPLOY_URL.slice(1);
+
 // html 模版
-const html = readFileSync(resolve(__dirname, './client/index.html'), 'utf-8');
+const html = readFileSync(resolve(__dirname, deployUrl, 'index.html'), 'utf-8');
 
 /**
  * 生成节点前执行组件的 getInitialProps 方法
@@ -36,7 +38,7 @@ const server = createServer(async (req, res) => {
 
   if (getStaticFileExts().includes(ext)) {
     // 静态资源
-    const filename = resolve(__dirname, './client', url.slice(1));
+    const filename = resolve(__dirname, deployUrl, url.slice(1));
     readFile(filename, (err, content) => {
       if (err) {
         res.writeHead(404, { 'Content-Type': 'text/plain' });
