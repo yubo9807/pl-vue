@@ -1,6 +1,6 @@
 {
   "name": "pl-vue",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Plagiarize Vue",
   "main": "publish/index.js",
   "scripts": {
@@ -19,7 +19,7 @@
     "type": "git",
     "url": "git+https://github.com/yubo9807/mvvm_vue3.git"
   },
-  "files": ["plvue", "publish"],
+  "files": ["publish"],
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.22.9",
