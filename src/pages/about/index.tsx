@@ -1,6 +1,6 @@
-import { h } from "~/vue";
-import * as vue from '~/vue';
-import * as router from '~/vue/router';
+import { h } from "~/pvue";
+import * as vue from '~/pvue';
+import * as router from '~/pvue/router';
 import style from './style.module.scss';
 
 export default function About() {

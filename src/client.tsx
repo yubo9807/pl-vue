@@ -1,4 +1,4 @@
-import { h, render } from "~/vue";
+import { h, render } from "~/pvue";
 import App from "./app";
 
 const root = document.getElementById('root')
