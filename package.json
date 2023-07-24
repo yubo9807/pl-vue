@@ -1,5 +1,5 @@
 {
-  "name": "vue",
+  "name": "pvue",
   "version": "0.1.0",
   "description": "",
   "main": "publish/index.js",
@@ -12,8 +12,14 @@
     "start": "node dist/server.js",
     "build:publish": "vite build -c build/vite.publish.ts"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["pvue", "reactivity", "jsx"],
+  "author": "yubo9807",
+  "homepage": "https://github.com/yubo9807/mvvm_vue3#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yubo9807/mvvm_vue3.git"
+  },
+  "files": ["pvue", "publish"],
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.22.9",
