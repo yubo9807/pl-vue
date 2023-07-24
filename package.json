@@ -1,15 +1,16 @@
 {
   "name": "vue",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "publish/index.js",
   "scripts": {
     "dev": "vite -c build/vite.client.ts",
     "preview": "vite preview -c build/vite.client.ts",
     "build:client": "vite build -c build/vite.client.ts",
     "build:server": "vite build -c build/vite.server.ts",
     "build": "rm -rf dist/ && npm run build:client && npm run build:server",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "build:publish": "vite build -c build/vite.publish.ts"
   },
   "keywords": [],
   "author": "",
