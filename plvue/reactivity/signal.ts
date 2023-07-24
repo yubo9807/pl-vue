@@ -1,7 +1,11 @@
 import { reactive } from "./reactive";
 
+type Return<T> = [
+  GetSignal: () => T,
+  SetSignal: (val: T) => void,
+]
 
-export function createSignal<T>(value: T): [typeof getSignal, typeof setSignal]{
+export function createSignal<T>(value: T): Return<T>{
 
   const o = reactive({
     value,

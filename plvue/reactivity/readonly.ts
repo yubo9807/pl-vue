@@ -1,4 +1,5 @@
 import { AnyObj } from "../utils/type";
+import { printWarn } from "../utils/string";
 import { ReactiveFlags } from './reactive';
 
 /**
@@ -22,13 +23,13 @@ export function readonly(target: AnyObj) {
 
     set(target, key, value) {
       const oldValue = Reflect.get(target, key);
-      printWran(`Set operation on key '${key.toString()}' failed: target is readonly.`, { [key.toString()]: oldValue });
+      printWarn(`Set operation on key '${key.toString()}' failed: target is readonly.`, { [key.toString()]: oldValue });
       return oldValue;
     },
 
     deleteProperty(target, key) {
       const oldValue = Reflect.get(target, key);
-      printWran(`Delete operation on key '${key.toString()}' failed: target is readonly.`, { [key.toString()]: oldValue });
+      printWarn(`Delete operation on key '${key.toString()}' failed: target is readonly.`, { [key.toString()]: oldValue });
       return oldValue;
     }
 
