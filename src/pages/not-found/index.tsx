@@ -1,4 +1,4 @@
-import { h } from "~/pvue";
+import { h } from "~/plvue";
 import style from './style.module.scss';
 
 export default function NotFound() {

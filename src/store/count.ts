@@ -1,4 +1,4 @@
-import { createStore } from "~/pvue/store";
+import { createStore } from "~/plvue/store";
 
 const state = {
   count: 0,

@@ -1,4 +1,4 @@
-import { h, renderToString } from "~/pvue";
+import { h, renderToString } from "~/plvue";
 import App, { routes } from "./app";
 import { createServer } from 'http';
 import { readFileSync, readFile } from 'fs';

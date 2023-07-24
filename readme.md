@@ -1,6 +1,6 @@
-# 手写前端框架
+# Plagiarize Vue
 
-Plagiarize Vue: vue 的响应式，jsx 方式编程。集成组件化、挂载钩子、Router、Store... 大小不到 20KB
+vue 的响应式，jsx 方式编程。集成组件化、挂载钩子、Router、Store... 大小不到 20KB
 
 ## 数据响应式
 

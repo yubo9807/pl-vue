@@ -1,7 +1,7 @@
 {
-  "name": "pvue",
+  "name": "pl-vue",
   "version": "0.1.0",
-  "description": "",
+  "description": "Plagiarize Vue",
   "main": "publish/index.js",
   "scripts": {
     "dev": "vite -c build/vite.client.ts",
@@ -12,14 +12,14 @@
     "start": "node dist/server.js",
     "build:publish": "vite build -c build/vite.publish.ts"
   },
-  "keywords": ["pvue", "reactivity", "jsx"],
+  "keywords": ["plvue", "reactivity", "jsx"],
   "author": "yubo9807",
   "homepage": "https://github.com/yubo9807/mvvm_vue3#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yubo9807/mvvm_vue3.git"
   },
-  "files": ["pvue", "publish"],
+  "files": ["plvue", "publish"],
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.22.9",

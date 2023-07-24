@@ -1,5 +1,5 @@
-import { h, Fragment } from "~/pvue";
-import { Router, Route, Link, initRouter, useRoute } from "~/pvue/router";
+import { h, Fragment } from "~/plvue";
+import { Router, Route, Link, initRouter, useRoute } from "~/plvue/router";
 import Home from '@/pages/home';
 import About from '@/pages/about';
 import NotFound from "./pages/not-found";

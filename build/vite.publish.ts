@@ -5,7 +5,7 @@ export default defineConfig({
     outDir: 'publish',
     minify: false,
     lib: {
-      entry: 'pvue/index.ts',
+      entry: 'plvue/index.ts',
       fileName: 'index',
       formats: ['es', 'cjs'],
     },

@@ -1,5 +1,5 @@
 import { createColor } from "@/utils/string";
-import { h, onUnmounted, ref, computed } from "~/pvue";
+import { h, onUnmounted, ref, computed } from "~/plvue";
 import style from './style.module.scss';
 import useStore from '@/store/count';
 
