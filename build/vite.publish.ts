@@ -6,8 +6,10 @@ export default defineConfig({
     minify: false,
     lib: {
       entry: 'plvue/index.ts',
-      fileName: 'index',
-      formats: ['es', 'cjs'],
+      fileName() {
+        return 'index.cjs';
+      },
+      formats: ['cjs'],
     },
   },
 })

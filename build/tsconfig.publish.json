@@ -4,7 +4,9 @@
     "target": "ESNext",
     "module": "ESNext",
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",
+    "declaration": true,
+    "declarationDir": "../publish",
+    "outDir": "../publish",
     "moduleResolution": "node",
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
@@ -14,5 +16,5 @@
       "~/*": ["./*"],
     },
   },
-  "include": ["./src", "./plvue"],
+  "include": ["../plvue"],
 }
