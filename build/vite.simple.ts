@@ -2,10 +2,10 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   build: {
-    outDir: 'publish',
+    outDir: 'lib',
     minify: false,
     lib: {
-      entry: 'plvue/index.ts',
+      entry: 'plvue/simple.ts',
       fileName() {
         return 'index.cjs';
       },

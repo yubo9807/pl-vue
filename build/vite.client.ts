@@ -9,7 +9,7 @@ const config = defineConfig({
     rollupOptions: {
       output: {
         manualChunks(url) {
-          if (url.includes('/vue/')) return 'vue';
+          if (url.includes('/plvue/')) return 'plvue';
         }
       }
     },
