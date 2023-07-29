@@ -1,3 +1,4 @@
+import { reactive } from '../reactivity/reactive';
 import { watch } from '../reactivity/watch';
 import { isObject } from '../utils/judge';
 import { objectAssign } from '../utils/object';
@@ -7,7 +8,6 @@ import { base, isBrowser, mode, ssrDataKey } from './init-router';
 import { isRoute } from './route';
 import { analysisRoute, currentRoute } from './use-route';
 import { formatPath } from './utils';
-import { binding, computed, reactive, toRaw } from '../simple';
 
 type Props = {
   children?: []
@@ -138,7 +138,7 @@ function BrowserRouter(props: BrowserRouterProps) {
     analysisRoute(getUrl());
   })
 
-  const { currentTree } = watchRoutePath(props);  
+  const { currentTree } = watchRoutePath(props);
 
   return <>{tier(currentTree as CompTree)}</>;
 
