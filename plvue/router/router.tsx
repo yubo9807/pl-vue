@@ -1,11 +1,13 @@
-import { ref } from '../reactivity/ref';
 import { watch } from '../reactivity/watch';
 import { isObject } from '../utils/judge';
+import { objectAssign } from '../utils/object';
 import { Fragment, h } from '../vdom/h';
 import { Component, Tree } from '../vdom/type';
 import { base, isBrowser, mode, ssrDataKey } from './init-router';
 import { isRoute } from './route';
 import { analysisRoute, currentRoute } from './use-route';
+import { formatPath } from './utils';
+import { binding, computed, reactive, toRaw } from '../simple';
 
 type Props = {
   children?: []
@@ -26,58 +28,94 @@ let isFirstRender = true;  // 是否为第一次渲染
  * @returns 
  */
 function watchRoutePath(props: StaticRouterProps & BrowserRouterProps, isBrowser = true) {
-  const CurrentComp = ref(null);
-  const data = ref(void 0);
+  const currentTree: Tree = reactive({
+    tag: '',
+    attrs: {},
+    children: [],
+  });
 
   watch(() => currentRoute.path, async value => {
     const routes = props.children.filter((tree: Tree) =>
       isObject(tree) && isRoute(tree.tag as Function));
 
-    const tree: Tree = routes.find((tree: Tree) => {
-      if (tree.attrs.exact) {
-        return value === tree.attrs.path;
-      } else {
-        return (value + '/').startsWith(tree.attrs.path + '/');
-      }
-    });
+    const tree = findTree(routes, value);
+    if (!tree) return;
 
-    if (tree) {
-      // 能匹配到响应路径
-      if (isBrowser){  // 客户端组件渲染
-        const Comp = tree.attrs.component;
-        if (typeof Comp.prototype.getInitialProps === 'function') {
-          if (isFirstRender && window[ssrDataKey]) {
-            data.value = window[ssrDataKey];
-            delete window[ssrDataKey];
-            isFirstRender = false;
-          } else {
-            if (props.Loading) CurrentComp.value = props.Loading;
-            data.value = await Comp.prototype.getInitialProps();
-          }
-        } else {
-          data.value = void 0;
-        }
-        CurrentComp.value = Comp;
-      } else {  // 服务端组件渲染
-        CurrentComp.value = tree.attrs.component;
-      }
-    } else {
-      const tree: Tree = routes[routes.length - 1];
-      // 设置了 NotFound 组件
-      if (isObject(tree) && isRoute(tree.tag as Function) && !tree.attrs.path) {
-        CurrentComp.value = tree.attrs.component;
+    if (isBrowser && typeof tree.tag.prototype.getInitialProps === 'function') {
+      let data = void 0;
+      if (isFirstRender && window[ssrDataKey]) {
+        data = window[ssrDataKey];
+        delete window[ssrDataKey];
+        isFirstRender = false;
       } else {
-        CurrentComp.value = null;
+        if (props.Loading) currentTree.tag = props.Loading;
+        // await executeTreeMethods(tree);
       }
+    }
+    for (const prop in tree) {
+      currentTree[prop] = tree[prop];
     }
   }, { immediate: true })
 
   return {
-    CurrentComp,
-    data,
+    currentTree,
   }
 }
 
+/**
+ * 执行组件树上的 getInitialProps，并将结果赋值在 props 中
+ * @param tree 
+ */
+async function executeTreeMethods(tree: CompTree) {
+  const func = tree.tag.prototype.getInitialProps;
+  if (typeof func === 'function') {
+    tree.attrs.data = await func();
+  }
+  if (tree.children.length > 0) {
+    await executeTreeMethods(tree.children[0]);
+  }
+}
+
+interface CompTree extends Tree {
+  tag: Function
+}
+/**
+ * 查找匹配的组件树
+ * @param treeList
+ * @param path 
+ * @returns 
+ */
+function findTree(treeList: Tree[], path: string) {
+  const qureyTree = treeList.find((tree: Tree) => {
+    if (tree.attrs.exact || tree.attrs.exact === void 0) {
+      return path === tree.attrs.path;
+    } else {
+      return (path + '/').startsWith(formatPath(tree.attrs.path + '/'));
+    }
+  });
+  if (!qureyTree) return null;
+
+  const tree: Tree = { tag: '', attrs: {}, children: [] }
+  tree.tag = qureyTree.attrs.component;
+  const children = [findTree(qureyTree.children, path)].filter(val => val);
+  tree.children = children;
+  if (children.length === 0) {
+    const lastTree = qureyTree.children[qureyTree.children.length - 1];
+    if (lastTree && isRoute(lastTree.tag) && !lastTree.attrs.path) {
+      tree.children = [objectAssign(tree, { tag: lastTree.attrs.component })];
+    }
+  }
+
+  if (qureyTree.attrs.exact === false && tree.children.length === 0) {
+    const lastTree = treeList[treeList.length - 1] as CompTree;
+    if (lastTree && isRoute(lastTree.tag) && !lastTree.attrs.path) {
+      tree.tag = lastTree.attrs.component;
+      return tree as CompTree;
+    }
+  }
+
+  return tree as CompTree;
+}
 
 
 /**
@@ -96,16 +134,25 @@ function BrowserRouter(props: BrowserRouterProps) {
   }
 
   analysisRoute(getUrl());
-
   window.addEventListener('popstate', () => {
     analysisRoute(getUrl());
   })
 
-  const { CurrentComp, data } = watchRoutePath(props);
+  const { currentTree } = watchRoutePath(props);  
 
-  return <>
-    {() => CurrentComp.value ? <CurrentComp.value data={data.value} /> : null}
-  </>
+  return <>{tier(currentTree as CompTree)}</>;
+
+}
+
+/**
+ * 递归渲染组件树
+ * @param tree 
+ * @returns 
+ */
+function tier(tree: CompTree) {
+  return () => tree.tag ? <tree.tag>
+    {tree.children.length > 0 ? tier(tree.children[0]) : null}
+  </tree.tag> : null
 }
 
 
@@ -126,11 +173,9 @@ function StaticRouter(props: StaticRouterProps) {
   }
 
   analysisRoute(url);
-  const { CurrentComp } = watchRoutePath({ children: props.children, url }, false);
+  const { currentTree } = watchRoutePath({ children: props.children, url }, false);
 
-  return <>
-    {() => <CurrentComp.value data={props.data} />}
-  </>
+  return <>{tier(currentTree as CompTree)}</>;
 }
 
 export function Router(props: StaticRouterProps & BrowserRouterProps) {

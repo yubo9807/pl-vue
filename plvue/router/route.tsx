@@ -15,6 +15,7 @@ type RouteProps = {
  * @returns 
  */
 export function Route(props: RouteProps) {
+  props.exact ??= true;
   const Comp = props.component;
   return <Comp />
 }
