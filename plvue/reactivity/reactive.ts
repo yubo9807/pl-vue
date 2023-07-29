@@ -6,6 +6,7 @@ import { dependencyCollection, distributeUpdates } from "./depend";
 import { isReadonly } from "./readonly";
 
 const rawMap = new WeakMap();
+const updateKeysMap: WeakMap<object, Set<string | symbol>> = new WeakMap();
 
 export const ReactiveFlags = {
   RAW:         Symbol('__v_raw'),
@@ -43,20 +44,33 @@ export function reactive<T extends AnyObj>(target: T): T {
 
     // 赋值/修改
     set(target, key, value, receiver) {
+      if (target[ReactiveFlags.IS_READONLY]) return true;
 
+      // 如果是一个对象，需要递归去设置每个值，来确保具体更新的值
+      if (isMemoryObject(target[key])) {
+        for (const prop in value) {
+          this.set(target[key], prop, value[prop], receiver[key]);
+        }
+        return true;
+      }
+      
       const oldValue = Reflect.get(target, key, receiver);
+      if (oldValue === value) return true;
       const result = Reflect.set(target, key, value, receiver);
 
-      if (target[ReactiveFlags.IS_READONLY]) {
-        return oldValue;
-      }
+      // 记录要更新的 key
+      const updateKeys = updateKeysMap.get(target) || new Set()
+      updateKeys.add(key);
+      const size = updateKeys.size;
+      updateKeysMap.set(target, updateKeys);
 
       nextTick(() => {  // 利用时间循环机制，防止同一时刻多次将数据更新
         const newValue = Reflect.get(target, key, receiver);  // 拿到最最新的值
-        if (result && oldValue !== value && newValue === value) {
+        if (result && newValue === value && size === 1) {
           // console.log(`%c update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`, 'color: orange');
-          distributeUpdates(target);  // 在同一时刻多次改变数据
+          distributeUpdates(target);  // 在同一时刻多次改变数据，只更新一次即可
         }
+        updateKeysMap.delete(target);  // 更新完成后清除记录
       })
 
       return result;
