@@ -123,13 +123,12 @@ async function executeTreeMethods(tree: CompTree) {
  * @param props 
  * @returns 
  */
-function Tier(props: { tree: () => CompTree }) {
-  const tree = props.tree();
+function tier(compTree: () => CompTree) {
+  const tree = compTree();
   const Comp = tree.tag;
-  const subTree = tree.children[0];
-  return <Comp>
-    {() => <Tier tree={() => subTree} />}
-  </Comp>
+  return <>{() => <Comp>
+    {tree.children[0] && tier(() => tree.children[0])}
+  </Comp>}</>
 }
 
 
@@ -155,7 +154,7 @@ function BrowserRouter(props: BrowserRouterProps) {
 
   const { currentTree } = watchRoutePath(props);
 
-  return <Tier tree={() => currentTree as CompTree} />
+  return tier(() => currentTree as CompTree);
 
 }
 
@@ -179,7 +178,7 @@ function StaticRouter(props: StaticRouterProps) {
   analysisRoute(url);
   const { currentTree } = watchRoutePath({ children: props.children, url }, false);
 
-  return <Tier tree={() => currentTree as CompTree} />
+  return <tier tree={() => currentTree as CompTree} />
 }
 
 export function Router(props: StaticRouterProps & BrowserRouterProps) {

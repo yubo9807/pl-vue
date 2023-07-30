@@ -52,8 +52,16 @@ export function reactive<T extends AnyObj>(target: T): T {
 
       // 如果是一个对象，需要递归去设置每个值，来确保具体更新的值
       if (isMemoryObject(target[key])) {
-        for (const prop in value) {
-          this.set(target[key], prop, value[prop], receiver[key]);
+        const object = target[key];
+        const collect: Set<string | symbol> = new Set();  // 收集已经更新的值
+        for (const prop in value) {  // 重新设置每个值
+          collect.add(prop);
+          this.set(object, prop, value[prop], receiver[key]);
+        }
+        for (const prop in object) {
+          if (!collect.has(prop)) {  // 需要删除的值
+            this.deleteProperty(object, prop);
+          }
         }
         return true;
       }
@@ -86,12 +94,19 @@ export function reactive<T extends AnyObj>(target: T): T {
     deleteProperty(target, key) {
 
       const oldValue = Reflect.get(target, key);
+      if (isMemoryObject(oldValue)) {
+        for (const prop in oldValue) {
+          this.deleteProperty(oldValue, prop);
+        }
+        return true;
+      }
+
       const hasKey = hasOwn(target, key);
       const result = Reflect.deleteProperty(target, key);
       backupKey = key;
       
       nextTick(() => {
-        if (hasKey && result && oldValue !== void 0, key === backupKey) {
+        if (hasKey && result && oldValue !== void 0 && key === backupKey) {
           // console.log(`%c delete ${isType(target)}[${key.toString()}]`, 'color: red');
           distributeUpdates(target);
           backupKey = null;
