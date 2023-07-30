@@ -256,6 +256,11 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
 
         // 节点替换，重新备份
         const node = createNode(val);
+        if (!node) {  // 创建节点失败，有可能原节点被删除
+          value.splice(index, 1);
+          i++;
+          continue;
+        }
         const originTree = backupNodes[index].tree;
 
         isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag);  // 组件卸载之前
@@ -266,6 +271,10 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
         backupNodes[index].node = node;
       } else {  // 节点不存在，追加节点
         const node = createNode(val);
+        if (!node) {  // 创建节点失败，有可能原节点被删除
+          i++;
+          continue;
+        }
 
         if (lockFirstRun) {
           fragment.appendChild(node);
