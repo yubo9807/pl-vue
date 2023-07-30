@@ -20,8 +20,50 @@ interface StaticRouterProps extends Props {
   data?: any     // 服务端获取数据
 }
 
-let isFirstRender = true;  // 是否为第一次渲染
+interface CompTree extends Tree {
+  tag: Function
+}
+/**
+ * 查找匹配的组件树
+ * @param treeList
+ * @param path 
+ * @returns 
+ */
+function findTree(treeList: Tree[], path: string) {
+  const qureyTree = treeList.find((tree: Tree) => {
+    if (tree.attrs.exact || tree.attrs.exact === void 0) {
+      return path === tree.attrs.path;
+    } else {
+      return (path + '/').startsWith(formatPath(tree.attrs.path + '/'));
+    }
+  });
+  if (!qureyTree) return null;
 
+  const tree: Tree = { tag: '', attrs: {}, children: [] }
+  tree.tag = qureyTree.attrs.component;
+  const children = [findTree(qureyTree.children, path)].filter(val => val);
+  tree.children = children;
+  if (children.length === 0) {
+    const lastTree = qureyTree.children[qureyTree.children.length - 1];
+    if (lastTree && isRoute(lastTree.tag) && !lastTree.attrs.path) {
+      tree.children = [objectAssign(tree, { tag: lastTree.attrs.component })];
+    }
+  }
+
+  if (qureyTree.attrs.exact === false && tree.children.length === 0) {
+    const lastTree = treeList[treeList.length - 1] as CompTree;
+    if (lastTree && isRoute(lastTree.tag) && !lastTree.attrs.path) {
+      tree.tag = lastTree.attrs.component;
+      return tree as CompTree;
+    }
+  }
+
+  return tree as CompTree;
+}
+
+
+
+let isFirstRender = true;  // 是否为第一次渲染
 /**
  * 监听路由变化
  * @param props 
@@ -76,45 +118,18 @@ async function executeTreeMethods(tree: CompTree) {
   }
 }
 
-interface CompTree extends Tree {
-  tag: Function
-}
 /**
- * 查找匹配的组件树
- * @param treeList
- * @param path 
+ * 递归渲染组建树
+ * @param props 
  * @returns 
  */
-function findTree(treeList: Tree[], path: string) {
-  const qureyTree = treeList.find((tree: Tree) => {
-    if (tree.attrs.exact || tree.attrs.exact === void 0) {
-      return path === tree.attrs.path;
-    } else {
-      return (path + '/').startsWith(formatPath(tree.attrs.path + '/'));
-    }
-  });
-  if (!qureyTree) return null;
-
-  const tree: Tree = { tag: '', attrs: {}, children: [] }
-  tree.tag = qureyTree.attrs.component;
-  const children = [findTree(qureyTree.children, path)].filter(val => val);
-  tree.children = children;
-  if (children.length === 0) {
-    const lastTree = qureyTree.children[qureyTree.children.length - 1];
-    if (lastTree && isRoute(lastTree.tag) && !lastTree.attrs.path) {
-      tree.children = [objectAssign(tree, { tag: lastTree.attrs.component })];
-    }
-  }
-
-  if (qureyTree.attrs.exact === false && tree.children.length === 0) {
-    const lastTree = treeList[treeList.length - 1] as CompTree;
-    if (lastTree && isRoute(lastTree.tag) && !lastTree.attrs.path) {
-      tree.tag = lastTree.attrs.component;
-      return tree as CompTree;
-    }
-  }
-
-  return tree as CompTree;
+function Tier(props: { tree: () => CompTree }) {
+  const tree = props.tree();
+  const Comp = tree.tag;
+  const subTree = tree.children[0];
+  return <Comp>
+    {() => <Tier tree={() => subTree} />}
+  </Comp>
 }
 
 
@@ -140,19 +155,8 @@ function BrowserRouter(props: BrowserRouterProps) {
 
   const { currentTree } = watchRoutePath(props);
 
-  return <>{tier(currentTree as CompTree)}</>;
+  return <Tier tree={() => currentTree as CompTree} />
 
-}
-
-/**
- * 递归渲染组件树
- * @param tree 
- * @returns 
- */
-function tier(tree: CompTree) {
-  return () => tree.tag ? <tree.tag>
-    {tree.children.length > 0 ? tier(tree.children[0]) : null}
-  </tree.tag> : null
 }
 
 
@@ -175,7 +179,7 @@ function StaticRouter(props: StaticRouterProps) {
   analysisRoute(url);
   const { currentTree } = watchRoutePath({ children: props.children, url }, false);
 
-  return <>{tier(currentTree as CompTree)}</>;
+  return <Tier tree={() => currentTree as CompTree} />
 }
 
 export function Router(props: StaticRouterProps & BrowserRouterProps) {
