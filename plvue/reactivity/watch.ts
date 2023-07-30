@@ -18,63 +18,31 @@ type Option = {
  */
 export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void, option: Option = {}): Function {
   let cleanup = false;
-  if (cleanup) return;  // 侦听器被取消
+  if (cleanup) return;
 
   const oldValue = source();
-  let backup = deepClone(oldValue);
   option.immediate && cb(oldValue, void 0);
+  let backup = deepClone(oldValue);
 
-  // 数据被调用，自执行
   binding(() => {
-    const deepWatchList = [];
-    if (cleanup) {  // 被取消监听
-      if (deepWatchList.length > 0) {
-        deepWatchList.forEach(unwatch => unwatch());
-      }
-      return true;
-    }
-
     const value = source();
-
-    if (isMemoryObject(oldValue)) {
-      if (option.deep && !isEquals(value, backup)) {
-        cb(value, reactive(backup));
-        backup = deepClone(value);
-
-        getReferenceValue(value).forEach(obj => {
-          const unwatch = watch(() => obj, () => {
-            cb(value, reactive(backup));
-          }, { deep: true })
-          deepWatchList.push(unwatch);
-        })
-
-      }
-    } else {
-      if (value !== backup) {
-        cb(value, backup);  // 源码中是将 oldValue 返回的
+    if (isMemoryObject(value) && option.deep) {
+      if (!isEquals(value, backup)) {
+        cb(value, backup);
         backup = deepClone(value);
       }
+      return;
     }
-  });
 
-  // 取消监听
+    if (value !== backup) {
+      cb(value, backup);
+      backup = value;
+    }
+  })
+
   return () => {
     cleanup = true;
   }
-}
-
-/**
- * 获取一个对象下的所有引用值，不包括自己
- * @param obj 
- */
-function getReferenceValue(obj: AnyObj, collect = []) {
-  for (const prop in obj) {
-    if (isMemoryObject(obj[prop])) {
-      collect.push(obj[prop]);
-      getReferenceValue(obj[prop], collect);
-    }
-  }
-  return collect;
 }
 
 type OnCleanup = (cleanupFn: () => void) => void
