@@ -8,6 +8,15 @@ export function createColor(min = '000000', max = 'ffffff') {
   return '#' + randomNum(maxNumber, minNumber).toString(16);
 }
 
+/**
+ * 连接 class
+ * @param args 剩余参数，类名
+ * @returns 
+ */
+export function joinClass(...args: string[]) {
+  return args.join(' ').trim().replace(/\s+/, ' ');
+}
+
 const mimeTypes = {
   'text/html': ['.html'],
   'text/css': ['.css'],

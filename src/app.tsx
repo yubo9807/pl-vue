@@ -1,15 +1,25 @@
+import './styles/index.scss';
 import { h, Fragment } from "~/plvue";
-import { Router, Route, Link, initRouter, useRoute } from "~/plvue/router";
+import { Router, Route, initRouter } from "~/plvue/router";
 import Home from '@/pages/home';
-import About from '@/pages/about';
+import Docs from '@/pages/docs';
 import NotFound from "./pages/not-found";
-import style from './style.module.scss';
 import env from '~/config/env';
+import Layout from './layout';
 
 export const routes = [
-  { path: '/', component: Home, exact: true },
-  { path: '/about', component: About },
-  { component: NotFound },
+  {
+    path: '/',
+    component: Layout,
+    exact: false,
+    routes: [
+      { path: '/', component: Home, },
+      { path: '/docs', component: Docs, },
+    ],
+  },
+  {
+    component: NotFound,
+  },
 ]
 
 type Props = {
@@ -25,22 +35,18 @@ function App(props: Props) {
     isBrowser: props.isBrowser,
   })
 
-  return <>
-    <nav className={style.header}>
-      <Link to='/'>首页</Link>
-      <Link to='/about'>关于</Link>
-      <Link to='/404'>notFound</Link>
-      <a className={style.github} href="https://github.com/yubo9807/mvvm_vue3" target="_blank">GitHub</a>
-    </nav>
-
-    <Router url={props.url} data={props.data} Loading={Loading}>
-      {...routes.map(item => <Route {...item} />)}
-    </Router>
-  </>
+  return <Router url={props.url} data={props.data}>
+    {...routeRecursion(routes)}
+  </Router>
 }
 
-function Loading() {
-  return <div>loading...</div>
+function routeRecursion(routes) {
+  return routes ? routes.map(val => {
+    const { routes: childRoutes, ...args } = val;
+    return <Route {...args}>
+      {...routeRecursion(childRoutes)}
+    </Route>
+  }) : []
 }
 
 export default App;

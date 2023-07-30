@@ -5,6 +5,7 @@ import { readFileSync, readFile } from 'fs';
 import { resolve, extname } from 'path';
 import { getMimeType, getStaticFileExts } from "./utils/string";
 import env from "~/config/env";
+import { formatPath } from "~/plvue/router/utils";
 
 const deployUrl = env.DEPLOY_URL.slice(1);
 
@@ -16,17 +17,20 @@ const html = readFileSync(resolve(__dirname, deployUrl, 'index.html'), 'utf-8');
  * @param url 
  * @returns 
  */
-async function getInitialProps(url: string) {
+async function getInitialProps(routes, url: string) {
   const route = routes.find(val => {
-    if (val.exact) {
+    if (val.exact || val.exact === void 0) {
       return url === val.path;
     } else {
-      return (url + '/').startsWith(val.path + '/');
+      return (url + '/').startsWith(formatPath(val.path + '/'));
     }
   });
   if (route && typeof route.component.prototype.getInitialProps === 'function') {
     return await route.component.prototype.getInitialProps();
   } else {
+    if (route.routes && route.routes.length > 0) {
+      return await getInitialProps(route.routes, url);
+    }
     return void 0;
   }
 }
@@ -52,7 +56,7 @@ const server = createServer(async (req, res) => {
     });
   } else {
     // 服务端渲染
-    const data = await getInitialProps(url);
+    const data = await getInitialProps(routes, url);
     const content = renderToString(<App isBrowser={false} url={url} data={data} />);
     const index = html.search('</body>');
     const script = data === void 0 ? '' : `<script>window.g_initialProps=${JSON.stringify(data)}</script>`;

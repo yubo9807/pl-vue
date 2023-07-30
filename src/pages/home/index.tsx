@@ -1,51 +1,57 @@
-import { createColor } from "@/utils/string";
-import { h, onUnmounted, ref, computed } from "~/plvue";
+import { h } from "~/plvue";
 import style from './style.module.scss';
-import useStore from '@/store/count';
+import { joinClass } from "@/utils/string";
+import env from "~/config/env";
 
 function Home(props) {
-  const store = useStore();
-  const count = ref(0);
-  const elTitle = ref(null);
+  return <div>
+    <div className={style.banner}>
+      <div className={style.box}>
+        <strong>Pl Vue</strong>
+        <p>一个 JS 库，只关心数据与函数之间的联动</p>
+      </div>
+    </div>
 
-  onUnmounted(Home, () => {
-    console.log(Home.name, '组件被卸载');
-  })
+    <article className={joinClass('leayer', 'module-gap', style.article)}>
+      <p className={style.paragraph}>
+        Plagiarize Vue 是一个轻量级、不依赖任何第三方库的 JS 数据响应式库，除响应式 API 外，该库还提供了组件化、挂载钩子、Router、Store 以及服务端渲染相关 API，项目搭建可参考 
+        &nbsp;<a href={env.GITHUB_URL+'mvvm_vue3'}>GitHub</a>
+        。
+      </p>
+      <p className={style.mark}>该库本身与 Vue 框架无任何关系，只是多数 API 在命名上相同而已。</p>
+    </article>
 
-  return <div className={style['page-home']}>
-    <h1>
-      Store: {() => store.count }
-    </h1>
-    <button onclick={() => store.setCount(++store.count)}>Store change</button>
-    <h1 ref={elTitle}>
-      Ref: count&nbsp;
-      <span className={style['red-font']}>{() => count.value}</span>
-    </h1>
-    <button onclick={() => count.value++}>count++</button>
-    <Comp count={() => count.value} />
-    <h1>Page.getInitialProps: {props.data}</h1>
+    <ul className={joinClass('leayer', 'module-gap', style.peculiarity)}>
+      <li>
+        <h2>响不响应式的，高度交予开发者决定</h2>
+        <p>
+          JSX 编程方式，响应式数据统一使用函数的方式包裹。
+          <a href={env.GITHUB_URL+'mvvm_vue3'} target="_blank">了解更多</a>
+        </p>
+      </li>
+      <li>
+        <h2>无虚拟 DOM 参与</h2>
+        <p>将用到响应式数据的函数进行收集，在数据更新后执行相应的函数。因此直接省去了虚拟 DOM 的比较。</p>
+      </li>
+      <li>
+        <h2>拿来就用，灵活多变</h2>
+        <p>
+          无需脚手架，原生应用亦可构建。
+          <a href={env.GITHUB_URL+'single-page'} target="_blank">代码示例</a>
+        </p>
+      </li>
+      <li>
+        <h2>代码精简，打包后不到 15k</h2>
+        <p>手写 h 与 Fragment，将代码体积精简到极致。</p>
+      </li>
+
+    </ul>
   </div>
 }
 
 Home.prototype.getInitialProps = async () => {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve(123);
-    }, 300)
-  })
-}
-
-
-
-type CompProps = {
-  count: () => number
-}
-function Comp(props: CompProps) {
-  const color = computed(() => createColor().slice(0, -1) + props.count().toString().slice(0, 1));
-
-  return <h1 style={{ color: () => color.value }}>
-    子组件 {props.count}
-  </h1>
+  console.log('home')
+  return 'home'
 }
 
 export default Home;
