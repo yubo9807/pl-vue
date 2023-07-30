@@ -23,21 +23,28 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
   const oldValue = source();
   option.immediate && cb(oldValue, void 0);
   let backup = deepClone(oldValue);
+  let first = true;
 
   binding(() => {
     const value = source();
-    if (isMemoryObject(value) && option.deep) {
-      if (!isEquals(value, backup)) {
+
+    // 是一个对象
+    if (isMemoryObject(value)) {
+      if (option.deep && !isEquals(value, backup)) {
         cb(value, backup);
         backup = deepClone(value);
       }
       return;
     }
 
-    if (value !== backup) {
-      cb(value, backup);
-      backup = value;
+    // 原始值
+    if (first) {  // 第一次不进行回调，上面已经执行过一次
+      first = false;
+      return;
     }
+
+    cb(value, backup);
+    backup = value;
   })
 
   return () => {
