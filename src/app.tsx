@@ -3,6 +3,8 @@ import { h, Fragment } from "~/plvue";
 import { Router, Route, initRouter } from "~/plvue/router";
 import Home from '@/pages/home';
 import Docs from '@/pages/docs';
+import DocsUse from '@/pages/docs/use';
+import DocsRealize from '@/pages/docs/realize';
 import NotFound from "./pages/not-found";
 import env from '~/config/env';
 import Layout from './layout';
@@ -14,7 +16,12 @@ export const routes = [
     exact: false,
     routes: [
       { path: '/', component: Home, },
-      { path: '/docs', component: Docs, },
+      { path: '/docs', component: Docs, exact: false,
+        routes: [
+          { path: '/docs/use', component: DocsUse, },
+          { path: '/docs/realize', component: DocsRealize, },
+        ]
+      },
     ],
   },
   {

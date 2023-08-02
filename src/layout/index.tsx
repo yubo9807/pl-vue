@@ -1,9 +1,10 @@
 import Header from "./components/header";
 import Footer from "./components/footer";
-import { h, Fragment } from "~/plvue";
+import { h, Fragment, onMounted } from "~/plvue";
 import style from './style.module.scss';
 
 export default function Layout(props) {
+  console.log('layout')
   return <div>
     <Header />
     <main className={style.main}>
@@ -14,6 +15,5 @@ export default function Layout(props) {
 }
 
 Layout.prototype.getInitialProps = async () => {
-  console.log('loyout')
-  return 'loyout'
+  return 'loyout';
 }

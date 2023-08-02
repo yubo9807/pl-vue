@@ -4,6 +4,7 @@ import { joinClass } from "@/utils/string";
 import env from "~/config/env";
 
 function Home(props) {
+  console.log('home')
   return <div>
     <div className={style.banner}>
       <div className={style.box}>

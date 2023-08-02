@@ -1,0 +1,16 @@
+
+.container{
+  padding-top: 20px;
+  display: flex;
+}
+
+.side{
+  width: 200px;
+  li{
+    line-height: 2;
+  }
+}
+
+.content{
+  width: calc(100% - 200px);
+}
