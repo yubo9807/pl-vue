@@ -1,5 +1,5 @@
 import { watch } from '../reactivity/watch';
-import { ref } from '../simple';
+import { ref } from '../reactivity/ref';
 import { objectAssign } from '../utils/object';
 import { Fragment, h } from '../vdom/h';
 import { Component, Tree } from '../vdom/type';
@@ -11,19 +11,13 @@ import { formatPath } from './utils';
 type Props = {
   children?: []
 }
-interface BrowserRouterProps extends Props {
-  Loading?: Component
-}
-interface StaticRouterProps extends Props {
-  url?:  string  // 渲染路径
-  data?: any     // 服务端获取数据
-}
+
+
 
 interface CompTree extends Tree {
   tag: Function
 }
 
-const collect: CompTree[] = [];
 /**
  * 查找匹配的组件树
  * @param treeList
@@ -42,11 +36,6 @@ function findTree(treeList: Tree[], path: string) {
 
   const tree: Tree = { tag: '', attrs: {}, children: [] }
   tree.tag = qureyTree.attrs.component;
-  collect.push({
-    tag: qureyTree.attrs.component,
-    children: [],
-    attrs: [],
-  })
   const children = [findTree(qureyTree.children, path)].filter(val => val);
   tree.children = children;
   if (children.length === 0) {
@@ -67,8 +56,41 @@ function findTree(treeList: Tree[], path: string) {
   return tree as CompTree;
 }
 
+/**
+ * 扁平化组件树
+ * @param tree 
+ * @param collect 
+ * @returns 
+ */
+function flatteningTree(tree: CompTree, collect: CompTree[] = []) {
+  const { tag, attrs, children } = tree;
+  collect.push({ tag, attrs, children: [] });
+  if (children.length > 0) {
+    flatteningTree(children[0], collect);
+  }
+  return collect;
+}
+
+/**
+ * 递归渲染页面组件
+ * @param treeList 
+ * @param index 
+ * @returns 
+ */
+function recursionPage(treeList: CompTree[], index: number = 0) {
+  return () => {
+    const tree = treeList[index];
+    return tree && <tree.tag>
+      {recursionPage(treeList, index+1)}
+    </tree.tag>
+  }
+}
 
 
+
+interface BrowserRouterProps extends Props {
+  Loading?: Component
+}
 /**
  * 浏览器端路由渲染
  * @param props 
@@ -76,13 +98,13 @@ function findTree(treeList: Tree[], path: string) {
  */
 function BrowserRouter(props: BrowserRouterProps) {
 
-  function getUrl() {
+  const getUrl = (function() {
     if (mode === 'history') {
-      return location.href.replace(location.origin + base, '');
+      return () => location.href.replace(location.origin + base, '');
     } else {
-      return location.hash.slice(1);
+      return () => location.hash.slice(1);
     }
-  }
+  }())
 
   analysisRoute(getUrl());
   window.addEventListener('popstate', () => {
@@ -91,26 +113,20 @@ function BrowserRouter(props: BrowserRouterProps) {
 
   const pageList = ref([]);
   watch(() => currentRoute.path, value => {
-    collect.length = 0;
-    findTree(props.children, currentRoute.path);
-    pageList.value = collect;
+    const tree = findTree(props.children, value);
+    pageList.value = flatteningTree(tree);
   }, { immediate: true })
 
   return <>{recursionPage(pageList.value)}</>;
 
 }
 
-function recursionPage(treeList: CompTree[], index: number = 0) {
-  return () => {
-    const tree = treeList[index];
-    if (!tree) return null;
-    return <tree.tag>
-      {recursionPage(treeList, index+1)}
-    </tree.tag>
-  }
+
+
+interface StaticRouterProps extends Props {
+  url?:  string  // 渲染路径
+  data?: any     // 服务端获取数据
 }
-
-
 /**
  * 服务端渲染
  * @param props 
@@ -127,14 +143,15 @@ function StaticRouter(props: StaticRouterProps) {
   }
 
   analysisRoute(url);
-  
-  return <div>111</div>
+
+  const tree = findTree(props.children, url);
+  const pageList = flatteningTree(tree);
+
+  return <>{recursionPage(pageList)}</>;
 }
 
 export function Router(props: StaticRouterProps & BrowserRouterProps) {
-  return <>{
-    isBrowser
-      ? <BrowserRouter {...props} />
-      : <StaticRouter {...props} />
-  }</>
+  return isBrowser
+    ? <BrowserRouter {...props} />
+    : <StaticRouter {...props} />
 }
