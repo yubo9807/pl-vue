@@ -41,3 +41,11 @@ export function distributeUpdates(key: object) {
     }
   });
 }
+
+/**
+ * 清空收集的依赖
+ * @param key 
+ */
+export function clearDependencys(key: object) {
+  funcsMap.delete(key);
+}
