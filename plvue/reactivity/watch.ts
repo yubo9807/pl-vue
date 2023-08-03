@@ -43,8 +43,10 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
       return;
     }
 
-    cb(value, backup);
-    backup = value;
+    if (value !== backup) {
+      cb(value, backup);
+      backup = value;
+    }
   })
 
   return () => {
