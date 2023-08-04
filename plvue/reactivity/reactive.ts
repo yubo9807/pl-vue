@@ -2,7 +2,7 @@ import { hasOwn, isMemoryObject } from "../utils/judge";
 import { nextTick } from "../utils/next-tick";
 import { printWarn } from "../utils/string";
 import { AnyObj } from "../utils/type";
-import { dependencyCollection, distributeUpdates, clearDependencys } from "./depend";
+import { dependencyCollection, distributeUpdates } from "./depend";
 import { isReadonly } from "./readonly";
 
 const rawMap = new WeakMap();
@@ -109,7 +109,6 @@ export function reactive<T extends AnyObj>(target: T): T {
         if (hasKey && result && oldValue !== void 0 && key === backupKey) {
           // console.log(`%c delete ${isType(target)}[${key.toString()}]`, 'color: red');
           distributeUpdates(target);
-          clearDependencys(target);
           backupKey = null;
         }
       })

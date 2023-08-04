@@ -35,7 +35,7 @@ export function distributeUpdates(key: object) {
   funcs && funcs.forEach((fn, index) => {
     const del = fn();
     // 清理下内存，将不用的函数删除
-    if (typeof del === 'boolean' && del) {
+    if (del === true) {
       funcs.splice(index, 1);
       funcsMap.set(key, funcs);
     }
@@ -46,6 +46,6 @@ export function distributeUpdates(key: object) {
  * 清空收集的依赖
  * @param key 
  */
-export function clearDependencys(key: object) {
+export function removeDependency(key: object) {
   funcsMap.delete(key);
 }

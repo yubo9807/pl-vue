@@ -1,7 +1,9 @@
-import { watch } from '../reactivity/watch';
-import { ref } from '../reactivity/ref';
-import { objectAssign } from '../utils/object';
 import { Fragment, h } from '../vdom/h';
+import { ref } from '../reactivity/ref';
+import { toRaw } from '../reactivity/reactive';
+import { watch } from '../reactivity/watch';
+import { removeDependency } from '../reactivity/depend';
+import { objectAssign } from '../utils/object';
 import { Component, Tree } from '../vdom/type';
 import { base, isBrowser, mode, ssrDataKey } from './init-router';
 import { isRoute } from './route';
@@ -71,21 +73,6 @@ function flatteningTree(tree: CompTree, collect: CompTree[] = []) {
   return collect;
 }
 
-/**
- * 递归渲染页面组件
- * @param treeList 
- * @param index 
- * @returns 
- */
-function recursionPage(treeList: CompTree[], index: number = 0) {
-  return () => {
-    const tree = treeList[index];
-    return tree && <tree.tag>
-      {recursionPage(treeList, index+1)}
-    </tree.tag>
-  }
-}
-
 
 
 interface BrowserRouterProps extends Props {
@@ -111,13 +98,42 @@ function BrowserRouter(props: BrowserRouterProps) {
     analysisRoute(getUrl());
   })
 
-  const pageList = ref([]);
+  const treeList = ref([]);
   watch(() => currentRoute.path, value => {
     const tree = findTree(props.children, value);
-    pageList.value = flatteningTree(tree);
+    treeList.value = flatteningTree(tree);
   }, { immediate: true })
 
-  return <>{recursionPage(pageList.value)}</>;
+  const oldTreeList = new Array();  // 收集旧的响应式对象
+  /**
+   * 递归渲染页面组件
+   * @param index 
+   * @returns 
+   */
+  function recursionPage(index: number = 0) {
+    return () => {
+      const tree = treeList.value[index];
+      if (!tree) {
+        delete oldTreeList[index];
+        return null;
+      }
+
+      const rawTree = toRaw(tree);
+
+      // 从第二层开始，组件被卸载后，清除旧组件的自动更新。防止重复渲染
+      if (index > 0 && oldTreeList[index] && !rawTree.tag) {
+        removeDependency(oldTreeList[index]);
+      }
+
+      // 保存数据，方便后续清除响应式依赖
+      oldTreeList[index] = rawTree;
+
+      // 递归渲染组件
+      return <tree.tag>{recursionPage(index+1)}</tree.tag>
+    }
+  }
+
+  return <>{recursionPage()}</>;
 
 }
 
@@ -145,9 +161,7 @@ function StaticRouter(props: StaticRouterProps) {
   analysisRoute(url);
 
   const tree = findTree(props.children, url);
-  const pageList = flatteningTree(tree);
-
-  return <>{recursionPage(pageList)}</>;
+  return <tree.tag children={tree.children} />;
 }
 
 export function Router(props: StaticRouterProps & BrowserRouterProps) {
