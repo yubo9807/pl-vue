@@ -11,19 +11,10 @@ import { createHTML } from "./create-html";
  */
 export function render({ tag, attrs, children }) {
   const dom = createElement(tag, attrs, children);
-  
+
   // 执行钩子函数
   triggerBeforeMount();
-  if (dom instanceof DocumentFragment) {  // 节点片段
-    const node = dom.children[0];
-    nextTick(() => {
-      node.parentNode && triggerMounted();  // 能找到父级节点，说明已经被挂载
-    })
-  } else if (dom instanceof HTMLElement) {
-    nextTick(() => {
-      dom.parentNode && triggerMounted();
-    })
-  }
+  nextTick(triggerMounted);
 
   return dom;
 }

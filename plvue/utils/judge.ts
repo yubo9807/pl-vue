@@ -56,6 +56,14 @@ export function isEquals(val1: any, val2: any) {
   }
 }
 
+/**
+ * 是否为浏览器环境
+ * @returns 
+ */
+export function isBrowser() {
+  return typeof window === 'object';
+}
+
 
 
 // #region 减少打包代码体积

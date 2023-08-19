@@ -3,7 +3,7 @@ import baseConfig from './vite.base';
 import env from '../config/env';
 
 const config = defineConfig({
-  base: env.BASE_URL,
+  base: env.BASE_URL || '/',
   build: {
     outDir: 'dist' + env.DEPLOY_URL,
     rollupOptions: {

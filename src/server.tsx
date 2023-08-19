@@ -17,7 +17,7 @@ const html = readFileSync(resolve(__dirname, deployUrl, 'index.html'), 'utf-8');
  * @param url 
  * @returns 
  */
-async function getInitialProps(routes, url: string) {
+async function getInitialProps(url: string) {
   const route = routes.find(val => {
     if (val.exact || val.exact === void 0) {
       return url === val.path;
@@ -27,17 +27,12 @@ async function getInitialProps(routes, url: string) {
   });
   if (route && typeof route.component.prototype.getInitialProps === 'function') {
     return await route.component.prototype.getInitialProps();
-  } else {
-    if (route.routes && route.routes.length > 0) {
-      return await getInitialProps(route.routes, url);
-    }
-    return void 0;
   }
 }
 
 const server = createServer(async (req, res) => {
 
-  const url = req.url.replace(env.BASE_URL, '/');
+  const url = req.url.replace(env.BASE_URL, '');
   const ext = extname(url);
 
   if (getStaticFileExts().includes(ext)) {
@@ -56,8 +51,8 @@ const server = createServer(async (req, res) => {
     });
   } else {
     // 服务端渲染
-    const data = await getInitialProps(routes, url);
-    const content = renderToString(<App isBrowser={false} url={url} data={data} />);
+    const data = await getInitialProps(url);
+    const content = renderToString(<App url={url} data={data} />);
     const index = html.search('</body>');
     const script = data === void 0 ? '' : `<script>window.g_initialProps=${JSON.stringify(data)}</script>`;
     const newHtml = html.slice(0, index) + script + html.slice(index, html.length);

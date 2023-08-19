@@ -1,11 +1,12 @@
-import { h } from "~/plvue";
 import style from './style.module.scss';
+import { h } from "~/plvue";
+import Layout from '@/components/layout';
 import { joinClass } from "@/utils/string";
 import env from "~/config/env";
 
-function Home(props) {
-  console.log('home')
-  return <div>
+function Home() {
+
+  return <Layout>
     <div className={style.banner}>
       <div className={style.box}>
         <strong>Pl Vue</strong>
@@ -47,11 +48,10 @@ function Home(props) {
       </li>
 
     </ul>
-  </div>
+  </Layout>
 }
 
 Home.prototype.getInitialProps = async () => {
-  console.log('home')
   return 'home'
 }
 

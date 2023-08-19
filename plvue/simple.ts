@@ -9,6 +9,5 @@ export { nextTick } from './utils/next-tick';
 
 export { createStore } from './store';
 
-export { initRouter } from './router/init-router';
-export { useRoute } from './router/use-route';
+export { useRoute, initRouter } from './router/use-route';
 export { useRouter } from './router/use-router';

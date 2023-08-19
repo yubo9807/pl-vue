@@ -1,35 +1,34 @@
-import { Config, formatPath, splicingUrl } from './utils';
-import { base, mode } from './init-router';
-import { analysisRoute } from './use-route';
+import { RouteOption, splicingUrl } from './utils';
+import { config, routeChange } from './use-route';
 
 /**
  * 向前 push 一个路由
  * @param option 
  */
-function push(option: Config | string) {
+function push(option: RouteOption | string) {
   const path = splicingUrl(option);
 
-  if (mode === 'history') {
-    history.pushState({}, '', formatPath(base + '/' + path));
+  if (config.mode === 'history') {
+    history.pushState({}, '', config.base + path);
   } else {
     location.hash = path;
   }
-  analysisRoute(path);
+  routeChange(path);
 }
 
 /**
  * 替换当前路由
  * @param option 
  */
-function replace(option: Config | string) {
+function replace(option: RouteOption | string) {
   const path = splicingUrl(option);
 
-  if (mode === 'history') {
-    history.replaceState({}, '', formatPath(base + '/' + path));
+  if (config.mode === 'history') {
+    history.replaceState({}, '', config.base + path);
   } else {
     location.hash = path;
   }
-  analysisRoute(path);
+  routeChange(path);
 }
 
 function go(num: number) {

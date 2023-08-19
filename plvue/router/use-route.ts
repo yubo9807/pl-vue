@@ -1,36 +1,59 @@
 import { reactive } from '../reactivity/reactive';
-import { base, isBrowser, mode } from './init-router';
-import { formatPath, getQueryAll } from './utils';
+import { isBrowser } from '../utils/judge';
+import { RouteOption, analyzeRoute } from './utils';
 
-export const currentRoute = reactive({
-  path:  '',
-  query: {},
-  hash:  '',
-  meta:  {},
-})
-
-/**
- * 解析 url
- * @param url 
- */
-export function analysisRoute(url: string) {
-  const newUrl = new URL(formatPath('http://0.0.0.0/' + url));
-  currentRoute.path = newUrl.pathname.replace(base, '/');
-  currentRoute.query = getQueryAll(newUrl.search);
-  currentRoute.hash = newUrl.hash;
+type Config = {
+  base: string
+  mode: 'history' | 'hash'
+  ssrDataKey: string
+}
+export const config: Config = {
+  base: '',
+  mode: 'history',
+  ssrDataKey: 'g_initialProps',
 }
 
-export function useRoute() {
-  // 发生在 Router 组件渲染之前，并且是客户端
-  if (!currentRoute.path && isBrowser) {
-    let url = '';
-    if (mode === 'history') {
-      url = location.href.replace(location.origin + base, '');
-    } else {
-      url = location.hash.slice(1);
-    }
-    analysisRoute(url);
-  }
+export let currentRoute: RouteOption = null;
 
+type Option = {
+  [k in keyof Config]?: Config[k]
+}
+export function initRouter(option: Option = {}) {
+  Object.assign(config, option);
+
+  // 浏览器环境
+  if (isBrowser()) {
+    const route = analyzeRoute(getBrowserUrl());
+    currentRoute = reactive(route);
+  }
+}
+
+/**
+ * route 发生变化，响应式数据重新赋值
+ * @param url 
+ */
+export function routeChange(url: string) {
+  const option = analyzeRoute(url);
+  for (const key in option) {
+    currentRoute[key] = option[key];
+  }
+}
+
+/**
+ * 获取浏览器端 url
+ */
+export function getBrowserUrl() {
+  if (config.mode === 'history') {
+    return location.href.replace(location.origin + config.base, '');
+  } else {
+    return location.hash.slice(1);
+  }
+}
+
+/**
+ * 获取当前的路有信息
+ * @returns 
+ */
+export function useRoute() {
   return currentRoute;
 }
