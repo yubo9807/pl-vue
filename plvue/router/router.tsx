@@ -4,7 +4,6 @@ import { watch } from '../reactivity/watch';
 import { Component, Tree } from '../vdom/type';
 import { isRoute } from './route';
 import { currentRoute, getBrowserUrl, config, routeChange } from './use-route';
-import { analyzeRoute } from './utils';
 import { isBrowser } from '../utils/judge';
 
 
@@ -98,7 +97,7 @@ function StaticRouter(props: StaticRouterProps) {
     url = match ? match[0] : '';
   }
 
-  analyzeRoute(url);
+  routeChange(url);
 
   const Comp = findComp(props.children, url);
   return <Comp />;

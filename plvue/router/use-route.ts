@@ -25,6 +25,10 @@ export function initRouter(option: Option = {}) {
   if (isBrowser()) {
     const route = analyzeRoute(getBrowserUrl());
     currentRoute = reactive(route);
+  } else {
+    // 服务端只需初始化，真正解析由 StaticRouter 组件来完成
+    // 并且服务端也不需要响应式数据
+    currentRoute ??= analyzeRoute('/');
   }
 }
 
