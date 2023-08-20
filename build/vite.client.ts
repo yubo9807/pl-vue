@@ -5,7 +5,7 @@ import env from '../config/env';
 const config = defineConfig({
   base: env.BASE_URL || '/',
   build: {
-    outDir: 'dist' + env.DEPLOY_URL,
+    outDir: 'dist' + env.BASE_URL,
     rollupOptions: {
       output: {
         manualChunks(url) {

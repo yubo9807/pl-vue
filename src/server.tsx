@@ -7,7 +7,7 @@ import { getMimeType, getStaticFileExts } from "./utils/string";
 import env from "~/config/env";
 import { formatPath } from "~/plvue/router/utils";
 
-const deployUrl = env.DEPLOY_URL.slice(1);
+const deployUrl = env.BASE_URL.slice(1);
 
 // html 模版
 const html = readFileSync(resolve(__dirname, deployUrl, 'index.html'), 'utf-8');
@@ -32,7 +32,7 @@ async function getInitialProps(url: string) {
 
 const server = createServer(async (req, res) => {
 
-  const url = req.url.replace(env.BASE_URL, '');
+  const url = req.url.replace(env.BASE_URL || '/', '/');
   const ext = extname(url);
 
   if (getStaticFileExts().includes(ext)) {
