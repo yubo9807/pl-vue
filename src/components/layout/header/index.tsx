@@ -11,7 +11,7 @@ export default function() {
       </Link>
     </div>
     <nav className={style.navigation}>
-      <Link to='/docs/use'>文档</Link>
+      <Link to='/docs'>文档</Link>
       <a href={env.GITHUB_URL+'mvvm_vue3'} target="_blank">GitHub</a>
     </nav>
   </header>
