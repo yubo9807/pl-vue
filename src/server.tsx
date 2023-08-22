@@ -1,11 +1,11 @@
 import { h, renderToString } from "~/plvue";
+import { analyzeRoute } from "~/plvue/router";
 import App, { routes } from "./app";
 import { createServer } from 'http';
 import { readFileSync, readFile } from 'fs';
 import { resolve, extname } from 'path';
 import { getMimeType, getStaticFileExts } from "./utils/string";
 import env from "~/config/env";
-import { formatPath } from "~/plvue/router/utils";
 
 const deployUrl = env.BASE_URL.slice(1);
 
@@ -22,11 +22,11 @@ async function getInitialProps(url: string) {
     if (val.exact || val.exact === void 0) {
       return url === val.path;
     } else {
-      return (url + '/').startsWith(formatPath(val.path + '/'));
+      return (url + '/').startsWith(val.path + '/');
     }
   });
   if (route && typeof route.component.prototype.getInitialProps === 'function') {
-    return await route.component.prototype.getInitialProps();
+    return await route.component.prototype.getInitialProps(analyzeRoute(url));
   }
 }
 

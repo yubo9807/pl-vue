@@ -3,8 +3,9 @@ import { ref } from '../reactivity/ref';
 import { watch } from '../reactivity/watch';
 import { Component, Tree } from '../vdom/type';
 import { isRoute } from './route';
-import { currentRoute, getBrowserUrl, config, routeChange } from './use-route';
+import { currentRoute, getBrowserUrl, config, routeChange, useRoute } from './use-route';
 import { isBrowser } from '../utils/judge';
+import { analyzeRoute } from './utils';
 
 
 
@@ -67,7 +68,8 @@ function BrowserRouter(props: BrowserRouterProps) {
         data = window[config.ssrDataKey];
         delete window[config.ssrDataKey];
       } else {
-        data = await getInitialProps();
+        const route = analyzeRoute(value);
+        data = await getInitialProps(route);
       }
     }
     currentComp.value = comp;

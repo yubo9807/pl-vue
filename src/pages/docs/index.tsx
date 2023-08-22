@@ -4,9 +4,7 @@ import { Link, useRoute } from "~/plvue/router"
 import { joinClass } from "@/utils/string";
 import Layout from '@/components/layout';
 
-export default function Docs(props) {
-  const route = useRoute();
-  console.log(route)
+function Docs(props) {
   return <Layout>
     <div className={joinClass('leayer', style.container)}>
       <ul className={style.side}>
@@ -25,3 +23,10 @@ export default function Docs(props) {
     </div>
   </Layout>
 }
+
+Docs.prototype.getInitialProps = async (route) => {
+  console.log(route)
+  return 'docs';
+}
+
+export default Docs;
