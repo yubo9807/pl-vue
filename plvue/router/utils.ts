@@ -1,6 +1,9 @@
 import { isString } from "../utils/judge";
 
 export type RouteOption = ReturnType<typeof analyzeRoute>
+export type RouteOptionOptional = {
+  [k in keyof RouteOption]?: RouteOption[k]
+}
 
 /**
  * 根据 url 解析 route
@@ -10,6 +13,7 @@ export type RouteOption = ReturnType<typeof analyzeRoute>
 export function analyzeRoute(url: string) {
   const newUrl = new URL('http://0.0.0.0' + url);
   return {
+    fullPath: newUrl.href,
     path: newUrl.pathname,
     query: getQueryAll(newUrl.search),
     hash: newUrl.hash,
@@ -20,10 +24,10 @@ export function analyzeRoute(url: string) {
  * 组织 url
  * @param option
  */
-export function splicingUrl(option: RouteOption | string): string {
+export function splicingUrl(option: RouteOptionOptional | string): string {
   if (isString(option)) return option as string;
 
-  option = option as RouteOption
+  option = option as RouteOptionOptional
   const pathname = option.path;
   let queryStr = '';
   for (const key in option.query) {
