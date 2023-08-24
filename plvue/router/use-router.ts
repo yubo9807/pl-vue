@@ -1,5 +1,5 @@
 import { RouteOptionOptional, splicingUrl } from './utils';
-import { config, routeChange } from './use-route';
+import { config, routeChange } from './create-router';
 
 /**
  * 向前 push 一个路由

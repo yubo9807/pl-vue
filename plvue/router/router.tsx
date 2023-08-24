@@ -3,7 +3,7 @@ import { toRaw } from '../reactivity/reactive';
 import { ref } from '../reactivity/ref';
 import { watch } from '../reactivity/watch';
 import { Component } from '../vdom/type';
-import { currentRoute, getBrowserUrl, config, routeChange, findRoute } from './use-route';
+import { currentRoute, getBrowserUrl, config, routeChange, findRoute } from './create-router';
 import { isBrowser } from '../utils/judge';
 import { analyzeRoute } from './utils';
 
@@ -13,7 +13,7 @@ type Props = {
 }
 
 interface BrowserRouterProps extends Props {
-  Loading?: Component
+  loading?: Component
 }
 /**
  * 浏览器端路由渲染
@@ -37,6 +37,7 @@ function BrowserRouter(props: BrowserRouterProps) {
         data = window[config.ssrDataKey];
         delete window[config.ssrDataKey];
       } else {
+        currentComp.value = props.loading;
         const route = toRaw(currentRoute);
         data = await getInitialProps(route);
       }
