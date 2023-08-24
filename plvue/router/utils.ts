@@ -13,7 +13,7 @@ export type RouteOptionOptional = {
 export function analyzeRoute(url: string) {
   const newUrl = new URL('http://0.0.0.0' + url);
   return {
-    fullPath: newUrl.href,
+    fullPath: newUrl.href.replace(newUrl.origin, ''),
     path: newUrl.pathname,
     query: getQueryAll(newUrl.search),
     hash: newUrl.hash,

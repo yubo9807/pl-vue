@@ -1,42 +1,11 @@
 import { Fragment, h } from '../vdom/h';
+import { toRaw } from '../reactivity/reactive';
 import { ref } from '../reactivity/ref';
 import { watch } from '../reactivity/watch';
-import { Component, Tree } from '../vdom/type';
-import { isRoute } from './route';
-import { currentRoute, getBrowserUrl, config, routeChange } from './use-route';
+import { Component } from '../vdom/type';
+import { currentRoute, getBrowserUrl, config, routeChange, findRoute } from './use-route';
 import { isBrowser } from '../utils/judge';
 import { analyzeRoute } from './utils';
-
-
-
-interface CompTree extends Tree {
-  tag: Function
-}
-
-/**
- * 查找匹配的组件
- * @param treeList
- * @param path 
- * @returns 
- */
-function findComp(treeList: Tree[], path: string) {
-  const qureyTree = treeList.find((tree: Tree) => {
-    if (tree.attrs.exact || tree.attrs.exact === void 0) {
-      return path === tree.attrs.path;
-    } else {
-      return (path + '/').startsWith(tree.attrs.path + '/');
-    }
-  });
-
-  if (qureyTree) {
-    return qureyTree.attrs.component;
-  } else {
-    const lastTree = treeList[treeList.length - 1] as CompTree;
-    if (lastTree && isRoute(lastTree.tag) && !lastTree.attrs.path) {
-      return lastTree.attrs.component as CompTree;
-    }
-  }
-}
 
 
 type Props = {
@@ -60,19 +29,19 @@ function BrowserRouter(props: BrowserRouterProps) {
   const currentComp = ref(null);
   let data = void 0;
   watch(() => currentRoute.path, async value => {
-    const comp = findComp(props.children, value);
-    if (!comp) return;
-    const { getInitialProps } = comp.prototype;
+    const find = findRoute(value);
+    if (!find) return;
+    const { getInitialProps } = find.component.prototype;
     if (typeof getInitialProps === 'function') {
       if (window[config.ssrDataKey]) {
         data = window[config.ssrDataKey];
         delete window[config.ssrDataKey];
       } else {
-        const route = analyzeRoute(value);
+        const route = toRaw(currentRoute);
         data = await getInitialProps(route);
       }
     }
-    currentComp.value = comp;
+    currentComp.value = find.component;
   }, { immediate: true })
 
   return <>{() => currentComp.value && <currentComp.value data={data} />}</>;
@@ -101,9 +70,27 @@ function StaticRouter(props: StaticRouterProps) {
 
   routeChange(url);
 
-  const Comp = findComp(props.children, url);
-  return <Comp />;
+  const find = findRoute(currentRoute.path);
+  return <>{find && <find.component />}</>;
 }
+
+/**
+ * 生成节点前执行组件的 getInitialProps 方法
+ * @param url 
+ * @returns 
+ */
+export async function execGetInitialProps(url: string) {
+  const currentRoute = analyzeRoute(url);
+  const find = findRoute(currentRoute.path);
+  if (!find) return;
+
+  const { getInitialProps } = find.component.prototype;
+  if (typeof getInitialProps === 'function') {
+    return await getInitialProps(currentRoute);
+  }
+}
+
+
 
 export function Router(props: StaticRouterProps & BrowserRouterProps) {
   return isBrowser()

@@ -5,7 +5,7 @@ import { config, routeChange } from './use-route';
  * 向前 push 一个路由
  * @param option 
  */
-function push(option: RouteOptionOptional | string) {
+export function push(option: RouteOptionOptional | string) {
   const path = splicingUrl(option);
 
   if (config.mode === 'history') {
@@ -20,7 +20,7 @@ function push(option: RouteOptionOptional | string) {
  * 替换当前路由
  * @param option 
  */
-function replace(option: RouteOptionOptional | string) {
+export function replace(option: RouteOptionOptional | string) {
   const path = splicingUrl(option);
 
   if (config.mode === 'history') {
@@ -31,7 +31,7 @@ function replace(option: RouteOptionOptional | string) {
   routeChange(path);
 }
 
-function go(num: number) {
+export function go(num: number) {
   history.go(num);
 }
 

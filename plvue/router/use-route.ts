@@ -1,16 +1,25 @@
-import { reactive } from '../reactivity/reactive';
+import { reactive, toRaw } from '../reactivity/reactive';
 import { isBrowser } from '../utils/judge';
+import { Component } from '../vdom/type';
+import { push, replace, go } from './use-router';
 import { RouteOption, analyzeRoute } from './utils';
 
 type Config = {
   base: string
   mode: 'history' | 'hash'
   ssrDataKey: string
+  routes: {
+    path?: string
+    component: Component
+    exact?: boolean
+    redirect?: string
+  }[]
 }
 export const config: Config = {
   base: '',
   mode: 'history',
   ssrDataKey: 'g_initialProps',
+  routes: [],
 }
 
 export let currentRoute: RouteOption = null;
@@ -18,7 +27,7 @@ export let currentRoute: RouteOption = null;
 type Option = {
   [k in keyof Config]?: Config[k]
 }
-export function initRouter(option: Option = {}) {
+export function createRouter(option: Option = {}) {
   Object.assign(config, option);
 
   // 浏览器环境
@@ -29,6 +38,16 @@ export function initRouter(option: Option = {}) {
     // 服务端只需初始化，真正解析由 StaticRouter 组件来完成
     // 并且服务端也不需要响应式数据
     currentRoute ??= analyzeRoute('/');
+  }
+
+  return {
+    back: () => go(-1),
+    forward: () => go(1),
+    go,
+    push,
+    replace,
+    options: config,
+    currentRoute: toRaw(currentRoute),
   }
 }
 
@@ -52,6 +71,22 @@ export function getBrowserUrl() {
   } else {
     return location.hash.slice(1);
   }
+}
+
+/**
+ * 查找匹配的路由信息
+ * @param path 
+ * @returns 
+ */
+export function findRoute(path: string) {
+  const route = config.routes.find(val => {
+    if (val.exact || val.exact === void 0) {
+      return path === val.path;
+    } else {
+      return (path + '/').startsWith(val.path + '/');
+    }
+  });
+  return route;
 }
 
 /**
