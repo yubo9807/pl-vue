@@ -36,13 +36,15 @@ class Stroe<S extends Obj, A extends Obj> {
         const result = actions[key](...args);
         self._merge(state);
         if (isMemoryObject(result) && result[Symbol.toStringTag] === 'Promise') {
-          result.then(() => {
+          result.then(res => {
             self._merge(state);
             nextTick(() => self.#lock = true);
+            return res;
           })
         } else {
           self._merge(state);
           nextTick(() => self.#lock = true);  // 重新上锁
+          return result;
         }
       }
       func.prototype[actionFlag] = actionFlag;
