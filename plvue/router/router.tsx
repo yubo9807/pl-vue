@@ -72,7 +72,7 @@ function StaticRouter(props: StaticRouterProps) {
   routeChange(url);
 
   const find = findRoute(currentRoute.path);
-  return <>{find && <find.component />}</>;
+  return <>{find && <find.component data={props.data} />}</>;
 }
 
 /**

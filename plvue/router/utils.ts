@@ -1,4 +1,5 @@
 import { isString } from "../utils/judge";
+import { AnyObj } from "../utils/type";
 
 export type RouteOption = ReturnType<typeof analyzeRoute>
 export type RouteOptionOptional = {
@@ -15,7 +16,7 @@ export function analyzeRoute(url: string) {
   return {
     fullPath: newUrl.href.replace(newUrl.origin, ''),
     path: newUrl.pathname,
-    query: getQueryAll(newUrl.search),
+    query: getQueryAll(newUrl.search) as AnyObj,
     hash: newUrl.hash,
   }
 }
