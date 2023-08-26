@@ -1,12 +1,10 @@
 import style from './style.module.scss';
 import './markdown.scss';
-import 'highlight.js/styles/base16/decaf.css';
 import { h, nextTick, onMounted, ref, watch } from "~/plvue";
 import { Link, useRoute } from "~/plvue/router";
 import { joinClass } from "@/utils/string";
 import Layout from '@/components/layout';
 import { api_getDocsConfig, api_getDocsContent } from '@/api/docs';
-import hljs from 'highlight.js/lib/common';
 
 function Docs(props) {
 
@@ -22,9 +20,7 @@ function Docs(props) {
 
   // path 发生变化，重新请求文档内容
   const mdRef = ref<HTMLElement>(null);
-  onMounted(() => {
-    codeHighlight();
-
+  onMounted(async () => {
     watch(() => route.path, async value => {
 
       // 渲染文档
@@ -35,7 +31,11 @@ function Docs(props) {
       // 代码高亮
       nextTick(codeHighlight);      
     });
-    
+
+    import('highlight.js/styles/base16/decaf.css');
+    const hljs = (await import('highlight.js/lib/common')).default;
+
+    codeHighlight();
     function codeHighlight() {
       const codeList = mdRef.value.querySelectorAll('pre code');
       codeList.forEach((val: HTMLElement) => {

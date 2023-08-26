@@ -221,11 +221,9 @@
     font-size: 100%;
     margin: 0;
     vertical-align: baseline;
-    *vertical-align: middle;
   }
   button, input {
     line-height: normal;
-    *overflow: visible;
   }
   button::-moz-focus-inner, input::-moz-focus-inner {
     border: 0;
@@ -378,7 +376,6 @@
 
   table {
     border-collapse: separate;
-    *border-collapse: separate; /* IE7 and lower */
     border-spacing: 0;
     width: 100%;
     margin-bottom: 10px;
