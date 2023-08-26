@@ -8,7 +8,7 @@
 .leayer{
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--both-sides-padding);
 }
 
 // 模块儿之前的间隙

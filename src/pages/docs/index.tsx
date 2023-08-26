@@ -1,40 +1,67 @@
 import style from './style.module.scss';
-import { h, onMounted, ref, watch } from "~/plvue"
-import { Link, useRoute } from "~/plvue/router"
+import './markdown.scss';
+import 'highlight.js/styles/base16/decaf.css';
+import { h, nextTick, onMounted, ref, watch } from "~/plvue";
+import { Link, useRoute } from "~/plvue/router";
 import { joinClass } from "@/utils/string";
 import Layout from '@/components/layout';
 import { api_getDocsConfig, api_getDocsContent } from '@/api/docs';
+import hljs from 'highlight.js/lib/common';
 
 function Docs(props) {
 
   const list = ref(props.data.list);
   const content = ref(props.data.content);
 
+  const route = useRoute();
+  const visible = ref(false);  // 移动端侧边栏是否显示
+  const active = ref(getName() || list.value[0] && list.value[0].value);
+  function getName() {
+    return route.path.replace(route.monitor, '').slice(1);
+  }
+
+  // path 发生变化，重新请求文档内容
+  const mdRef = ref<HTMLElement>(null);
   onMounted(() => {
-    const route = useRoute();
+    codeHighlight();
+
     watch(() => route.path, async value => {
-      content.value = await getContent(value.replace(route.monitor, ''));
-    }, { deep: true });
+
+      // 渲染文档
+      active.value = getName();
+      content.value = await getContent(active.value);
+      visible.value = false;
+
+      // 代码高亮
+      nextTick(codeHighlight);      
+    });
+    
+    function codeHighlight() {
+      const codeList = mdRef.value.querySelectorAll('pre code');
+      codeList.forEach((val: HTMLElement) => {
+        hljs.highlightElement(val);
+      })
+    }
   })
 
   return <Layout>
     <div className={joinClass('leayer', style.container)}>
-      <ul className={style.side}>
-        {list.value.map(val => <li>
+      <ul className={() => joinClass(style.side, visible.value ? style.active : '')}>
+        {list.value.map(val => <li className={() => active.value === val.value ? style.active : ''}>
           <Link to={`/docs/${val.value}`}>{val.label}</Link>
         </li>)}
       </ul>
-      <div className={style.content}>
+      <div ref={mdRef} className={joinClass(style.content, 'markdown')}>
         <div innerHTML={() => content.value}></div>
       </div>
     </div>
+    <div className={() => joinClass(style.showSide, visible.value ? style.active : '')} onclick={() => visible.value = !visible.value}></div>
   </Layout>
 }
 
 Docs.prototype.getInitialProps = async (route) => {
-  const { name } = route.query;
   const list = await getCatalogue();
-  const content = await getContent(name || list[0] && list[0].value);
+  const content = await getContent(route.path.replace(route.monitor, '') || list[0] && list[0].value);
   return {
     list,
     content,
