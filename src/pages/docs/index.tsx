@@ -12,8 +12,8 @@ function Docs(props) {
 
   onMounted(() => {
     const route = useRoute();
-    watch(() => route.query, async value => {
-      content.value = await getContent(value.name);
+    watch(() => route.path, async value => {
+      content.value = await getContent(value.replace(route.monitor, ''));
     }, { deep: true });
   })
 
@@ -21,7 +21,7 @@ function Docs(props) {
     <div className={joinClass('leayer', style.container)}>
       <ul className={style.side}>
         {list.value.map(val => <li>
-          <Link to={`/docs?name=${val.value}`}>{val.label}</Link>
+          <Link to={`/docs/${val.value}`}>{val.label}</Link>
         </li>)}
       </ul>
       <div className={style.content}>
@@ -49,10 +49,10 @@ export default Docs;
  */
 async function getCatalogue() {
   const [err, res] = await api_getDocsConfig();
-  if (err) return [];
-  const obj = JSON.parse(res.data.content);
-
   const list = [];
+  if (err) return list;
+
+  const obj = JSON.parse(res.data.content);
   for (const key in obj) {
     list.push({ label: obj[key], value: key });
   }

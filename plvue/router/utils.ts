@@ -1,5 +1,6 @@
 import { isString } from "../utils/judge";
 import { AnyObj } from "../utils/type";
+import { config } from "./create-router";
 
 export type RouteOption = ReturnType<typeof analyzeRoute>
 export type RouteOptionOptional = {
@@ -13,9 +14,14 @@ export type RouteOptionOptional = {
  */
 export function analyzeRoute(url: string) {
   const newUrl = new URL('http://0.0.0.0' + url);
+  const pathname = newUrl.pathname;
+  const query = config.routes.find(val => {
+    return pathname.startsWith(val.path + '/') && val.exact === false;
+  })
   return {
+    monitor: query ? query.path : pathname,
     fullPath: newUrl.href.replace(newUrl.origin, ''),
-    path: newUrl.pathname,
+    path: pathname,
     query: getQueryAll(newUrl.search) as AnyObj,
     hash: newUrl.hash,
   }
@@ -54,6 +60,26 @@ export function getQueryAll(search: string) {
     if (key && value) obj[key] = value;
   })
   return obj;
+}
+
+/**
+ * 获取浏览器端 url
+ */
+export function getBrowserUrl() {
+  if (config.mode === 'history') {
+    return location.href.replace(location.origin + config.base, '');
+  } else {
+    return location.hash.slice(1);
+  }
+}
+
+/**
+ * 查找匹配的路由信息
+ * @param monitor 
+ * @returns 
+ */
+export function findRoute(monitor: string) {
+  return config.routes.find(val => val.path === monitor);
 }
 
 /**

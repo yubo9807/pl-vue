@@ -3,9 +3,9 @@ import { toRaw } from '../reactivity/reactive';
 import { ref } from '../reactivity/ref';
 import { watch } from '../reactivity/watch';
 import { Component } from '../vdom/type';
-import { currentRoute, getBrowserUrl, config, routeChange, findRoute } from './create-router';
+import { currentRoute, config, routeChange } from './create-router';
 import { isBrowser } from '../utils/judge';
-import { analyzeRoute } from './utils';
+import { analyzeRoute, findRoute, getBrowserUrl } from './utils';
 
 
 type Props = {
@@ -28,7 +28,7 @@ function BrowserRouter(props: BrowserRouterProps) {
 
   const currentComp = ref(null);
   let data = void 0;
-  watch(() => currentRoute.path, async value => {
+  watch(() => currentRoute.monitor, async value => {
     const find = findRoute(value);
     if (!find) return;
     const { getInitialProps } = find.component.prototype;
@@ -71,7 +71,7 @@ function StaticRouter(props: StaticRouterProps) {
 
   routeChange(url);
 
-  const find = findRoute(currentRoute.path);
+  const find = findRoute(currentRoute.monitor);
   return <>{find && <find.component data={props.data} />}</>;
 }
 
@@ -82,7 +82,7 @@ function StaticRouter(props: StaticRouterProps) {
  */
 export async function execGetInitialProps(url: string) {
   const currentRoute = analyzeRoute(url);
-  const find = findRoute(currentRoute.path);
+  const find = findRoute(currentRoute.monitor);
   if (!find) return;
 
   const { getInitialProps } = find.component.prototype;

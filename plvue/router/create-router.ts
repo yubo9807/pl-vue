@@ -2,7 +2,7 @@ import { reactive, toRaw } from '../reactivity/reactive';
 import { isBrowser } from '../utils/judge';
 import { Component } from '../vdom/type';
 import { push, replace, go } from './use-router';
-import { RouteOption, analyzeRoute } from './utils';
+import { RouteOption, analyzeRoute, getBrowserUrl } from './utils';
 
 type Config = {
   base: string
@@ -60,33 +60,6 @@ export function routeChange(url: string) {
   for (const key in option) {
     currentRoute[key] = option[key];
   }
-}
-
-/**
- * 获取浏览器端 url
- */
-export function getBrowserUrl() {
-  if (config.mode === 'history') {
-    return location.href.replace(location.origin + config.base, '');
-  } else {
-    return location.hash.slice(1);
-  }
-}
-
-/**
- * 查找匹配的路由信息
- * @param path 
- * @returns 
- */
-export function findRoute(path: string) {
-  const route = config.routes.find(val => {
-    if (val.exact || val.exact === void 0) {
-      return path === val.path;
-    } else {
-      return (path + '/').startsWith(val.path + '/');
-    }
-  });
-  return route;
 }
 
 /**
