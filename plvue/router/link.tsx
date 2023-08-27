@@ -9,6 +9,7 @@ type Props = {
   to:        RouteOptionOptional | string
   children?: []
   type?:     'push' | 'replace'
+  className?: string
 }
 const defaultProps = { to: '/', type: 'push' }
 
@@ -27,5 +28,5 @@ export function Link(props: Props) {
     }
   }
 
-  return <a href={href} onclick={jump}>{props.children}</a>
+  return <a className={props.className} href={href} onclick={jump}>{props.children}</a>
 }
