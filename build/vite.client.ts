@@ -4,7 +4,7 @@ import env from '../config/env';
 
 const proxy = {
   '^/api': {
-    target: 'http://hicky.hpyyb.cn',
+    target: 'http://127.0.0.1:20010',
     changeOrigin: true,
   },
 }

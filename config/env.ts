@@ -1,14 +1,14 @@
 
-type Mode = 'development' | 'production'
+const NODE_ENV = process.env.NODE_ENV as 'development' | 'production';
 
-export default {
+export default Object.freeze({
 
   BASE_URL: '',
 
-  NODE_ENV: process.env.NODE_ENV as Mode,
+  NODE_ENV,
 
-  BASE_API: '/api',
+  BASE_API: NODE_ENV === 'development' ? '/api' : 'http://hicky.hpyyb.cn/api',
 
   GITHUB_URL: 'https://github.com/yubo9807/',
 
-}
+})
