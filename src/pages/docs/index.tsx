@@ -21,7 +21,10 @@ function Docs(props) {
   // path 发生变化，重新请求文档内容
   const mdRef = ref<HTMLElement>(null);
   onMounted(async () => {
-    watch(() => route.path, async value => {
+    const unWatch = watch(() => route.path, async value => {
+      if (route.monitor !== '/docs') {
+        return unWatch();
+      }
 
       // 渲染文档
       active.value = getName();

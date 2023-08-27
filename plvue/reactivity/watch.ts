@@ -26,6 +26,8 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
   let first = true;
 
   binding(() => {
+    if (cleanup) return true;
+
     const value = source();
 
     // 是一个对象
