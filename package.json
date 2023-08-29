@@ -1,7 +1,7 @@
 {
   "name": "pl-vue",
-  "version": "0.1.1",
-  "description": "Plagiarize Vue",
+  "version": "0.2.0",
+  "description": "Pl Vue",
   "main": "lib/index.js",
   "scripts": {
     "dev": "vite -c build/vite.client.ts",
@@ -18,7 +18,7 @@
     "jsx"
   ],
   "author": "yubo9807",
-  "homepage": "https://github.com/yubo9807/mvvm_vue3#readme",
+  "homepage": "http://plvue.hpyyb.cn",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yubo9807/mvvm_vue3.git"
