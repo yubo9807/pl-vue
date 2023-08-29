@@ -32,7 +32,7 @@ function Home() {
         <h2>响不响应式的，高度交予开发者决定</h2>
         <p>
           JSX 编程方式，响应式数据统一使用函数的方式包裹。
-          <a href={env.GITHUB_URL+'mvvm_vue3'} target="_blank">了解更多</a>
+          <Link to='/docs/intro'>了解更多</Link>
         </p>
       </li>
       <li>
@@ -47,7 +47,7 @@ function Home() {
         </p>
       </li>
       <li>
-        <h2>代码精简，打包代码仅有 10k</h2>
+        <h2>代码精简，minify &lt; 10k</h2>
         <p>手写 h 与 Fragment，将代码体积精简到极致。</p>
       </li>
 

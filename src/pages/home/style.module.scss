@@ -87,7 +87,7 @@
   flex-wrap: wrap;
   > li{
     width: calc(50% - 20px);
-    padding: 20px;
+    padding: var(--both-sides-padding);
     box-sizing: border-box;
     box-shadow: 0 4px 10px rgba(0,0,0,.05);
     margin-bottom: 32px;

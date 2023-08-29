@@ -11,7 +11,7 @@ $headerHeight: 60px;
   top: 0;
   padding: 0 var(--both-sides-padding);
   background-color: rgba(249,251,255,.6);;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(16px);
   h1{
     background: var(--vue-bg);
     -webkit-background-clip: text;

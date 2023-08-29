@@ -13,9 +13,10 @@ function Docs(props) {
 
   const route = useRoute();
   const visible = ref(false);  // 移动端侧边栏是否显示
-  const active = ref(getName() || list.value[0] && list.value[0].value);
+  const active = ref(getName());
   function getName() {
-    return route.path.replace(route.monitor, '').slice(1);
+    const name = route.path.replace(route.monitor, '').slice(1);
+    return name || list.value[0] && list.value[0].value;
   }
 
   // path 发生变化，重新请求文档内容
