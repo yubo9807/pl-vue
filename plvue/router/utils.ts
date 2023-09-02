@@ -79,7 +79,14 @@ export function getBrowserUrl() {
  * @returns 
  */
 export function findRoute(monitor: string) {
-  return config.routes.find(val => val.path === monitor);
+  const { routes } = config;
+  const query = routes.find(val => val.path === monitor);
+  if (query) return query;
+
+  const lastRoute = routes[routes.length - 1];
+  if (lastRoute.path === void 0 && lastRoute.component) {
+    return lastRoute;
+  } 
 }
 
 /**
