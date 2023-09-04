@@ -5,7 +5,8 @@ import { watch } from '../reactivity/watch';
 import { Component } from '../vdom/type';
 import { currentRoute, config, routeChange } from './create-router';
 import { isBrowser } from '../utils/judge';
-import { analyzeRoute, findRoute, getBrowserUrl } from './utils';
+import { findRoute, getBrowserUrl } from './utils';
+import { StaticRouter } from './ssr';
 
 
 type Props = {
@@ -48,53 +49,8 @@ function BrowserRouter(props: BrowserRouterProps) {
   return <>{() => currentComp.value && <currentComp.value data={data} />}</>;
 }
 
-
-
-interface StaticRouterProps extends Props {
-  url?:  string  // 渲染路径
-  data?: any     // 服务端获取数据
-}
-/**
- * 服务端渲染
- * @param props 
- * @returns 
- */
-function StaticRouter(props: StaticRouterProps) {
-
-  let url = ''
-  if (config.mode === 'history') {
-    url = props.url.replace(config.base, '');
-  } else {
-    const match = props.url.match(/#.*/);
-    url = match ? match[0] : '';
-  }
-
-  routeChange(url);
-
-  const find = findRoute(currentRoute.monitor);
-  return <>{find && <find.component data={props.data} />}</>;
-}
-
-/**
- * 生成节点前执行组件的 getInitialProps 方法
- * @param url 
- * @returns 
- */
-export async function execGetInitialProps(url: string) {
-  const currentRoute = analyzeRoute(url);
-  const find = findRoute(currentRoute.monitor);
-  if (!find) return;
-
-  const { getInitialProps } = find.component.prototype;
-  if (typeof getInitialProps === 'function') {
-    return await getInitialProps(currentRoute);
-  }
-}
-
-
-
-export function Router(props: StaticRouterProps & BrowserRouterProps) {
+export function Router(props: BrowserRouterProps) {
   return isBrowser()
     ? <BrowserRouter {...props} />
-    : <StaticRouter {...props} />
+    : <StaticRouter />
 }

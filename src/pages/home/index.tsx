@@ -32,7 +32,7 @@ function Home() {
         <h2>响不响应式的，高度交予开发者决定</h2>
         <p>
           JSX 编程方式，响应式数据统一使用函数的方式包裹。
-          <Link to='/docs/intro'>了解更多</Link>
+          <Link to='/docs/property'>了解更多</Link>
         </p>
       </li>
       <li>

@@ -1,15 +1,15 @@
 import style from './style.module.scss';
 import './markdown.scss';
 import { h, nextTick, onMounted, ref, watch } from "~/plvue";
-import { Link, useRoute } from "~/plvue/router";
+import { Helmet, Link, useRoute } from "~/plvue/router";
 import { joinClass } from "@/utils/string";
 import Layout from '@/components/layout';
 import { api_getDocsConfig, api_getDocsContent } from '@/api/docs';
 
-function Docs(props) {
+function Docs({ data }) {
 
-  const list = ref(props.data.list);
-  const content = ref(props.data.content);
+  const list = ref(data.list);
+  const content = ref(data.content);
 
   const route = useRoute();
   const visible = ref(false);  // 移动端侧边栏是否显示
@@ -48,7 +48,14 @@ function Docs(props) {
     }
   })
 
+  const title = list.value.find(val => val.value === active.value)?.label;
+
   return <Layout>
+    <Helmet>
+      <title>{title} | Pl Vue</title>
+      <meta name='keywords' content={`${title}`} />
+      <meta name='description' content={`${title}`} />
+    </Helmet>
     <div className={joinClass('leayer', style.container)}>
       <ul className={() => joinClass(style.side, visible.value ? style.active : '')}>
         {list.value.map(val => <li className={() => active.value === val.value ? style.active : ''}>

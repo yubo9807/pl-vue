@@ -17,12 +17,8 @@ const router = createRouter({
 });
 
 
-type Props = {
-  url?:  string  // 服务端渲染请求路径
-  data?: any     // 渲染前数据（getInitialProps）
-}
-function App(props: Props) {
-  return <Router url={props.url} data={props.data} />
+function App() {
+  return <Router />
 }
 
 export default App;

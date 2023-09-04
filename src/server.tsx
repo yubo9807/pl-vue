@@ -1,8 +1,7 @@
 import { createServer } from 'http';
 import { readFileSync, readFile } from 'fs';
 import { resolve, extname } from 'path';
-import { h, renderToString } from "~/plvue";
-import { execGetInitialProps } from "~/plvue/router";
+import { ssrOutlet } from "~/plvue/router";
 import App from "./app";
 import { getMimeType, getStaticFileExts } from "./utils/string";
 import env from "~/config/env";
@@ -33,12 +32,8 @@ const server = createServer(async (req, res) => {
     });
   } else {
     // 服务端渲染
-    const data = await execGetInitialProps(url);
-    const content = renderToString(<App url={url} data={data} />);
-    const index = html.search('</body>');
-    const script = data === void 0 ? '' : `<script>window.g_initialProps=${JSON.stringify(data)}</script>`;
-    const newHtml = html.slice(0, index) + script + html.slice(index, html.length);
-    res.write(newHtml.replace('<!--ssr-outlet-->', content));
+    const content = await ssrOutlet(App, url, html);
+    res.write(content);
     res.end();
   }
 
