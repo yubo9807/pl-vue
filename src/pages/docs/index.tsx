@@ -36,6 +36,7 @@ function Docs({ data }) {
       nextTick(codeHighlight);      
     });
 
+    // 开发环境：在切换页面后样式会丢失，可能是 vite 的问题（生产环境没事）
     import('highlight.js/styles/base16/decaf.css');
     const hljs = (await import('highlight.js/lib/common')).default;
 
