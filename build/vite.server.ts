@@ -9,6 +9,7 @@ const config = defineConfig({
     removeFuncs('onMounted', 'onUnmounted', 'onBeforeMount', 'onBeforeUnmount', 'printWarn'),  // 一些不可能触发的钩子
   ],
   build: {
+    copyPublicDir: false,
     emptyOutDir: false,
     minify: true,
     ssr: 'src/server.tsx',
