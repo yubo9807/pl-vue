@@ -101,6 +101,8 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
   // attrs 赋值
   for (const attr in attrs) {
     const value = attrs[attr];
+    if (!value) continue;
+
     el[attr] = value;
 
     if (attr === 'ref') {

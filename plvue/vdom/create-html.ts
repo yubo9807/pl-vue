@@ -36,7 +36,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
     let value = typeof attrs[attr] === 'function' && isReactiveChangeAttr(attr) ? attrs[attr]() : attrs[attr];
 
     if (attr === 'className') {
-      attrStr += ` class=${value}`;
+      value && (attrStr += ` class="${value}"`);
       continue;
     }
 
@@ -50,7 +50,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
       value = '"' + JSON.stringify(value).slice(1, -1).replaceAll('"', '').replaceAll(',', ';') + '"';
     }
 
-    attrStr += ` ${attr}=${value}`;
+    attrStr += ` ${attr}="${value}"`;
   }
 
   // 子节点
