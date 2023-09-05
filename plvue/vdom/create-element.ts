@@ -140,7 +140,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
  * @param children 
  * @returns 
  */
-function createElementFragment(children: Children) {
+export function createElementFragment(children: Children) {
 
   const fragment = document.createDocumentFragment();
 

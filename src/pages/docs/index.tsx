@@ -1,6 +1,6 @@
 import style from './style.module.scss';
 import './markdown.scss';
-import { h, nextTick, onMounted, ref, watch } from "~/plvue";
+import { h, nextTick, onMounted, ref, watch, computed } from "~/plvue";
 import { Helmet, Link, useRoute } from "~/plvue/router";
 import { joinClass } from "@/utils/string";
 import Layout from '@/components/layout';
@@ -49,13 +49,12 @@ function Docs({ data }) {
     }
   })
 
-  const title = list.value.find(val => val.value === active.value)?.label;
+  const title = computed(() => list.value.find(val => val.value === active.value)?.label);
 
   return <Layout>
     <Helmet>
-      <title>{title} | Pl Vue</title>
-      <meta name='keywords' content={`${title}`} />
-      <meta name='description' content={`${title}`} />
+      <title>{() => title.value + ' | Pl Vue'}</title>
+      <meta name='description' content={() => `${title.value}`} />
     </Helmet>
     <div className={joinClass('leayer', style.container)}>
       <ul className={() => joinClass(style.side, visible.value ? style.active : '')}>

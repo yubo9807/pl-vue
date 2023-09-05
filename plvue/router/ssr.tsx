@@ -1,4 +1,6 @@
 import { onMounted } from '../hooks';
+import { createElementFragment } from '../vdom/create-element';
+import { createHTML } from '../vdom/create-html';
 import { h, Fragment } from '../vdom/h';
 import { renderToString } from '../vdom/render';
 import { Component } from '../vdom/type';
@@ -9,51 +11,59 @@ let currentTemplate = ``;
 
 export function Helmet(props) {
 
-  /**
-   * 替换 head 中的内容
-   * @param headInnerHTML
-   * @returns 
-   */
-  function relpaceTemplate(headInnerHTML: string) {
-    const collect: RegExp[] = [];
-    const nodes = props.children.map(tree => {
-      if (tree.tag === 'title') {
-        collect.push(new RegExp('<title'));
-      } else if (tree.tag === 'meta' && tree.attrs.name) {
-        collect.push(new RegExp(`<meta name=("|')?${tree.attrs.name}`));
-      }
-      return renderToString(tree);
-    });
-    const arr = headInnerHTML.split('\n');
-  
-    const markers: number[] = [];
-    tag: for (let i = 0; i < arr.length; i++) {
-      arr[i] = arr[i].trim();
-      for (let j = 0; j < collect.length; j++) {
-        if (collect[j].test(arr[i])) {
-          markers.push(i);
-          continue tag;
-        }
-      }
+  const regs: RegExp[] = [];
+  props.children.forEach(tree => {
+    if (tree.tag === 'title') {
+      regs.push(new RegExp('<title'));
+    } else if (tree.tag === 'meta' && tree.attrs.name) {
+      regs.push(new RegExp(`<meta name=("|')?${tree.attrs.name}`));
     }
-
-    arr.push(...nodes);
-    const newArr = arr.filter((_, index) => !markers.includes(index));
-    return newArr.join('\n');
-  }
+  });
 
   // 服务端
   if (currentTemplate) {
     const matched = currentTemplate.match(/\<head\>(.*)\<\/head>/s);
-    const newHeadChild = relpaceTemplate(matched[1].trim());
-    currentTemplate = currentTemplate.replace(/\<head\>.*\<\/head>/s, `<head>\n${newHeadChild}\n</head>`);
+    const headInnerHTML = matched[1].trim();
+    const nodes = headInnerHTML.split('\n').filter(val => val.includes('<'));
+    for (let i = 0; i < nodes.length; i++) {
+      nodes[i] = nodes[i].trim();
+      for (let j = 0; j < regs.length; j++) {
+        if (regs[j].test(nodes[i])) {
+          nodes[i] = '';
+        }
+      }
+    }
+    props.children.forEach(val => {
+      const html = createHTML(val.tag, val.attrs, val.children);
+      nodes.push(html);
+    })
+    const newHeadInnerHTML = nodes.filter(val => val).join('\n');
+    currentTemplate = currentTemplate.replace(/\<head\>.*\<\/head>/s, `<head>\n${newHeadInnerHTML}\n</head>`);
   }
+
+  const backupChild = [];
 
   // 客户端
   onMounted(() => {
     const head = document.head;
-    const newHeadChild = relpaceTemplate(head.innerHTML);
-    head.innerHTML = newHeadChild;
+    const arr = head.innerHTML.split('\n').filter(val => val.includes('<'));
+
+    const removes: number[] = [];  // 删除项
+    tag: for (let i = 0; i < arr.length; i++) {
+      for (let j = i; j < regs.length; j++) {
+        if (regs[j].test(arr[i])) {
+          removes.push(i);
+          continue tag;
+        }
+      }
+    }
+    removes.forEach(val => {
+      backupChild.push(head.children[val]);
+      head.children[val].remove();
+    })
+
+    const node = createElementFragment(props.children);
+    head.insertBefore(node, head.children[0]);
   })
 
   return <></>

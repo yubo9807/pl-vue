@@ -67,7 +67,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
  * @param children 
  * @returns 
  */
-function createHTMLFragment(children: Children) {
+export function createHTMLFragment(children: Children) {
   let text = '';
   children.forEach(val => {
 
