@@ -1,4 +1,4 @@
-import { onMounted } from '../hooks';
+import { onMounted, onUnmounted } from '../hooks';
 import { createElementFragment } from '../vdom/create-element';
 import { createHTML } from '../vdom/create-html';
 import { h, Fragment } from '../vdom/h';
@@ -41,30 +41,44 @@ export function Helmet(props) {
     currentTemplate = currentTemplate.replace(/\<head\>.*\<\/head>/s, `<head>\n${newHeadInnerHTML}\n</head>`);
   }
 
-  const backupChild = [];
+  // #region 客户端
+  let backupChild = [];  // 备份原先的字节点
+  let count = 0;         // 更换新的节点个数
 
-  // 客户端
   onMounted(() => {
     const head = document.head;
-    const arr = head.innerHTML.split('\n').filter(val => val.includes('<'));
+    const nodes = head.innerHTML.split('\n').filter(val => val.includes('<'));
 
     const removes: number[] = [];  // 删除项
-    tag: for (let i = 0; i < arr.length; i++) {
-      for (let j = i; j < regs.length; j++) {
-        if (regs[j].test(arr[i])) {
+    tag: for (let i = 0; i < regs.length; i++) {
+      for (let j = i; j < nodes.length; j++) {
+        if (regs[i].test(nodes[j])) {
           removes.push(i);
           continue tag;
         }
       }
     }
     removes.forEach(val => {
-      backupChild.push(head.children[val]);
+      backupChild.push(head.children[val].cloneNode(true));
       head.children[val].remove();
     })
 
+    count = props.children.length;
     const node = createElementFragment(props.children);
     head.insertBefore(node, head.children[0]);
   })
+
+  // 恢复原先的节点
+  onUnmounted(Helmet, () => {
+    const head = document.head;
+    for (let i = 0; i < count; i++) {
+      head.children[0].remove();
+    }
+    backupChild.forEach(node => {
+      head.insertBefore(node, head.childNodes[0]);
+    })
+  })
+  // #endregion
 
   return <></>
 }
