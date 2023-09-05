@@ -7,7 +7,7 @@ import { isFragment } from "./h";
 import { Tag, Attrs, Children, Tree, Component } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
-import { createId, printWarn } from "../utils/string";
+import { printWarn } from "../utils/string";
 
 
 
@@ -27,7 +27,6 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
   }
   if (isComponent(tag)) {  // 组件
     const props = objectAssign(attrs, { children });
-    (tag as Function).prototype._id = createId();  // 给组件添加一个唯一的值
     const tree = (tag as Function)(props);
     if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
       return createTextNode(tree);
