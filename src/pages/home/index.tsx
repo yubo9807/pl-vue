@@ -1,9 +1,9 @@
 import style from './style.module.scss';
 import { h } from "~/plvue";
+import { Link } from '~/plvue/router';
 import Layout from '@/components/layout';
 import { joinClass } from "@/utils/string";
 import env from "~/config/env";
-import { Link } from '~/plvue/router';
 
 function Home() {
 
@@ -20,7 +20,7 @@ function Home() {
 
     <article className={joinClass('leayer', 'module-gap', style.article)}>
       <p className={style.paragraph}>
-        一个轻量级、不依赖任何第三方库的 JS 数据响应式库，除响应式 API 外，该库还提供了组件化、挂载钩子、Router、Store 以及服务端渲染相关 API，项目搭建可参考 
+        Pl Vue 是一个将响应式数据的使用高度交予开发者决定的一个库，它不依赖于任何第三方库。该库提供了组件化、挂载钩子、Router、Store 以及服务端渲染相关 API。项目搭建可参考 
         &nbsp;<a href={env.GITHUB_URL+'mvvm_vue3'}>GitHub</a>
         。
       </p>
@@ -47,16 +47,12 @@ function Home() {
         </p>
       </li>
       <li>
-        <h2>代码精简，minify &lt; 10k</h2>
+        <h2>代码精简，minify &lt; 12k</h2>
         <p>手写 h 与 Fragment，将代码体积精简到极致。</p>
       </li>
 
     </ul>
   </Layout>
-}
-
-Home.prototype.getInitialProps = async () => {
-  return 'home'
 }
 
 export default Home;

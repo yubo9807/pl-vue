@@ -12,9 +12,9 @@ const config = defineConfig({
     copyPublicDir: false,
     emptyOutDir: false,
     minify: true,
-    ssr: 'src/server.tsx',
+    ssr: 'src/server.ts',
     lib: {
-      entry: 'src/server.tsx',
+      entry: 'src/server.ts',
       fileName: 'server.js',
       formats: ['cjs'],
     },
