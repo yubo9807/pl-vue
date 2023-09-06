@@ -1,4 +1,5 @@
 import { getSubComponent } from "../vdom/component-tree";
+import { getComponentId } from "../vdom/h";
 import { Component } from "../vdom/type";
 import { hookLock } from "./utils";
 
@@ -12,7 +13,7 @@ const map = new Map();
  */
 export function onUnmounted(comp: Component, fn: Function) {
   if (hookLock) return;
-  const key = comp.prototype._id;  // 在微队列之前与微队列之后拿到的 id 不一致
+  const key = getComponentId(comp);  // 在微队列之前与微队列之后拿到的 id 不一致
   const arr = map.get(key) || [];
   const isExist = arr.some(func => func === fn);
   if (isExist) return;
@@ -27,7 +28,7 @@ export function onUnmounted(comp: Component, fn: Function) {
  */
 export function triggerUnmounted(comp: Component) {
   const keys = getSubComponent(comp).map(val => val.compId);
-  keys.unshift(comp.prototype._id);
+  keys.unshift(getComponentId(comp));
   const funcs = [];
   keys.forEach(key => {
     const arr = map.get(key) || [];

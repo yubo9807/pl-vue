@@ -1,5 +1,5 @@
 import { createId } from "../utils/string";
-import { Attrs, Children, Tag } from "./type";
+import { Attrs, Children, Component, Tag } from "./type";
 import { isComponent } from "./utils";
 
 export function h(tag: Tag, attrs: Attrs, ...children: Children) {
@@ -20,6 +20,17 @@ export function h(tag: Tag, attrs: Attrs, ...children: Children) {
 
   return tree;
 }
+
+/**
+ * 获取组件 id
+ * @param comp 
+ * @returns 
+ */
+export function getComponentId(comp: Component) {
+  return comp.prototype._id;
+}
+
+
 
 export function Fragment({ children }) {
   return children;
