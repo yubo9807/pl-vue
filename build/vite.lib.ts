@@ -6,9 +6,9 @@ export default defineConfig({
     outDir: 'lib',
     minify: false,
     lib: {
-      entry: 'plvue/simple.ts',
-      fileName() {
-        return 'index.cjs';
+      entry: ['plvue/index'],
+      fileName(_format, entryName) {
+        return `${entryName}.cjs`;
       },
       formats: ['cjs'],
     },
