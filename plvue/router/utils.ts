@@ -84,7 +84,7 @@ export function findRoute(monitor: string) {
   if (query) return query;
 
   const lastRoute = routes[routes.length - 1];
-  if (lastRoute.path === void 0 && lastRoute.component) {
+  if (lastRoute && lastRoute.path === void 0 && lastRoute.component) {
     return lastRoute;
   } 
 }
