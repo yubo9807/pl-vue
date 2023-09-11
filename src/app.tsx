@@ -1,24 +1,13 @@
-import './styles/index.scss';
-import { h } from "~/plvue";
-import { Router, createRouter } from "~/plvue/router";
-import env from '~/config/env';
-import Home from './pages/home';
-import Docs from './pages/docs';
-import NotFound from "./pages/not-found";
-
-const router = createRouter({
-  base: env.BASE_URL,
-  mode: 'history',
-  routes: [
-    { path: '/', component: Home, },
-    { path: '/docs', component: Docs, exact: false, },
-    { component: NotFound, },
-  ]
-});
-
+import { h, ref } from "~/plvue";
 
 function App() {
-  return <Router />
+  const count = ref(0);
+
+  return <div>
+    {/* 响应式数据一律以函数形式返回 */}
+    <h1>{() => count.value}</h1>
+    <button onclick={() => count.value++}>click</button>
+  </div>
 }
 
 export default App;
