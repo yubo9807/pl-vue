@@ -10,9 +10,9 @@
     "jsxFragmentFactory": "Fragment",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"],
+      "@/*": ["test/*"],
       "~/*": ["./*"],
     },
   },
-  "include": ["./src", "./plvue"],
+  "include": ["./test", "./core"],
 }

@@ -1,4 +1,4 @@
-import { h, ref } from "~/plvue";
+import { h, ref } from "~/core";
 
 function App() {
   const count = ref(0);

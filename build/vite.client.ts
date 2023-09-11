@@ -17,7 +17,7 @@ const config = defineConfig({
     rollupOptions: {
       output: {
         manualChunks(url) {
-          if (url.includes('/plvue/')) return 'plvue';
+          if (url.includes('/core/')) return 'plvue';
           if (url.includes('node_modules')) {
             return url.split('node_modules/')[1].split('/')[0];
           }

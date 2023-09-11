@@ -6,7 +6,7 @@ export default defineConfig({
     outDir: 'lib',
     minify: false,
     lib: {
-      entry: ['plvue/index'],
+      entry: ['core/index'],
       fileName(_format, entryName) {
         return `${entryName}.cjs`;
       },

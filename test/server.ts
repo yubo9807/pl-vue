@@ -1,7 +1,7 @@
 import { createServer } from 'http';
 import { readFileSync, readFile } from 'fs';
 import { resolve, extname } from 'path';
-import { ssrOutlet } from "~/plvue";
+import { ssrOutlet } from "~/core";
 import App from "./app";
 import { getMimeType, getStaticFileExts } from "./utils/string";
 import env from "~/config/env";
