@@ -14,7 +14,6 @@ const config = defineConfig({
   preview: { proxy },
   base: env.BASE_URL || '/',
   build: {
-    outDir: 'dist' + env.BASE_URL,
     rollupOptions: {
       output: {
         manualChunks(url) {
