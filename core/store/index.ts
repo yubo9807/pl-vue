@@ -46,8 +46,9 @@ class Stroe<S extends Obj, A extends Obj> {
           return result;
         }
       }
+
       func.prototype[actionFlag] = actionFlag;
-      this.actions[key] = func as any;
+      self.actions[key] = func as any;
     }
   }
 
@@ -61,14 +62,21 @@ class Stroe<S extends Obj, A extends Obj> {
       this.state[prop] = state[prop];
     }
     for (const key in this.state) {
-      if (isAction(this.state[key])) continue;
+      if (isAction(this.state[key])) continue;  // 只对 state 数据做更改
       !targetKsys.includes(key) && delete this.state[key];
     }
   }
 
   get store() {
     this.#lock = false;
-    const store = Object.assign(this.state, this.actions);
+
+    const store = Object.assign(this.state, this.actions);  // 将 actions 塞到 state 中
+    for (const key in this.actions) {
+      Object.defineProperty(store, key, {
+        writable: false,  // actions 不可被重写
+      })
+    }
+
     nextTick(() => this.#lock = true);
     return store;
   }
