@@ -34,7 +34,6 @@ class Stroe<S extends Obj, A extends Obj> {
       function func(...args: unknown[]) {
         self.#lock = false;                   // 解锁
         const result = actions[key](...args);
-        self._merge(state);
         if (isMemoryObject(result) && result[Symbol.toStringTag] === 'Promise') {
           result.then(res => {
             self._merge(state);
