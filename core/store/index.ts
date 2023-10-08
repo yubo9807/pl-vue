@@ -19,14 +19,6 @@ class Stroe<S extends Obj, A extends Obj> {
   constructor(state: S, actions: A) {
     this.state = reactive(deepClone(state));
 
-    // 监听数据：若通过直接赋值的方式，恢复到原先的值
-    watch(() => this.state, () => {
-      if (this.#lock) {  // 上锁时不允许改变任何值
-        // 这里也可重置为 watch 回掉中的 oldValue，但在原 vue 中不可以
-        this._merge(state);
-      }
-    }, { deep: true });
-
     // 包装每个 actions
     (this.actions as AnyObj) = {};
     for (const key in actions) {
@@ -50,6 +42,23 @@ class Stroe<S extends Obj, A extends Obj> {
       func.prototype[actionFlag] = actionFlag;
       self.actions[key] = func as any;
     }
+
+    // 合并对象
+    Object.assign(this.state, this.actions);  // 将 actions 塞到 state 中
+    for (const key in this.actions) {
+      Object.defineProperty(this.state, key, {
+        writable: false,  // actions 不可被重写
+      })
+    }
+
+    // 监听数据：若通过直接赋值的方式改变数据，恢复到原先的值
+    watch(() => this.state, () => {
+      if (this.#lock) {  // 上锁时不允许改变任何值
+        console.error('Failed to update state.');
+        this._merge(state);
+      }
+    }, { deep: true });
+
   }
 
   /**
@@ -58,27 +67,15 @@ class Stroe<S extends Obj, A extends Obj> {
    */
   _merge(state: S) {
     const targetKsys = Object.keys(state);
+
+    // 只对 state 数据做更改
     for (const prop in state) {
       this.state[prop] = state[prop];
     }
     for (const key in this.state) {
-      if (isAction(this.state[key])) continue;  // 只对 state 数据做更改
+      if (isAction(this.state[key])) continue;
       !targetKsys.includes(key) && delete this.state[key];
     }
-  }
-
-  get store() {
-    this.#lock = false;
-
-    const store = Object.assign(this.state, this.actions);  // 将 actions 塞到 state 中
-    for (const key in this.actions) {
-      Object.defineProperty(store, key, {
-        writable: false,  // actions 不可被重写
-      })
-    }
-
-    nextTick(() => this.#lock = true);
-    return store;
   }
 
 }
@@ -93,6 +90,6 @@ class Stroe<S extends Obj, A extends Obj> {
 export function createStore<S extends Obj, A extends Obj>(state: S, actions: A): () => S & A {
   return () => {
     const s = new Stroe(state, actions);
-    return s.store;
+    return s.state as S & A;
   }
 }
