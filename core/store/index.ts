@@ -81,6 +81,8 @@ class Stroe<S extends Obj, A extends Obj> {
 }
 
 
+const collectMap: WeakMap<Obj, Obj> = new WeakMap();
+
 /**
  * 创建一个 Store
  * @param state 
@@ -89,7 +91,10 @@ class Stroe<S extends Obj, A extends Obj> {
  */
 export function createStore<S extends Obj, A extends Obj>(state: S, actions: A): () => S & A {
   return () => {
-    const s = new Stroe(state, actions);
-    return s.state as S & A;
+    if (!collectMap.has(state)) {
+      const s = new Stroe(state, actions);
+      collectMap.set(state, s.state);
+    }
+    return collectMap.get(state) as S & A;
   }
 }
