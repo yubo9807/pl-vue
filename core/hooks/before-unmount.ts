@@ -1,5 +1,6 @@
 import { getSubComponent } from "../vdom/component-tree";
 import { getComponentId } from "../vdom/h";
+import { currentComp } from "../vdom/instance";
 import { Component } from "../vdom/type";
 import { hookLock } from "./utils";
 
@@ -11,9 +12,9 @@ const map = new Map();
  * @param fn 
  * @returns 
  */
-export function onBeforeUnmount(comp: Component, fn: Function) {
+export function onBeforeUnmount(fn: Function) {
   if (hookLock) return;
-  const key = getComponentId(comp);
+  const key = getComponentId(currentComp);
   const arr = map.get(key) || [];
   const isExist = arr.some(func => func === fn);
   if (isExist) return;

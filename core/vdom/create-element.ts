@@ -8,6 +8,7 @@ import { Tag, Attrs, Children, Tree, Component } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
 import { printWarn } from "../utils/string";
+import { collectExportsData, collectInstanceData } from "./instance";
 
 
 
@@ -26,12 +27,15 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
     return createElementFragment(children);
   }
   if (isComponent(tag)) {  // 组件
+    tag = tag as Component;
+    collectInstanceData(tag, attrs, children);
     const props = objectAssign(attrs, { children });
-    const tree = (tag as Function)(props);
+    const tree = tag(props);
+    collectExportsData(tag, attrs, children);
     if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
       return createTextNode(tree);
     }
-    compTreeMap.set(tag as Function, filterElement(tree.children));  // 搜集组件
+    compTreeMap.set(tag, filterElement(tree.children));  // 收集组件
     return createElement(tree.tag, tree.attrs, tree.children);
   }
 }

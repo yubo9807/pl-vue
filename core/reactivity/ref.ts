@@ -38,7 +38,7 @@ export type Ref<T> = { value: T }
  * @param value 
  * @returns 
  */
-export function ref<T>(value: T) {
+export function ref<T>(value: T = void 0) {
   return new RefImpl(value);
 }
 

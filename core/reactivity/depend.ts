@@ -1,6 +1,6 @@
 
 let func = null;
-const funcsMap: WeakMap<object, Function[]> = new WeakMap();  // 搜集依赖的 map 集合
+const funcsMap: WeakMap<object, Function[]> = new WeakMap();  // 收集依赖的 map 集合
 
 /**
  * 绑定响应式对象

@@ -93,4 +93,8 @@ export function isArray(arr: AnyObj) {
 export function isString(text: any) {
   return typeof text === 'string';
 }
+
+export function isFunction(value: any) {
+  return typeof value === 'function';
+}
 // #region
