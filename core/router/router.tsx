@@ -4,7 +4,7 @@ import { ref } from '../reactivity/ref';
 import { watch } from '../reactivity/watch';
 import { Component } from '../vdom/type';
 import { currentRoute, config, routeChange } from './create-router';
-import { isBrowser } from '../utils/judge';
+import { isBrowser, isFunction } from '../utils/judge';
 import { findRoute, getBrowserUrl } from './utils';
 import { StaticRouter } from './ssr';
 
@@ -33,7 +33,7 @@ function BrowserRouter(props: BrowserRouterProps) {
     const find = findRoute(value);
     if (!find) return;
     const { getInitialProps } = find.component.prototype;
-    if (typeof getInitialProps === 'function') {
+    if (isFunction(getInitialProps)) {
       if (window[config.ssrDataKey]) {
         data = window[config.ssrDataKey];
         delete window[config.ssrDataKey];

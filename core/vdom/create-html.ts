@@ -1,7 +1,7 @@
 import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr } from "./utils";
 import { isFragment } from "./h";
 import { Attrs, Children, Tag } from "./type";
-import { isArray, isObject } from "../utils/judge";
+import { isArray, isFunction, isObject } from "../utils/judge";
 import { objectAssign } from "../utils/object";
 import { printWarn } from "../utils/string";
 
@@ -33,7 +33,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
   for (const attr in attrs) {
     if (attr.startsWith('on') || attr === 'ref') continue;
 
-    let value = typeof attrs[attr] === 'function' && isReactiveChangeAttr(attr) ? attrs[attr]() : attrs[attr];
+    let value = isFunction(attrs[attr]) && isReactiveChangeAttr(attr) ? attrs[attr]() : attrs[attr];
 
     if (attr === 'className') {
       value && (attrStr += ` class="${value}"`);
@@ -43,7 +43,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
     // 对样式单独做下处理
     if (attr === 'style' && isObject(value)) {
       for (const key in value) {
-        if (typeof value[key] === 'function') {  // 响应式数据
+        if (isFunction(value[key])) {  // 响应式数据
           value[key] = value[key]();
         }
       }
@@ -84,7 +84,7 @@ export function createHTMLFragment(children: Children) {
     }
 
     // 响应式数据
-    if (typeof val === 'function') {
+    if (isFunction(val)) {
       const value = val();
       text += createHTMLFragment([value]);
       return;

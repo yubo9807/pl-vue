@@ -1,5 +1,5 @@
 import { binding } from "../reactivity/depend";
-import { isArray, isEquals, isObject, isString } from '../utils/judge';
+import { isArray, isEquals, isFunction, isObject, isString } from '../utils/judge';
 import { objectAssign } from '../utils/object';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode } from "./utils"
 import { AnyObj } from "../utils/type";
@@ -71,7 +71,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
     }
 
     // 响应式数据
-    if (typeof val === 'function') {
+    if (isFunction(val)) {
       const fragment = createElementFragment([val]);
       el.appendChild(fragment);
       return;
@@ -112,7 +112,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
       value.value = el;
     }
 
-    if (typeof value === 'function' && isReactiveChangeAttr(attr)) {
+    if (isFunction(value) && isReactiveChangeAttr(attr)) {
       binding(() => {
         el[attr] = value();
       })
@@ -123,7 +123,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
   if (attrs.style && isObject(attrs.style)) {
     for (const prop in attrs.style) {
       const value = attrs.style[prop];
-      if (typeof value === 'function') {
+      if (isFunction(value)) {
         binding(() => el.style[prop] = value());
       } else {
         el.style[prop] = value;
@@ -160,7 +160,7 @@ export function createElementFragment(children: Children) {
     }
 
     // 响应式数据
-    if (typeof val === 'function') {
+    if (isFunction(val)) {
       reactivityNode(fragment, val);
       return;
     }

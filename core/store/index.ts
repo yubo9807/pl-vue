@@ -1,13 +1,13 @@
 import { reactive } from "../reactivity/reactive";
 import { watch } from "../reactivity/watch";
-import { isMemoryObject } from "../utils/judge";
+import { isFunction, isMemoryObject } from "../utils/judge";
 import { nextTick } from "../utils/next-tick";
 import { deepClone } from "../utils/object";
 import { AnyObj } from "../utils/type";
 
 const actionFlag = Symbol('action');
-function isAction(func: unknown) {
-  return typeof func === 'function' && func.prototype[actionFlag] === actionFlag;
+function isAction(func: Function) {
+  return isFunction(func) && func.prototype[actionFlag] === actionFlag;
 }
 
 type Obj = Record<string, any>

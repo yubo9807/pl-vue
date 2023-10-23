@@ -1,3 +1,4 @@
+import { isFunction } from "../utils/judge";
 import { createId } from "../utils/string";
 import { Attrs, Children, Component, Tag } from "./type";
 import { isComponent } from "./utils";
@@ -45,5 +46,5 @@ Fragment.prototype[FragmentMark] = FragmentMark;
  * @returns 
  */
 export function isFragment(tag: string | Function) {
-  return typeof tag === 'function' && tag.prototype[FragmentMark] === FragmentMark;
+  return isFunction(tag) && (tag as Function).prototype[FragmentMark] === FragmentMark;
 }

@@ -1,4 +1,5 @@
 import { onMounted, onUnmounted } from '../hooks';
+import { isFunction } from '../utils/judge';
 import { createElementFragment } from '../vdom/create-element';
 import { createHTML } from '../vdom/create-html';
 import { h, Fragment } from '../vdom/h';
@@ -69,7 +70,7 @@ export function Helmet(props) {
   })
 
   // 恢复原先的节点
-  onUnmounted(Helmet, () => {
+  onUnmounted(() => {
     const head = document.head;
     for (let i = 0; i < count; i++) {
       head.children[0].remove();
@@ -99,7 +100,7 @@ async function execGetInitialProps(url: string) {
   if (!find) return;
 
   const { getInitialProps } = find.component.prototype;
-  if (typeof getInitialProps === 'function') {
+  if (isFunction(getInitialProps)) {
     data = await getInitialProps(currentRoute);
     return data;
   }

@@ -1,6 +1,7 @@
 import { ISREF } from "./ref";
 import { ReactiveEffect } from './effect'
 import { printWarn } from "../utils/string";
+import { isFunction } from "../utils/judge";
 
 type Getter<T> = () => T
 type Setter<T> = (val: T) => void
@@ -45,9 +46,11 @@ class ComputedRefImpl<T> {
  * @returns 
  */
 export function computed<T>(option: ComputedOption<T>) {
-  if (typeof option === 'function') {
+  if (isFunction(origin)) {
+    // @ts-ignore
     return new ComputedRefImpl(option);
   }
 
+  // @ts-ignore
   return new ComputedRefImpl(option.get, option.set);
 }

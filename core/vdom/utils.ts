@@ -1,4 +1,4 @@
-import { isObject, isString } from "../utils/judge";
+import { isFunction, isObject, isString } from "../utils/judge";
 import { isFragment } from "./h";
 
 /**
@@ -33,7 +33,7 @@ export function isVirtualDomObject(o) {
  * @returns 
  */
 export function isComponent(tag) {
-  return typeof tag === 'function' && !isFragment(tag);
+  return isFunction(tag) && !isFragment(tag);
 }
 
 /**
