@@ -1,7 +1,7 @@
 export * from './reactivity';
 export { nextTick } from './utils/next-tick';
 export { h, Fragment } from "./vdom/h";
-export { defineExports } from './vdom/instance';
+export { defineExpose, getCurrentInstance } from './vdom/instance';
 export { render, renderToString } from "./vdom/render";
 export * from './hooks';
 export * from './store';

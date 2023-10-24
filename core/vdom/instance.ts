@@ -34,7 +34,7 @@ let currentExportData = null;
  * 定义组件数据出口
  * @param data 
  */
-export function defineExports(data: object) {
+export function defineExpose(data: object) {
   currentExportData = data;
 }
 
