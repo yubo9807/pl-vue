@@ -1,9 +1,11 @@
 import { reactive, toRaw } from '../reactivity/reactive';
+import { nextTick } from '../utils/next-tick';
 import { isBrowser } from '../utils/judge';
 import { deepClone } from '../utils/object';
 import { Component } from '../vdom/type';
 import { push, replace, go } from './use-router';
 import { RouteOption, analyzeRoute, getBrowserUrl } from './utils';
+import { ref } from '../reactivity';
 
 type Config = {
   base: string
@@ -24,11 +26,11 @@ export const config: Config = {
 }
 
 export let currentRoute: RouteOption = null;
+export const isReady = ref(false);
 
 type Option = {
   [k in keyof Config]?: Config[k]
 }
-
 export function createRouter(option: Option = {}) {
   Object.assign(config, option);
 
@@ -36,6 +38,11 @@ export function createRouter(option: Option = {}) {
   if (isBrowser()) {
     const route = analyzeRoute(getBrowserUrl());
     currentRoute = reactive(route);
+    nextTick(() => {
+      beforeEach(route, route, () => {
+        isReady.value = true;
+      });
+    });
   } else {
     // 服务端只需初始化，真正解析由 StaticRouter 组件来完成
     // 并且服务端也不需要响应式数据
@@ -50,7 +57,7 @@ export function createRouter(option: Option = {}) {
     replace,
     options: config,
     currentRoute: toRaw(currentRoute),
-    beforeEach(func: (from: RouteOption, to: RouteOption, next: Function) => void) {
+    beforeEach(func: typeof beforeEach) {
       beforeEach = func;
     },
   }

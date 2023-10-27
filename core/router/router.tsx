@@ -3,7 +3,7 @@ import { toRaw } from '../reactivity/reactive';
 import { ref } from '../reactivity/ref';
 import { watch } from '../reactivity/watch';
 import { Component } from '../vdom/type';
-import { currentRoute, config, routeChange } from './create-router';
+import { currentRoute, config, routeChange, isReady } from './create-router';
 import { isBrowser, isFunction } from '../utils/judge';
 import { findRoute, getBrowserUrl } from './utils';
 import { StaticRouter } from './ssr';
@@ -46,7 +46,11 @@ function BrowserRouter(props: BrowserRouterProps) {
     currentComp.value = find.component;
   }, { immediate: true })
 
-  return <>{() => currentComp.value && <currentComp.value data={data} />}</>;
+  return <>{() => {
+    const ready = isReady.value;
+    const Comp = currentComp.value;
+    return ready && Comp && <Comp data={data} />
+  }}</>;
 }
 
 export function Router(props: BrowserRouterProps) {
