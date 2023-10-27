@@ -1,5 +1,6 @@
 import { reactive, toRaw } from '../reactivity/reactive';
 import { isBrowser } from '../utils/judge';
+import { deepClone } from '../utils/object';
 import { Component } from '../vdom/type';
 import { push, replace, go } from './use-router';
 import { RouteOption, analyzeRoute, getBrowserUrl } from './utils';
@@ -13,7 +14,7 @@ type Config = {
     component: Component
     exact?: boolean
     redirect?: string
-  }[]
+  }[],
 }
 export const config: Config = {
   base: '',
@@ -27,6 +28,7 @@ export let currentRoute: RouteOption = null;
 type Option = {
   [k in keyof Config]?: Config[k]
 }
+
 export function createRouter(option: Option = {}) {
   Object.assign(config, option);
 
@@ -48,7 +50,14 @@ export function createRouter(option: Option = {}) {
     replace,
     options: config,
     currentRoute: toRaw(currentRoute),
+    beforeEach(func: (from: RouteOption, to: RouteOption, next: Function) => void) {
+      beforeEach = func;
+    },
   }
+}
+
+let beforeEach = (from: RouteOption, to: RouteOption, next: Function) => {
+  next();
 }
 
 /**
@@ -56,10 +65,16 @@ export function createRouter(option: Option = {}) {
  * @param url 
  */
 export function routeChange(url: string) {
-  const option = analyzeRoute(url);
-  for (const key in option) {
-    currentRoute[key] = option[key];
-  }
+  const from = deepClone(currentRoute);
+  const to = analyzeRoute(url);
+  return new Promise((resolve, reject) => {
+    beforeEach(from, to, () => {
+      for (const key in to) {
+        currentRoute[key] = to[key];
+      }
+      resolve(1);
+    })
+  })
 }
 
 /**

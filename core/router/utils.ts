@@ -22,7 +22,7 @@ export function analyzeRoute(url: string) {
     monitor: query ? query.path : pathname,
     fullPath: newUrl.href.replace(newUrl.origin, ''),
     path: pathname,
-    query: getQueryAll(newUrl.search) as AnyObj,
+    query: getQueryAll(newUrl.search),
     hash: newUrl.hash,
   }
 }
@@ -52,15 +52,14 @@ export function splicingUrl(option: RouteOptionOptional | string): string {
  * @param search 
  * @returns 
  */
-export function getQueryAll(search: string) {
-  const obj = {};
-  const arr = search.replace('?', '').split('&');
-  arr.forEach(val => {
-    const [ key, value ] = val.split('=');
-    if (key && value) obj[key] = value;
-  })
-  return obj;
-}
+export const getQueryAll = (function () {
+  const reg = /([^?&=]+)=([^&]+)/g;
+  return (search: string) => {
+    const query = {};
+    search.replace(reg, (_, k, v) => (query[k] = v));
+    return query;
+  }
+}())
 
 /**
  * 获取浏览器端 url

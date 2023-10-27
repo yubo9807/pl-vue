@@ -2,18 +2,28 @@ import { RouteOptionOptional, splicingUrl } from './utils';
 import { config, routeChange } from './create-router';
 
 /**
+ * 切换路由
+ * @param option 
+ * @param type 切换类型
+ */
+export function toggle(option: RouteOptionOptional | string, type: 'push' | 'replace') {
+  const path = splicingUrl(option);
+  
+  routeChange(path).then(() => {
+    if (config.mode === 'history') {
+      history[type === 'push' ? 'pushState' : 'replaceState']({}, '', config.base + path);
+    } else {
+      location.hash = path;
+    }
+  });
+}
+
+/**
  * 向前 push 一个路由
  * @param option 
  */
 export function push(option: RouteOptionOptional | string) {
-  const path = splicingUrl(option);
-
-  if (config.mode === 'history') {
-    history.pushState({}, '', config.base + path);
-  } else {
-    location.hash = path;
-  }
-  routeChange(path);
+  toggle(option, 'push');
 }
 
 /**
@@ -21,14 +31,7 @@ export function push(option: RouteOptionOptional | string) {
  * @param option 
  */
 export function replace(option: RouteOptionOptional | string) {
-  const path = splicingUrl(option);
-
-  if (config.mode === 'history') {
-    history.replaceState({}, '', config.base + path);
-  } else {
-    location.hash = path;
-  }
-  routeChange(path);
+  toggle(option, 'replace');
 }
 
 export function go(num: number) {
