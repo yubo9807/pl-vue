@@ -1,42 +1,44 @@
 import { isArray, isType } from "./judge";
+import { nextTick } from "./next-tick";
 import { AnyObj } from "./type";
 
 export const deepClone = (function () {
 	const cache = new WeakMap();
 	const noCloneTypes = ['null', 'weakset', 'weakmap'];
 
+	const specialClone = {
+		set(set: Set<any>) {
+			const collect = new Set();
+			for (const value of set) {
+				collect.add(deepClone(value));
+			}
+			return collect;
+		},
+		map(map: Map<any, any>) {
+			const collect = new Map();
+			for (const [ key, val ] of map.entries()) {
+				collect.set(key, deepClone(val));
+			}
+			return collect;
+		},
+	}
+
 	/**
 	 * 深度克隆
 	 * @param origin 被克隆对象
 	 */
-	return function<T>(origin: T, loop = false) {
+	return function<T>(origin: T) {
 		const type = isType(origin);
 		if (typeof origin !== 'object' || noCloneTypes.includes(type)) {
 			return origin;
 		}
 
 		// 防止环形引用问题（已经克隆过的对象不再进行克隆）
-		if (loop && cache.has(origin)) {
+		if (cache.has(origin)) {
 			return cache.get(origin);
 		}
 
 		// 特殊类型克隆处理
-		const specialClone = {
-			set(set: Set<any>) {
-				const collect = new Set();
-				for (const value of set) {
-					collect.add(deepClone(value, loop));
-				}
-				return collect;
-			},
-			map(map: Map<any, any>) {
-				const collect = new Map();
-				for (const [ key, val ] of map.entries()) {
-					collect.set(key, deepClone(val, loop));
-				}
-				return collect;
-			},
-		}
 		if (specialClone[type]) {
 			return specialClone[type](origin);
 		}
@@ -46,7 +48,10 @@ export const deepClone = (function () {
 		Object.setPrototypeOf(target, Object.getPrototypeOf(origin));
 
 		// 设置缓存，该对象已经被克隆过
-		loop && cache.set(origin, target);
+		cache.set(origin, target);
+		nextTick(() => {
+			cache.delete(origin);  // 在克隆结束之后将缓存清空，以便于下一次克隆正常使用
+		})
 
 		for (const key in origin) {
 			target[key] = deepClone(origin[key]);

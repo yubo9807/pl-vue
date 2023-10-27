@@ -297,7 +297,11 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
 
         isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag as Component);  // 组件卸载之前
         backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
-        isComponent(originTree.tag) && triggerUnmounted(originTree.tag as Component);      // 组件卸载之后
+        if (isComponent(originTree.tag)) {                                                 // 组件卸载之后
+          const comp = originTree.tag as Component;
+          triggerUnmounted(comp);
+          compTreeMap.delete(comp);
+        }
 
         backupNodes[index].tree = val;
         backupNodes[index].node = node;
@@ -331,7 +335,12 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
 
         isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag as Component);  // 组件卸载之前
         backupNodes[i].node.remove();
-        isComponent(originTree.tag) && triggerUnmounted(originTree.tag as Component);      // 组件卸载之后
+        if (isComponent(originTree.tag)) {                                                 // 组件卸载之后
+          const comp = originTree.tag as Component;
+          triggerUnmounted(comp);
+          compTreeMap.delete(comp);
+        }
+
       }
       backupNodes.splice(value.length, backupNodes.length - value.length);
     }

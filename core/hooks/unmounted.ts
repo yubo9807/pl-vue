@@ -34,6 +34,7 @@ export function triggerUnmounted(comp: Component) {
   keys.forEach(key => {
     const arr = map.get(key) || [];
     funcs.push(...arr);
+    map.delete(key);
   })
   funcs.forEach(func => {
     func();
