@@ -1,5 +1,4 @@
 import { isFunction } from "../utils/judge";
-import { createId } from "../utils/string";
 import { Attrs, Children, Component, Tag } from "./type";
 import { isComponent } from "./utils";
 
@@ -12,7 +11,6 @@ export function h(tag: Tag, attrs: Attrs, ...children: Children) {
 
   // 对组件做一些处理
   if (isComponent(tree.tag)) {
-    (tree.tag as Function).prototype._id = createId();
     // 高阶组件 props 传递
     if (tree.children.length === 0 && tree.attrs.children) {
       tree.children = tree.attrs.children;

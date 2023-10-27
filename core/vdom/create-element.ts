@@ -7,7 +7,7 @@ import { isFragment } from "./h";
 import { Tag, Attrs, Children, Tree, Component } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
-import { printWarn } from "../utils/string";
+import { createId, printWarn } from "../utils/string";
 import { collectExportsData, collectInstanceData } from "./instance";
 
 
@@ -28,6 +28,7 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
   }
   if (isComponent(tag)) {  // 组件
     tag = tag as Component;
+    tag.prototype._id = createId();
     collectInstanceData(tag, attrs, children);
     const props = objectAssign(attrs, { children });
     const tree = tag(props);
