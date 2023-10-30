@@ -1,7 +1,5 @@
-import { AnyObj } from "../utils/type";
-import { Attrs, Children, Component } from "./type";
+import { Attrs, Component } from "./type";
 
-const map: WeakMap<Component, AnyObj> = new WeakMap();
 
 export let currentComp = null;
 /**
@@ -10,21 +8,8 @@ export let currentComp = null;
  * @param attrs 
  * @param children 
  */
-export function collectInstanceData(comp: Component, attrs: Attrs, children: Children) {
+export function recordCurrentComp(comp: Component) {
   currentComp = comp;
-  const { ref, ...props } = attrs;
-  map.set(comp, {
-    props,
-    slots: children,
-  });
-}
-
-/**
- * 获取当前组件实例对象
- * @returns 
- */
-export function getCurrentInstance() {
-  return map.get(currentComp);
 }
 
 
@@ -44,7 +29,7 @@ export function defineExpose(data: object) {
  * @param attrs 
  * @param children 
  */
-export function collectExportsData(comp: Component, attrs: Attrs, children: Children) {
+export function collectExportsData(comp: Component, attrs: Attrs) {
   currentComp = comp;
   if ('ref' in attrs) {
     attrs.ref.value = currentExportData;

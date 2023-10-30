@@ -8,7 +8,7 @@ import { Tag, Attrs, Children, Tree, Component } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
 import { createId, printWarn } from "../utils/string";
-import { collectExportsData, collectInstanceData } from "./instance";
+import { collectExportsData, recordCurrentComp } from "./instance";
 
 
 
@@ -29,10 +29,10 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
   if (isComponent(tag)) {  // 组件
     tag = tag as Component;
     tag.prototype._id = createId();
-    collectInstanceData(tag, attrs, children);
+    recordCurrentComp(tag);
     const props = objectAssign(attrs, { children });
     const tree = tag(props);
-    collectExportsData(tag, attrs, children);
+    collectExportsData(tag, attrs);
     if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
       return createTextNode(tree);
     }
