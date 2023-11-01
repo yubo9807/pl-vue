@@ -1,10 +1,5 @@
-import { onMounted, onUnmounted } from '../hooks';
-import { isFunction } from '../utils/judge';
-import { createElementFragment } from '../vdom/create-element';
-import { createHTML } from '../vdom/create-html';
-import { h, Fragment } from '../vdom/h';
-import { renderToString } from '../vdom/render';
-import { Component } from '../vdom/type';
+import { isFunction } from '../utils';
+import { createElementFragment, createHTML, h, Fragment, renderToString, Component, onMounted, onUnmounted } from '../vdom';
 import { config, currentRoute, routeChange } from './create-router';
 import { analyzeRoute, findRoute } from './utils';
 

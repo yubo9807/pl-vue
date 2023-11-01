@@ -1,13 +1,11 @@
-import { binding } from "../reactivity/depend";
-import { isArray, isEquals, isFunction, isObject, isString } from '../utils/judge';
-import { objectAssign } from '../utils/object';
+import { binding } from "../reactivity";
+import { objectAssign, AnyObj, createId, printWarn, isArray, isEquals, isFunction, isObject, isString } from '../utils';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode } from "./utils"
-import { AnyObj } from "../utils/type";
 import { isFragment } from "./h";
 import { Tag, Attrs, Children, Tree, Component } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
-import { triggerBeforeUnmount, triggerUnmounted } from "../hooks";
-import { createId, printWarn } from "../utils/string";
+import { triggerBeforeUnmount } from "./hooks/before-unmount";
+import { triggerUnmounted } from "./hooks/unmounted";
 import { collectExportsData, recordCurrentComp } from "./instance";
 
 

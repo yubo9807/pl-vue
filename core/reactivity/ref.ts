@@ -1,4 +1,4 @@
-import { AnyObj, Key } from "../utils/type";
+import { AnyObj, Key } from "../utils";
 import { createSignal } from "./signal";
 
 export const ISREF = '__v_isRef';

@@ -1,4 +1,4 @@
-import { AnyObj } from "../utils/type"
+import { AnyObj } from "../utils"
 
 export type Tag = string | Function
 export type Attrs = AnyObj

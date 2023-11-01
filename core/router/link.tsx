@@ -1,6 +1,5 @@
-import { isString } from "../utils/judge";
-import { objectAssign } from "../utils/object";
-import { h } from "../vdom/h";
+import { isString, objectAssign } from "../utils";
+import { h } from "../vdom";
 import { config } from "./create-router";
 import { useRouter } from "./use-router";
 import { RouteOptionOptional, splicingUrl } from "./utils";

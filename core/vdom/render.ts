@@ -1,6 +1,7 @@
-import { triggerMounted, triggerBeforeMount } from "../hooks";
-import { setLock } from "../hooks/utils";
-import { nextTick } from "../utils/next-tick";
+import { nextTick } from "../utils";
+import { triggerBeforeMount } from "./hooks/before-mount";
+import { triggerMounted } from "./hooks/mounted";
+import { setLock } from "./hooks/utils";
 import { createElement } from "./create-element";
 import { createHTML } from "./create-html";
 

@@ -1,7 +1,6 @@
 import { ISREF } from "./ref";
 import { ReactiveEffect } from './effect'
-import { printWarn } from "../utils/string";
-import { isFunction } from "../utils/judge";
+import { printWarn, isFunction } from "../utils";
 
 type Getter<T> = () => T
 type Setter<T> = (val: T) => void

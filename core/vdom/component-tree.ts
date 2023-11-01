@@ -1,7 +1,6 @@
+import { deepClone, objectAssign, isObject } from '../utils';
 import { Attrs, Children, Component } from './type';
 import { isAssignmentValueToNode, isComponent } from './utils';
-import { isObject } from '../utils/judge';
-import { deepClone, objectAssign } from '../utils/object';
 import { getComponentId } from './h';
 
 type CompTree = {

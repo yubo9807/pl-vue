@@ -1,12 +1,9 @@
-import { Fragment, h } from '../vdom/h';
-import { toRaw } from '../reactivity/reactive';
-import { ref } from '../reactivity/ref';
-import { watch } from '../reactivity/watch';
-import { Component } from '../vdom/type';
+import { Fragment, h, Component } from '../vdom';
 import { currentRoute, config, routeChange, isReady } from './create-router';
-import { isBrowser, isFunction } from '../utils/judge';
+import { isBrowser, isFunction } from '../utils';
 import { findRoute, getBrowserUrl } from './utils';
 import { StaticRouter } from './ssr';
+import { toRaw, ref, watch } from '../reactivity';
 
 
 type Props = {

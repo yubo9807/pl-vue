@@ -1,11 +1,8 @@
-import { reactive, toRaw } from '../reactivity/reactive';
-import { nextTick } from '../utils/next-tick';
-import { isBrowser } from '../utils/judge';
-import { deepClone } from '../utils/object';
-import { Component } from '../vdom/type';
+import { isBrowser, deepClone, nextTick } from '../utils'
+import { reactive, toRaw, ref } from '../reactivity'
+import { Component } from '../vdom';
 import { push, replace, go } from './use-router';
 import { RouteOption, analyzeRoute, getBrowserUrl } from './utils';
-import { ref } from '../reactivity';
 
 type Config = {
   base: string

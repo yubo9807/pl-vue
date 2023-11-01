@@ -1,9 +1,5 @@
-import { reactive } from "../reactivity/reactive";
-import { watch } from "../reactivity/watch";
-import { isFunction, isMemoryObject } from "../utils/judge";
-import { nextTick } from "../utils/next-tick";
-import { deepClone } from "../utils/object";
-import { AnyObj } from "../utils/type";
+import { reactive, watch } from "../reactivity";
+import { AnyObj, deepClone, nextTick, isFunction, isMemoryObject } from "../utils";
 
 const actionFlag = Symbol('action');
 function isAction(func: Function) {

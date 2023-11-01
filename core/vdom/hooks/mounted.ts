@@ -1,4 +1,4 @@
-import { nextTick } from "../utils/next-tick";
+import { nextTick } from "../../utils";
 import { hookLock } from "./utils";
 
 const collect = [];

@@ -1,7 +1,4 @@
-import { hasOwn, isMemoryObject } from "../utils/judge";
-import { nextTick } from "../utils/next-tick";
-import { printWarn } from "../utils/string";
-import { AnyObj } from "../utils/type";
+import { nextTick, printWarn, AnyObj, hasOwn, isMemoryObject } from "../utils";
 import { dependencyCollection, distributeUpdates } from "./depend";
 import { isReadonly } from "./readonly";
 

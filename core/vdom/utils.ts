@@ -1,4 +1,4 @@
-import { isFunction, isObject, isString } from "../utils/judge";
+import { isFunction, isObject, isString } from "../utils";
 import { isFragment } from "./h";
 
 /**

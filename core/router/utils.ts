@@ -1,5 +1,4 @@
-import { isString } from "../utils/judge";
-import { AnyObj } from "../utils/type";
+import { isString } from "../utils";
 import { config } from "./create-router";
 
 export type RouteOption = ReturnType<typeof analyzeRoute>

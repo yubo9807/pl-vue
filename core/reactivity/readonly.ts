@@ -1,5 +1,4 @@
-import { AnyObj } from "../utils/type";
-import { printWarn } from "../utils/string";
+import { AnyObj, printWarn } from "../utils";
 import { ReactiveFlags } from './reactive';
 
 /**

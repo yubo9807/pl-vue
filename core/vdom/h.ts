@@ -1,4 +1,4 @@
-import { isFunction } from "../utils/judge";
+import { isFunction } from "../utils";
 import { Attrs, Children, Component, Tag } from "./type";
 import { isComponent } from "./utils";
 

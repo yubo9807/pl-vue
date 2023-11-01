@@ -1,8 +1,5 @@
 import { binding } from "./depend";
-import { reactive } from "./reactive";
-import { isEquals, isMemoryObject } from "../utils/judge";
-import { deepClone } from "../utils/object";
-import { AnyObj } from "../utils/type";
+import { isEquals, isMemoryObject, deepClone } from "../utils";
 
 type Option = {
   immediate?: boolean

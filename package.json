@@ -5,6 +5,12 @@
   "main": "lib/index.cjs",
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
+  "exports": {
+    ".": "./lib/index.cjs",
+    "./lib/utils": "./lib/utils/index.cjs",
+    "./lib/store": "./lib/store/index.cjs",
+    "./lib/router": "./lib/router/index.cjs"
+  },
   "scripts": {
     "dev": "vite -c build/vite.client.ts",
     "preview": "vite preview -c build/vite.client.ts",
@@ -12,7 +18,8 @@
     "build:server": "vite build -c build/vite.server.ts",
     "build": "rm -rf dist/ && npm run build:client && npm run build:server",
     "start": "node dist/server.js",
-    "build:lib": "vite build -c build/vite.lib.ts && tsc --project build/tsconfig.lib.json"
+    "tsc:lib": "tsc --project build/tsconfig.lib.json --declaration --emitDeclarationOnly",
+    "build:lib": "rm -rf lib && rollup -c build/rollup.lib.js && npm run tsc:lib"
   },
   "keywords": [
     "plvue",
@@ -32,6 +39,7 @@
   "devDependencies": {
     "@babel/core": "^7.22.9",
     "@types/node": "^20.4.2",
+    "rollup-plugin-typescript2": "^0.36.0",
     "sass": "^1.58.3",
     "typescript": "^5.1.6",
     "vite": "^4.4.9"

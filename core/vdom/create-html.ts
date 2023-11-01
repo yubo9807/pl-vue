@@ -1,9 +1,7 @@
+import { isArray, isFunction, isObject, objectAssign, printWarn } from "../utils";
 import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr } from "./utils";
 import { isFragment } from "./h";
 import { Attrs, Children, Tag } from "./type";
-import { isArray, isFunction, isObject } from "../utils/judge";
-import { objectAssign } from "../utils/object";
-import { printWarn } from "../utils/string";
 
 
 /**

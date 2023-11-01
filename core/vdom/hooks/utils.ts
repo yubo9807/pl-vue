@@ -1,8 +1,7 @@
-import { isObject } from "../utils/judge";
-import { objectAssign } from "../utils/object";
-import { getComponentId } from "../vdom/h";
-import { Tree } from "../vdom/type";
-import { isComponent } from "../vdom/utils";
+import { isObject, objectAssign } from "../../utils";
+import { getComponentId } from "../../vdom/h";
+import { Tree } from "../../vdom/type";
+import { isComponent } from "../../vdom/utils";
 
 /**
  * 当上锁时，所有的钩子都将无法注册
