@@ -17,6 +17,17 @@ export default function (...args: string[]) {
       const ast = parse(code, { sourceType: 'module' });
 
       traverse(ast, {
+        // 删除导出
+        ExportNamedDeclaration(path) {
+          const specifiers = path.node.specifiers;
+          for (const specifier of specifiers) {
+            const { name, type } = specifier.exported;
+            if (type === 'Identifier' && args.includes(name)) {
+              path.remove();
+            }
+          }
+        },
+        // 删除调用
         CallExpression(path) {
           const { name, type } = path.node.callee;
           if (type === 'Identifier' && args.includes(name)) {
