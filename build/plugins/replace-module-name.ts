@@ -1,5 +1,5 @@
 
-module.exports = function() {
+export default function() {
   return {
     name: 'replace-module-name',
 

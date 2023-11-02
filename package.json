@@ -19,7 +19,7 @@
     "build": "rm -rf dist/ && npm run build:client && npm run build:server",
     "start": "node dist/server.js",
     "tsc:lib": "tsc --project build/tsconfig.lib.json --declaration --emitDeclarationOnly",
-    "build:lib": "rm -rf lib && rollup -c build/rollup.lib.js && npm run tsc:lib"
+    "build:lib": "rm -rf lib && ts-node --project build/tsconfig.lib.json build/rollup.lib.ts && npm run tsc:lib"
   },
   "keywords": [
     "plvue",
@@ -41,6 +41,7 @@
     "@types/node": "^20.4.2",
     "rollup-plugin-typescript2": "^0.36.0",
     "sass": "^1.58.3",
+    "ts-node": "^10.9.1",
     "typescript": "^5.1.6",
     "vite": "^4.4.9"
   }

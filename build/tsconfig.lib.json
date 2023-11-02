@@ -2,11 +2,11 @@
   "compilerOptions": {
     "jsx": "react",
     "target": "ESNext",
-    "module": "ESNext",
+    "module": "NodeNext",
     "forceConsistentCasingInFileNames": true,
     "declaration": false,
     "outDir": "../lib",
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
     "baseUrl": "./",
