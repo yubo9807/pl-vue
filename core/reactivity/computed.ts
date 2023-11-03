@@ -45,7 +45,7 @@ class ComputedRefImpl<T> {
  * @returns 
  */
 export function computed<T>(option: ComputedOption<T>) {
-  if (isFunction(origin)) {
+  if (isFunction(option)) {
     // @ts-ignore
     return new ComputedRefImpl(option);
   }
