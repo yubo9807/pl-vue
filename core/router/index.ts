@@ -4,7 +4,8 @@ export { Router } from './router';
 export { Link } from './link';
 export { useRoute, createRouter } from './create-router';
 export { useRouter } from './use-router';
-export { Helmet, ssrOutlet } from './ssr';
+export { Helmet } from './ssr';
+export { ssrOutlet } from './ssr';
 
 export type PropsType<T extends AnyObj> = T & {
   ref?:      any

@@ -50,7 +50,13 @@ async function esmBuild(file, external) {
   await bundle.close();
 }
 
-const cjsFuncs = ['onMounted', 'onUnmounted', 'onBeforeMount', 'onBeforeUnmount', 'printWarn'];
+const cjsFuncs = [
+  'render',
+  'onMounted', 'onUnmounted',
+  'onBeforeMount', 'onBeforeUnmount',
+  'defineExpose',
+  'printWarn'
+];
 
 async function cjsBuild(file, external) {
   const bundle = await rollup({

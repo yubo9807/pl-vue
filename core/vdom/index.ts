@@ -1,7 +1,8 @@
 export { h, Fragment } from './h';
 export { createElement, createElementFragment } from './create-element';
 export { createHTML, createHTMLFragment } from './create-html';
-export { render, renderToString } from './render';
+export { render } from './render';
+export { renderToString } from './render';
 export { defineExpose } from './instance';
 export * from './type';
 export { onBeforeMount } from './hooks/before-mount';

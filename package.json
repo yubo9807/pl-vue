@@ -6,10 +6,26 @@
   "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "exports": {
-    ".": "./lib/index.cjs",
-    "./lib/utils": "./lib/utils/index.cjs",
-    "./lib/store": "./lib/store/index.cjs",
-    "./lib/router": "./lib/router/index.cjs"
+    ".": {
+      "import": "./lib/index.js",
+      "require": "./lib/index.cjs"
+    },
+    "./lib/utils": {
+      "import": "./lib/utils/index.js",
+      "require": "./lib/utils/index.cjs"
+    },
+    "./lib/vdom": {
+      "import": "./lib/vdom/index.js",
+      "require": "./lib/vdom/index.cjs"
+    },
+    "./lib/router": {
+      "import": "./lib/router/index.js",
+      "require": "./lib/router/index.cjs"
+    },
+    "./lib/store": {
+      "import": "./lib/store/index.js",
+      "require": "./lib/store/index.cjs"
+    }
   },
   "scripts": {
     "dev": "vite -c build/vite.client.ts",
