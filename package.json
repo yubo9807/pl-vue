@@ -1,6 +1,6 @@
 {
   "name": "pl-vue",
-  "version": "0.2.3",
+  "version": "0.3.1",
   "description": "Pl Vue",
   "main": "lib/index.cjs",
   "module": "lib/index.js",
