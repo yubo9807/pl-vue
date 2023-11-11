@@ -11,3 +11,8 @@ export type Tree = {
 }
 
 export type Component = Function
+
+export type PropsType<T extends AnyObj> = T & {
+  ref?:      any
+  children?: Children
+}

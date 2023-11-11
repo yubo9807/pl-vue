@@ -1,6 +1,6 @@
 {
   "name": "pl-vue",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Pl Vue",
   "main": "lib/index.cjs",
   "module": "lib/index.js",
@@ -13,6 +13,10 @@
     "./lib/utils": {
       "import": "./lib/utils/index.js",
       "require": "./lib/utils/index.cjs"
+    },
+    "./lib/reactivity": {
+      "import": "./lib/reactivity/index.js",
+      "require": "./lib/reactivity/index.cjs"
     },
     "./lib/vdom": {
       "import": "./lib/vdom/index.js",
