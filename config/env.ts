@@ -7,9 +7,4 @@ export default Object.freeze({
 
   NODE_ENV,
 
-  BASE_API: NODE_ENV === 'development' ? '/api' : 'http://hicky.hpyyb.cn/api',
-  // BASE_API: 'http://127.0.0.1:20010/api',
-
-  GITHUB_URL: 'https://github.com/yubo9807/',
-
 })

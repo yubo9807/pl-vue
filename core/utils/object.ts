@@ -1,33 +1,32 @@
 import { isArray, isType } from "./judge";
-import { nextTick } from "./next-tick";
 import { AnyObj } from "./type";
 
-export const deepClone = (function () {
+/**
+ * 深度克隆
+ * @param origin 被克隆对象
+ */
+export function deepClone<T>(origin: T) {
 	const cache = new WeakMap();
 	const noCloneTypes = ['null', 'weakset', 'weakmap'];
-
+	
 	const specialClone = {
 		set(set: Set<any>) {
 			const collect = new Set();
 			for (const value of set) {
-				collect.add(deepClone(value));
+				collect.add(_deepClone(value));
 			}
 			return collect;
 		},
 		map(map: Map<any, any>) {
 			const collect = new Map();
 			for (const [ key, val ] of map.entries()) {
-				collect.set(key, deepClone(val));
+				collect.set(key, _deepClone(val));
 			}
 			return collect;
 		},
 	}
 
-	/**
-	 * 深度克隆
-	 * @param origin 被克隆对象
-	 */
-	return function<T>(origin: T) {
+	function _deepClone<T>(origin: T) {
 		const type = isType(origin);
 		if (typeof origin !== 'object' || noCloneTypes.includes(type)) {
 			return origin;
@@ -49,16 +48,15 @@ export const deepClone = (function () {
 
 		// 设置缓存，该对象已经被克隆过
 		cache.set(origin, target);
-		nextTick(() => {
-			cache.delete(origin);  // 在克隆结束之后将缓存清空，以便于下一次克隆正常使用
-		})
 
 		for (const key in origin) {
-			target[key] = deepClone(origin[key]);
+			target[key] = _deepClone(origin[key]);
 		}
 		return target as T;
 	}
-}())
+
+  return _deepClone(origin);
+}
 
 
 // #region 减少打包代码体积
