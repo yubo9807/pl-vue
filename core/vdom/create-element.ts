@@ -105,17 +105,29 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
     const value = attrs[attr];
     if (!value) continue;
 
-    el[attr] = value;
+    if (attr.startsWith('data-')) {
+      el.dataset[attr.slice(5)] = value;
+      continue;
+    }
 
     if (attr === 'ref') {
       value.value = el;
+      continue;
     }
+
+    if (attr === 'created' && isFunction(value)) {
+      value(el);
+      continue;
+    } 
 
     if (isFunction(value) && isReactiveChangeAttr(attr)) {
       binding(() => {
         el[attr] = value();
       })
+      continue;
     }
+
+    el[attr] = value;
   }
 
   // 对样式单独处理
