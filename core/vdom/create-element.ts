@@ -103,7 +103,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
   // attrs 赋值
   for (const attr in attrs) {
     const value = attrs[attr];
-    if (!value) continue;
+    if ([void 0, null].includes(value)) continue;
 
     if (attr.startsWith('data-')) {
       el.dataset[attr.slice(5)] = value;
