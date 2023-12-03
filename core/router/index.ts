@@ -1,6 +1,7 @@
-export { Router } from './router';
+export { BrowserRouter, StaticRouter, Router } from './router';
+export { Route } from './route';
 export { Link } from './link';
-export { useRoute, createRouter } from './create-router';
+export { createRouter, useRoute } from './create-router';
 export { useRouter } from './use-router';
 export { Helmet } from './ssr';
 export { ssrOutlet } from './ssr';

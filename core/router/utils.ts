@@ -1,9 +1,14 @@
-import { isString } from "../utils";
-import { config } from "./create-router";
+import { BaseOption, RouteOption } from "./type";
 
-export type RouteOption = ReturnType<typeof analyzeRoute>
-export type RouteOptionOptional = {
-  [k in keyof RouteOption]?: RouteOption[k]
+/**
+ * 获取 url query
+ * @param url 
+ * @returns 
+ */
+export function parseQuery(url: string) {
+	const query = {};
+	url.replace(/([^?&=]+)=([^&]+)/g, (_, k, v) => (query[k] = v));
+	return query;
 }
 
 /**
@@ -11,87 +16,38 @@ export type RouteOptionOptional = {
  * @param url 
  * @returns 
  */
-export function analyzeRoute(url: string) {
+export function analyzeRoute(url: string): RouteOption {
   const newUrl = new URL('http://0.0.0.0' + url);
-  const pathname = newUrl.pathname;
-  const query = config.routes.find(val => {
-    return pathname.startsWith(val.path + '/') && val.exact === false;
-  })
   return {
-    monitor: query ? query.path : pathname,
     fullPath: newUrl.href.replace(newUrl.origin, ''),
-    path: pathname,
-    query: getQueryAll(newUrl.search),
-    hash: newUrl.hash,
+    path:     newUrl.pathname,
+    query:    parseQuery(newUrl.search),
+    hash:     newUrl.hash,
   }
 }
 
 /**
  * 组织 url
- * @param option
+ * @param option 
+ * @returns 
  */
-export function splicingUrl(option: RouteOptionOptional | string): string {
-  if (isString(option)) return option as string;
-
-  option = option as RouteOptionOptional
-  const pathname = option.path;
-  let queryStr = '';
+export function splicingUrl(option: BaseOption) {
+  let search = '';
   for (const key in option.query) {
-    queryStr += `&${key}=${option.query[key]}`;
+    if (option.query[key]) {
+      search += `${key}=${option.query[key]}&`;
+    }
   }
-  queryStr = queryStr ? '?' + queryStr : '';
-  const hash = option.hash ? '#' + option.hash : '';
-
-  const url = pathname + queryStr + hash;
-  return url;
+  search = search ? '?' + search.slice(0, -1) : '';
+  let hash = option.hash ? '#' + option.hash : '';
+  return option.path + search + hash;
 }
 
 /**
- * 获取路由 query
- * @param search 
- * @returns 
- */
-export const getQueryAll = (function () {
-  const reg = /([^?&=]+)=([^&]+)/g;
-  return (search: string) => {
-    const query = {};
-    search.replace(reg, (_, k, v) => (query[k] = v));
-    return query;
-  }
-}())
-
-/**
- * 获取浏览器端 url
- */
-export function getBrowserUrl() {
-  if (config.mode === 'history') {
-    return location.href.replace(location.origin + config.base, '');
-  } else {
-    return location.hash.slice(1);
-  }
-}
-
-/**
- * 查找匹配的路由信息
- * @param monitor 
- * @returns 
- */
-export function findRoute(monitor: string) {
-  const { routes } = config;
-  const query = routes.find(val => val.path === monitor);
-  if (query) return query;
-
-  const lastRoute = routes[routes.length - 1];
-  if (lastRoute && lastRoute.path === void 0 && lastRoute.component) {
-    return lastRoute;
-  } 
-}
-
-/**
- * 格式化路径，将多余的 / 删除掉
+ * 格式化 url，删除重复的 /
  * @param url 
  * @returns 
  */
-export function formatPath(url: string) {
-  return url.replace(/\/+/g, '/');
+export function formatUrl(url: string) {
+  return url.replace(/\/{1,}/g, '/');
 }

@@ -1,90 +1,51 @@
-import { isBrowser, deepClone, nextTick } from '../utils'
-import { reactive, toRaw, ref } from '../reactivity'
-import { Component } from '../vdom';
-import { push, replace, go } from './use-router';
-import { RouteOption, analyzeRoute, getBrowserUrl } from './utils';
+import { reactive } from "../reactivity";
+import { isBrowser } from "../utils";
+import { Config, RouteOption } from "./type";
+import { analyzeRoute } from "./utils";
 
-type Config = {
-  base: string
-  mode: 'history' | 'hash'
-  ssrDataKey: string
-  routes: {
-    path?: string
-    component: Component
-    exact?: boolean
-    redirect?: string
-  }[],
-}
 export const config: Config = {
-  base: '',
-  mode: 'history',
+  base:       '',
+  mode:       'history',
   ssrDataKey: 'g_initialProps',
-  routes: [],
 }
 
 export let currentRoute: RouteOption = null;
-export const isReady = ref(false);
-
-type Option = {
-  [k in keyof Config]?: Config[k]
+export function setCurrentRoute(route: RouteOption) {
+  currentRoute = route;
 }
-export function createRouter(option: Option = {}) {
-  Object.assign(config, option);
 
-  // 浏览器环境
+/**
+ * 获取浏览器 url
+ * @returns 
+ */
+function getBrowserUrl() {
+  const { origin, href, hash } = location;
+  if (config.mode === 'hash') {
+    return hash.replace('#', '');
+  }
+  return href.replace(origin + config.base, '');
+}
+
+export function createRouter(option: Config) {
+  Object.assign(config, option);
   if (isBrowser()) {
     const route = analyzeRoute(getBrowserUrl());
     currentRoute = reactive(route);
-    nextTick(() => {
-      beforeEach(route, route, () => {
-        isReady.value = true;
-      });
-    });
-  } else {
-    // 服务端只需初始化，真正解析由 StaticRouter 组件来完成
-    // 并且服务端也不需要响应式数据
-    currentRoute ??= analyzeRoute('/');
-  }
-
-  return {
-    back: () => go(-1),
-    forward: () => go(1),
-    go,
-    push,
-    replace,
-    options: config,
-    currentRoute: toRaw(currentRoute),
-    beforeEach(func: typeof beforeEach) {
-      beforeEach = func;
-    },
-  }
-}
-
-let beforeEach = (from: RouteOption, to: RouteOption, next: Function) => {
-  next();
-}
-
-/**
- * route 发生变化，响应式数据重新赋值
- * @param url 
- */
-export function routeChange(url: string) {
-  const from = deepClone(currentRoute);
-  const to = analyzeRoute(url);
-  return new Promise((resolve, reject) => {
-    beforeEach(from, to, () => {
-      for (const key in to) {
-        currentRoute[key] = to[key];
+    window.addEventListener('popstate', () => {
+      const route = analyzeRoute(getBrowserUrl());
+      for (const key in route) {
+        currentRoute[key] = route[key];
       }
-      resolve(1);
     })
-  })
+  }
 }
 
-/**
- * 获取当前的路有信息
- * @returns 
- */
 export function useRoute() {
   return currentRoute;
+}
+
+// 服务端临时变量
+export const variable = {
+  currentTemplate: '',
+  ssrData:         {},
 }

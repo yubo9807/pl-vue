@@ -1,28 +1,34 @@
-import { RouteOptionOptional, splicingUrl } from './utils';
-import { config, routeChange } from './create-router';
+import { toRaw } from "../reactivity";
+import { isString } from "../utils"
+import { config, currentRoute } from "./create-router"
+import { BaseOption, SkipOption } from "./type";
+import { analyzeRoute } from "./utils"
 
 /**
  * 切换路由
  * @param option 
  * @param type 切换类型
  */
-export function toggle(option: RouteOptionOptional | string, type: 'push' | 'replace') {
-  const path = splicingUrl(option);
-  
-  routeChange(path).then(() => {
-    if (config.mode === 'history') {
-      history[type === 'push' ? 'pushState' : 'replaceState']({}, '', config.base + path);
-    } else {
-      location.hash = path;
-    }
-  });
+function toggle(option: SkipOption, type: 'push' | 'replace') {
+  if (isString(option)) {
+    option = analyzeRoute(option as string);
+  }
+  for (const key in option as BaseOption) {
+    currentRoute[key] = option[key];
+  }
+  const { fullPath } = currentRoute;
+  if (config.mode === 'history') {
+    history[type === 'push' ? 'pushState' : 'replaceState']({}, '', fullPath);
+  } else {
+    location.hash = fullPath;
+  }
 }
 
 /**
  * 向前 push 一个路由
  * @param option 
  */
-export function push(option: RouteOptionOptional | string) {
+export function push(option: SkipOption) {
   toggle(option, 'push');
 }
 
@@ -30,18 +36,26 @@ export function push(option: RouteOptionOptional | string) {
  * 替换当前路由
  * @param option 
  */
-export function replace(option: RouteOptionOptional | string) {
+export function replace(option: SkipOption) {
   toggle(option, 'replace');
 }
 
+/**
+ * 向前/后改变路由
+ * @param num 
+ */
 export function go(num: number) {
   history.go(num);
 }
 
 export function useRouter() {
   return {
+    back: () => go(-1),
+    forward: () => go(1),
+    go,
     push,
     replace,
-    go,
+    options: config,
+    currentRoute: toRaw(currentRoute),
   }
 }

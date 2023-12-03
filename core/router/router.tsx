@@ -1,57 +1,146 @@
-import { Fragment, h, Component } from '../vdom';
-import { currentRoute, config, routeChange, isReady } from './create-router';
-import { isBrowser, isFunction } from '../utils';
-import { findRoute, getBrowserUrl } from './utils';
-import { StaticRouter } from './ssr';
-import { toRaw, ref, watch } from '../reactivity';
+import { reactive, ref, watch } from "../reactivity";
+import { createId, deepClone, isBrowser, isFunction } from "../utils";
+import { Component, PropsType, h, Fragment, renderToString } from "../vdom";
+import { config, currentRoute, variable } from "./create-router";
+import { getProtectItem, protectCollect } from "./protect";
+import { queryRoute } from "./route";
 
-
-type Props = {
-  children?: []
+export type PagePropsType = {
+  path?: string
+  data?: any
 }
 
-interface BrowserRouterProps extends Props {
-  loading?: Component
+type BrowserRouterProps = PropsType<{
+  loading?:  Component
+  notFound?: Component
+}>
+export function BrowserRouter(props: BrowserRouterProps) {
+
+  const Comp = ref<Component>();
+  let attrs: PagePropsType = {};
+
+  watch(() => currentRoute.path, async value => {
+    const query = queryRoute(props.children, value);
+    if (!query) {
+      attrs = {};
+      Comp.value = props.notFound;
+      return;
+    }
+    const beforeEnter = getProtectItem(query.path);
+    if (beforeEnter) {
+      console.log(beforeEnter)
+      // await beforeEnter();
+    }
+
+    // 按需加载组件
+    if (!query.component.prototype) {
+      query.component = (await query.component()).default;
+    }
+    attrs.path = query.path;
+    const getInitialProps = isExistGetInitialProps(query.component);
+    if (getInitialProps) {
+      const ssrData = window[config.ssrDataKey];
+      if (ssrData) {
+        attrs.data = ssrData[attrs.path];
+        delete ssrData[attrs.path];
+      } else {
+        attrs.data = await getInitialProps(deepClone(attrs));
+      }
+    }
+    Comp.value = query.component;
+  }, { immediate: true })
+
+  return <>{() => <Comp.value {...attrs} />}</>;
 }
+
+export const stack: string[] = reactive([]);  // 执行栈
+
+type StaticRouterProps = PropsType<{
+  notFound?: Component
+}>
+export function StaticRouter(props: StaticRouterProps) {
+  const query = queryRoute(props.children, currentRoute.path);
+  if (!query) {
+    const Comp = props.notFound;
+    return Comp ? <Comp /> : <></>;
+  }
+  let Comp = query.component;
+  const attrs: PagePropsType = {
+    path: query.path,
+  };
+  const replaceStr = `r_${createId()}`;
+
+  // 如果是异步组件
+  if (!Comp.prototype) {
+    stack.push(replaceStr);
+    Comp().then(async res => {
+      Comp = res.default;
+      
+      // 存在 getInitialProps
+      const getInitialProps = isExistGetInitialProps(Comp);
+      if (getInitialProps) {
+        attrs.data = await getInitialProps(deepClone(attrs));
+        variable.ssrData[attrs.path] = attrs.data;
+      }
+
+      // 替换结果
+      resultReplace(replaceStr, Comp, attrs);
+    });
+    return <>{replaceStr}</>;
+  }
+
+  // 存在 getInitialProps
+  const getInitialProps = isExistGetInitialProps(Comp);
+  if (getInitialProps) {
+    stack.push(replaceStr);
+    getInitialProps(deepClone(attrs)).then(res => {
+      attrs.data = res;
+      variable.ssrData[attrs.path] = res;
+
+      // 替换结果
+      resultReplace(replaceStr, Comp, attrs);
+    });
+    return <>{replaceStr}</>;
+  }
+
+  return <Comp {...attrs} />
+}
+
 /**
- * 浏览器端路由渲染
+ * BrowserRouter & StaticRouter
  * @param props 
  * @returns 
  */
-function BrowserRouter(props: BrowserRouterProps) {
-
-  window.addEventListener('popstate', () => {
-    routeChange(getBrowserUrl());
-  })
-
-  const currentComp = ref(null);
-  let data = void 0;
-  watch(() => currentRoute.monitor, async value => {
-    const find = findRoute(value);
-    if (!find) return;
-    const { getInitialProps } = find.component.prototype;
-    if (isFunction(getInitialProps)) {
-      if (window[config.ssrDataKey]) {
-        data = window[config.ssrDataKey];
-        delete window[config.ssrDataKey];
-      } else {
-        currentComp.value = props.loading;
-        const route = toRaw(currentRoute);
-        data = await getInitialProps(route);
-      }
-    }
-    currentComp.value = find.component;
-  }, { immediate: true })
-
-  return <>{() => {
-    const ready = isReady.value;
-    const Comp = currentComp.value;
-    return ready && Comp && <Comp data={data} />
-  }}</>;
-}
-
-export function Router(props: BrowserRouterProps) {
+export function Router(props: BrowserRouterProps & StaticRouterProps) {
+  protectCollect(props.children);
   return isBrowser()
     ? <BrowserRouter {...props} />
-    : <StaticRouter />
+    : <StaticRouter {...props} />
 }
+
+/**
+ * 结果替换
+ * @param replaceStr 
+ * @param Comp 
+ * @param attrs 
+ */
+function resultReplace(replaceStr: string, Comp: Component, attrs: PagePropsType) {
+  const string = renderToString(<Comp {...attrs} />);
+  const index = stack.indexOf(replaceStr);
+  stack.splice(index, 1);
+  const newTemplate = variable.currentTemplate.replace(replaceStr, string);
+  variable.currentTemplate = newTemplate;
+}
+
+/**
+ * 是否存在 getInitialProps 属性并且能运行
+ * @param Comp 
+ * @returns 如果能运行返回 getInitialProps 本身
+ */
+function isExistGetInitialProps(Comp: Component) {
+  const { getInitialProps } = Comp.prototype;
+  if (getInitialProps && isFunction(getInitialProps)) {
+    return getInitialProps;
+  }
+}
+

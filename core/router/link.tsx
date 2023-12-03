@@ -1,31 +1,28 @@
-import { isString, objectAssign } from "../utils";
-import { h } from "../vdom";
-import { config } from "./create-router";
-import { useRouter } from "./use-router";
-import { RouteOptionOptional, splicingUrl } from "./utils";
+import { isString } from "../utils"
+import { PropsType, h } from "../vdom"
+import { config } from "./create-router"
+import { BaseOption, SkipOption } from "./type"
+import { push, replace } from "./use-router"
+import { splicingUrl } from "./utils"
 
-type Props = {
-  to:        RouteOptionOptional | string
-  children?: []
-  type?:     'push' | 'replace'
+type LinkProps = PropsType<{
+  to:         SkipOption
   className?: string
-}
-const defaultProps = { to: '/', type: 'push' }
+  type?:      'push' | 'replace'
+}>
+export function Link(props: LinkProps) {
+  if (!isString(props.to)) {
+    props.to = splicingUrl(props.to as BaseOption);
+  }
 
-export function Link(props: Props) {
-  props = objectAssign(defaultProps, props);
-  const url = isString(props.to) ? props.to : splicingUrl(props.to as RouteOptionOptional);
-  const href = config.base + (config.mode === 'hash' ? '#' + url : url);
-
-  const router = useRouter();
   function jump(e: Event) {
     e.preventDefault();
     if (props.type === 'push') {
-      router.push(url);
+      push(props.to);
     } else {
-      router.replace(url);
+      replace(props.to);
     }
   }
 
-  return <a className={props.className} href={href} onclick={jump}>{props.children}</a>
+  return <a className={props.className} href={config.base + props.to} onclick={jump}>{props.children}</a>
 }
