@@ -1,4 +1,4 @@
-export { BrowserRouter, StaticRouter, Router } from './router';
+export { Router } from './router';
 export { Route } from './route';
 export { Link } from './link';
 export { createRouter, useRoute } from './create-router';

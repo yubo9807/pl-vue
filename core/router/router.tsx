@@ -3,19 +3,22 @@ import { createId, deepClone, isBrowser, isFunction } from "../utils";
 import { Component, PropsType, h, Fragment, renderToString } from "../vdom";
 import { config, currentRoute, variable } from "./create-router";
 import { queryRoute } from "./route";
+import { formatUrl } from "./utils";
 
 export type PagePropsType = {
   path?: string
   data?: any
 }
 
-let backup = void 0;
+let backupRoute = void 0;  // 旧的 route 信息
+const unwatchs  = [];      // 收集子路由的取消监听事件
 
 type BrowserRouterProps = PropsType<{
   loading?:  Component
   notFound?: Component
+  prefix?:   string
 }>
-export function BrowserRouter(props: BrowserRouterProps) {
+function BrowserRouter(props: BrowserRouterProps) {
 
   const Comp = ref<Component>();
   let attrs: PagePropsType = {};
@@ -51,28 +54,39 @@ export function BrowserRouter(props: BrowserRouterProps) {
     }
 
     if (query.beforeEnter) {
-      query.beforeEnter(toRaw(currentRoute), backup, () => {
-        backup = deepClone(currentRoute);
+      query.beforeEnter(toRaw(currentRoute), backupRoute, () => {
+        backupRoute = deepClone(currentRoute);
         path === currentRoute.path ? next() : routeChange(currentRoute.path);
       });
     } else {
+      backupRoute = deepClone(currentRoute);
       next();
     }
   }
 
-  watch(() => currentRoute.path, value => {
+  const unwatch = watch(() => currentRoute.path, value => {
+    // 父级组件卸载的时候，需要把嵌套路由的监听器全部取消掉（这里存在性能问题）
+    if (backupRoute) {
+      const arr1 = backupRoute.path.split('/'), arr2 = value.split('/');
+      if (arr1[1] !== arr2[1]) {
+        unwatchs.forEach(unwatch => unwatch());
+      }
+    }
     routeChange(value);
   }, { immediate: true })
+  props.prefix && unwatchs.push(unwatch);
 
   return <>{() => <Comp.value {...attrs} />}</>;
 }
+
+
 
 export const stack: string[] = reactive([]);  // 执行栈
 
 type StaticRouterProps = PropsType<{
   notFound?: Component
 }>
-export function StaticRouter(props: StaticRouterProps) {
+function StaticRouter(props: StaticRouterProps) {
   const query = queryRoute(props.children, currentRoute.path);
   if (!query) {
     const Comp = props.notFound;
@@ -82,8 +96,8 @@ export function StaticRouter(props: StaticRouterProps) {
   let lock = false;
   if (query.beforeEnter) {
     lock = true;
-    query.beforeEnter(toRaw(currentRoute), backup, () => {
-      backup = deepClone(currentRoute);
+    query.beforeEnter(toRaw(currentRoute), backupRoute, () => {
+      backupRoute = deepClone(currentRoute);
       lock = false;
     })
   }
@@ -137,6 +151,11 @@ export function StaticRouter(props: StaticRouterProps) {
  * @returns 
  */
 export function Router(props: BrowserRouterProps & StaticRouterProps) {
+  if (props.prefix) {
+    props.children.forEach(val => {
+      val.attrs.path = formatUrl(props.prefix + val.attrs.path);
+    })
+  }
   return isBrowser()
     ? <BrowserRouter {...props} />
     : <StaticRouter {...props} />
