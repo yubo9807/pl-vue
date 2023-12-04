@@ -1,11 +1,5 @@
 import { AnyObj } from "../utils"
 
-export type Config = {
-  base?:       string
-  mode?:       'history' | 'hash'
-  ssrDataKey?: string
-}
-
 export type BaseOption = {
   path?:  string
   query?: AnyObj
@@ -20,3 +14,13 @@ export type RouteOption = {
   hash:     string
   meta?:    AnyObj
 }
+
+export type GetInitialPropsOption = {
+  path?: string
+}
+
+export interface PagePropsType extends GetInitialPropsOption {
+  data?: any
+}
+
+export type BeforeEnter = (to: RouteOption, from: RouteOption, next: () => void) => void

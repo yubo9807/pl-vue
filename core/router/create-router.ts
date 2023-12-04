@@ -1,7 +1,13 @@
 import { reactive } from "../reactivity";
 import { isBrowser } from "../utils";
-import { Config, RouteOption } from "./type";
+import { RouteOption } from "./type";
 import { analyzeRoute } from "./utils";
+
+type Config = {
+  base?:       string
+  mode?:       'history' | 'hash'
+  ssrDataKey?: string
+}
 
 export const config: Config = {
   base:       '',
@@ -26,7 +32,7 @@ function getBrowserUrl() {
   return href.replace(origin + config.base, '');
 }
 
-export function createRouter(option: Config) {
+export function initRouter(option: Config) {
   Object.assign(config, option);
   if (isBrowser()) {
     const route = analyzeRoute(getBrowserUrl());

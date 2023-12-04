@@ -3,12 +3,8 @@ import { createId, deepClone, isBrowser, isFunction } from "../utils";
 import { Component, PropsType, h, Fragment, renderToString } from "../vdom";
 import { config, currentRoute, variable } from "./create-router";
 import { queryRoute } from "./route";
+import { PagePropsType } from "./type";
 import { formatUrl } from "./utils";
-
-export type PagePropsType = {
-  path?: string
-  data?: any
-}
 
 let backupRoute = void 0;  // 旧的 route 信息
 const unwatchs  = [];      // 收集子路由的取消监听事件

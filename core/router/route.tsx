@@ -1,12 +1,12 @@
 import { Component, PropsType, Tree } from "../vdom"
-import { RouteOption } from "./type"
+import { BeforeEnter } from "./type"
 import { formatUrl } from "./utils"
 
 type RouteProps = PropsType<{
   path:         string
   component:    Component | (() => Promise<Component>)
   exact?:       boolean
-  beforeEnter?: (to: RouteOption, from: RouteOption, next: () => void) => void
+  beforeEnter?: BeforeEnter
 }>
 export function Route(props: RouteProps) {}
 
