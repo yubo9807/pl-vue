@@ -20,8 +20,8 @@ export function BrowserRouter(props: BrowserRouterProps) {
   const Comp = ref<Component>();
   let attrs: PagePropsType = {};
 
-  watch(() => currentRoute.path, value => {
-    const query = queryRoute(props.children, value);
+  function routeChange(path: string) {
+    const query = queryRoute(props.children, path);
     if (!query) {
       attrs = {};
       Comp.value = props.notFound;
@@ -53,12 +53,15 @@ export function BrowserRouter(props: BrowserRouterProps) {
     if (query.beforeEnter) {
       query.beforeEnter(toRaw(currentRoute), backup, () => {
         backup = deepClone(currentRoute);
-        next();
+        path === currentRoute.path ? next() : routeChange(currentRoute.path);
       });
     } else {
       next();
     }
+  }
 
+  watch(() => currentRoute.path, value => {
+    routeChange(value);
   }, { immediate: true })
 
   return <>{() => <Comp.value {...attrs} />}</>;
