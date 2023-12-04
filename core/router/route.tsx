@@ -24,10 +24,10 @@ export function queryRoute(routes: RouteItem[], pathname: string) {
   const query = routes.find(val => {
     const { path, exact } = val.attrs;
 
-    if (exact === true) {
-      return path === pathname;
+    if (exact === false) {
+      return (pathname + '/').startsWith(formatUrl(path + '/'));
     }
-    return (pathname + '/').startsWith(formatUrl(path + '/'));
+    return formatUrl(path) === pathname;
   });
   if (!query) return;
   const { path, component, beforeEnter } = query.attrs;
