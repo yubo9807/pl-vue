@@ -1,14 +1,15 @@
-import { reactive, ref, watch } from "../reactivity";
+import { reactive, ref, toRaw, watch } from "../reactivity";
 import { createId, deepClone, isBrowser, isFunction } from "../utils";
 import { Component, PropsType, h, Fragment, renderToString } from "../vdom";
 import { config, currentRoute, variable } from "./create-router";
-import { getProtectItem, protectCollect } from "./protect";
 import { queryRoute } from "./route";
 
 export type PagePropsType = {
   path?: string
   data?: any
 }
+
+let backup = void 0;
 
 type BrowserRouterProps = PropsType<{
   loading?:  Component
@@ -19,35 +20,45 @@ export function BrowserRouter(props: BrowserRouterProps) {
   const Comp = ref<Component>();
   let attrs: PagePropsType = {};
 
-  watch(() => currentRoute.path, async value => {
+  watch(() => currentRoute.path, value => {
     const query = queryRoute(props.children, value);
     if (!query) {
       attrs = {};
       Comp.value = props.notFound;
       return;
     }
-    const beforeEnter = getProtectItem(query.path);
-    if (beforeEnter) {
-      console.log(beforeEnter)
-      // await beforeEnter();
+
+    /**
+     * 渲染组件
+     */
+    async function next() {
+      // 按需加载组件
+      if (!query.component.prototype) {
+        query.component = (await query.component()).default;
+      }
+      attrs.path = query.path;
+      const getInitialProps = isExistGetInitialProps(query.component);
+      if (getInitialProps) {
+        const ssrData = window[config.ssrDataKey];
+        if (ssrData) {
+          attrs.data = ssrData[attrs.path];
+          delete ssrData[attrs.path];
+        } else {
+          attrs.data = await getInitialProps(deepClone(attrs));
+        }
+      }
+      Comp.value = query.component;
     }
 
-    // 按需加载组件
-    if (!query.component.prototype) {
-      query.component = (await query.component()).default;
+    if (query.beforeEnter) {
+      query.beforeEnter(toRaw(currentRoute), backup, () => {
+        backup = deepClone(currentRoute);
+        next();
+      });
+    } else {
+      next();
     }
-    attrs.path = query.path;
-    const getInitialProps = isExistGetInitialProps(query.component);
-    if (getInitialProps) {
-      const ssrData = window[config.ssrDataKey];
-      if (ssrData) {
-        attrs.data = ssrData[attrs.path];
-        delete ssrData[attrs.path];
-      } else {
-        attrs.data = await getInitialProps(deepClone(attrs));
-      }
-    }
-    Comp.value = query.component;
+
   }, { immediate: true })
 
   return <>{() => <Comp.value {...attrs} />}</>;
@@ -64,6 +75,17 @@ export function StaticRouter(props: StaticRouterProps) {
     const Comp = props.notFound;
     return Comp ? <Comp /> : <></>;
   }
+
+  let lock = false;
+  if (query.beforeEnter) {
+    lock = true;
+    query.beforeEnter(toRaw(currentRoute), backup, () => {
+      backup = deepClone(currentRoute);
+      lock = false;
+    })
+  }
+  if (lock) return <></>
+
   let Comp = query.component;
   const attrs: PagePropsType = {
     path: query.path,
@@ -112,7 +134,6 @@ export function StaticRouter(props: StaticRouterProps) {
  * @returns 
  */
 export function Router(props: BrowserRouterProps & StaticRouterProps) {
-  protectCollect(props.children);
   return isBrowser()
     ? <BrowserRouter {...props} />
     : <StaticRouter {...props} />

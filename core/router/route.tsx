@@ -1,15 +1,16 @@
 import { Component, PropsType, Tree } from "../vdom"
+import { RouteOption } from "./type"
 import { formatUrl } from "./utils"
 
 type RouteProps = PropsType<{
-  path:      string
-  component: Component | (() => Promise<Component>)
-  exact?:    boolean
-
+  path:         string
+  component:    Component | (() => Promise<Component>)
+  exact?:       boolean
+  beforeEnter?: (to: RouteOption, from: RouteOption, next: () => void) => void
 }>
 export function Route(props: RouteProps) {}
 
-type RouteItem = Tree & {
+export type RouteItem = Tree & {
   attrs: RouteProps
 }
 
@@ -29,8 +30,10 @@ export function queryRoute(routes: RouteItem[], pathname: string) {
     return (pathname + '/').startsWith(formatUrl(path + '/'));
   });
   if (!query) return;
+  const { path, component, beforeEnter } = query.attrs;
   return {
-    path: formatUrl(query.attrs.path),
-    component: query.attrs.component,
+    path: formatUrl(path),
+    component,
+    beforeEnter,
   };
 }
