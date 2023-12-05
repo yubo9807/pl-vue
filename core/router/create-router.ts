@@ -1,6 +1,7 @@
 import { reactive } from "../reactivity";
 import { isBrowser } from "../utils";
-import { RouteOption } from "./type";
+import { BeforeEnter, RouteOption } from "./type";
+import { useRouter } from "./use-router";
 import { analyzeRoute } from "./utils";
 
 type Config = {
@@ -32,6 +33,13 @@ function getBrowserUrl() {
   return href.replace(origin + config.base, '');
 }
 
+export let beforeEach: BeforeEnter = null;
+
+/**
+ * 初始化路由
+ * @param option 
+ * @returns 
+ */
 export function initRouter(option: Config) {
   Object.assign(config, option);
   if (isBrowser()) {
@@ -43,6 +51,13 @@ export function initRouter(option: Config) {
         currentRoute[key] = route[key];
       }
     })
+  }
+
+  return {
+    ...useRouter(),
+    beforeEach(func: BeforeEnter) {
+      beforeEach = func;
+    },
   }
 }
 

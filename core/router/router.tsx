@@ -1,7 +1,7 @@
 import { reactive, ref, toRaw, watch } from "../reactivity";
 import { createId, deepClone, isBrowser, isFunction } from "../utils";
 import { Component, PropsType, h, Fragment, renderToString } from "../vdom";
-import { config, currentRoute, variable } from "./create-router";
+import { beforeEach, config, currentRoute, variable } from "./create-router";
 import { queryRoute } from "./route";
 import { PagePropsType } from "./type";
 import { formatUrl } from "./utils";
@@ -53,15 +53,26 @@ function BrowserRouter(props: BrowserRouterProps) {
       Comp.value = query.component;
     }
 
+    // 全局守卫
+    if (beforeEach) {
+      beforeEach(toRaw(currentRoute), backupRoute, () => {
+        backupRoute = deepClone(currentRoute);
+        path === currentRoute.path ? next() : routeChange(currentRoute.path);
+      })
+      return;
+    }
+
+    // 独享守卫
     if (query.beforeEnter) {
       query.beforeEnter(toRaw(currentRoute), backupRoute, () => {
         backupRoute = deepClone(currentRoute);
         path === currentRoute.path ? next() : routeChange(currentRoute.path);
       });
-    } else {
-      backupRoute = deepClone(currentRoute);
-      next();
+      return;
     }
+
+    backupRoute = deepClone(currentRoute);
+    next();
   }
 
   const unwatch = watch(() => currentRoute.path, value => {
