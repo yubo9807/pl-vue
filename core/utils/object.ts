@@ -8,8 +8,15 @@ import { AnyObj } from "./type";
 export function deepClone<T>(origin: T) {
 	const cache = new WeakMap();
 	const noCloneTypes = ['null', 'weakset', 'weakmap'];
-	
+
 	const specialClone = {
+		function(original: Function) {
+			const func = function(...args) {
+				return original.apply(this, args);
+			};
+			func.prototype = _deepClone(original.prototype);
+			return func;
+		},
 		set(set: Set<any>) {
 			const collect = new Set();
 			for (const value of set) {
@@ -28,13 +35,13 @@ export function deepClone<T>(origin: T) {
 
 	function _deepClone<T>(origin: T) {
 		const type = isType(origin);
-		if (typeof origin !== 'object' || noCloneTypes.includes(type)) {
+		if (!['object', 'function'].includes(typeof origin) || noCloneTypes.includes(type)) {
 			return origin;
 		}
 
 		// 防止环形引用问题（已经克隆过的对象不再进行克隆）
-		if (cache.has(origin)) {
-			return cache.get(origin);
+		if (cache.has(origin as object)) {
+			return cache.get(origin as object);
 		}
 
 		// 特殊类型克隆处理
@@ -47,7 +54,7 @@ export function deepClone<T>(origin: T) {
 		Object.setPrototypeOf(target, Object.getPrototypeOf(origin));
 
 		// 设置缓存，该对象已经被克隆过
-		cache.set(origin, target);
+		cache.set(origin as object, target);
 
 		for (const key in origin) {
 			target[key] = _deepClone(origin[key]);

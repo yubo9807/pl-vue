@@ -46,7 +46,7 @@ function BrowserRouter(props: BrowserRouterProps) {
           attrs.data = await getInitialProps(deepClone(attrs));
         }
       }
-      Comp.value = query.component;
+      Comp.value = deepClone(query.component);
     }
 
     if (query.beforeEnter) {
