@@ -35,11 +35,15 @@ function BrowserRouter(props: BrowserRouterProps) {
       if (!query.component.prototype) {
         query.component = (await query.component()).default;
       }
+
+      // 组件没有发生变化
+      if (Comp.value === query.component) return;
+
       attrs.path = query.path;
       const getInitialProps = isExistGetInitialProps(query.component);
       if (getInitialProps) {
         const ssrData = window[config.ssrDataKey];
-        if (ssrData) {
+        if (ssrData && attrs.path in ssrData) {
           attrs.data = ssrData[attrs.path];
           delete ssrData[attrs.path];
         } else {
