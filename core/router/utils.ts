@@ -1,3 +1,4 @@
+import { config } from "./create-router";
 import { BaseOption, RouteOption } from "./type";
 
 /**
@@ -17,7 +18,7 @@ export function parseQuery(url: string) {
  * @returns 
  */
 export function analyzeRoute(url: string): RouteOption {
-  const newUrl = new URL('http://0.0.0.0' + url);
+  const newUrl = new URL('http://0.0.0.0' + config.base + url);
   return {
     fullPath: newUrl.href.replace(newUrl.origin, ''),
     path:     newUrl.pathname,

@@ -1,5 +1,6 @@
 import { AnyObj } from "../utils"
 import { Component, PropsType, Tree } from "../vdom"
+import { config } from "./create-router"
 import { BeforeEnter } from "./type"
 import { formatUrl } from "./utils"
 
@@ -23,6 +24,7 @@ export type RouteItem = Tree & {
  * @returns 
  */
 export function queryRoute(routes: RouteItem[], pathname: string) {
+  pathname = pathname.replace(config.base, '');
   const query = routes.find(val => {
     const { path, exact } = val.attrs;
 
