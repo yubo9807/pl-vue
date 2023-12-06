@@ -51,6 +51,8 @@ function BrowserRouter(props: BrowserRouterProps) {
         }
       }
       Comp.value = query.component;
+      attrs.meta = query.meta;
+      currentRoute.meta = query.meta;
     }
 
     // 全局守卫
@@ -115,8 +117,10 @@ function StaticRouter(props: StaticRouterProps) {
   if (lock) return <></>
 
   let Comp = query.component;
+  currentRoute.meta = query.meta;
   const attrs: PagePropsType = {
     path: query.path,
+    meta: query.meta,
   };
   const replaceStr = `r_${createId()}`;
 

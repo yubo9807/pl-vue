@@ -61,10 +61,6 @@ export function initRouter(option: Config) {
   }
 }
 
-export function useRoute() {
-  return currentRoute;
-}
-
 // 服务端临时变量
 export const variable = {
   currentTemplate: '',

@@ -1,3 +1,4 @@
+import { AnyObj } from "../utils"
 import { Component, PropsType, Tree } from "../vdom"
 import { BeforeEnter } from "./type"
 import { formatUrl } from "./utils"
@@ -7,6 +8,7 @@ type RouteProps = PropsType<{
   component:    Component | (() => Promise<Component>)
   exact?:       boolean
   beforeEnter?: BeforeEnter
+  meta?:        AnyObj
 }>
 export function Route(props: RouteProps) {}
 
@@ -30,10 +32,11 @@ export function queryRoute(routes: RouteItem[], pathname: string) {
     return formatUrl(path) === pathname;
   });
   if (!query) return;
-  const { path, component, beforeEnter } = query.attrs;
+  const { path, component, beforeEnter, meta } = query.attrs;
   return {
     path: formatUrl(path),
     component,
+    meta,
     beforeEnter,
   };
 }

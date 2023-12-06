@@ -23,6 +23,7 @@ export function analyzeRoute(url: string): RouteOption {
     path:     newUrl.pathname,
     query:    parseQuery(newUrl.search),
     hash:     newUrl.hash,
+    meta:     {},
   }
 }
 

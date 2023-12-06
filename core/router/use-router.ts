@@ -48,6 +48,10 @@ export function go(num: number) {
   history.go(num);
 }
 
+/**
+ * router method
+ * @returns 
+ */
 export function useRouter() {
   return {
     back: () => go(-1),
@@ -58,4 +62,12 @@ export function useRouter() {
     options: config,
     currentRoute: toRaw(currentRoute),
   }
+}
+
+/**
+ * 当前 route 信息
+ * @returns 
+ */
+export function useRoute() {
+  return currentRoute;
 }

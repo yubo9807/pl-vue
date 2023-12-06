@@ -17,6 +17,7 @@ export type RouteOption = {
 
 export type GetInitialPropsOption = {
   path?: string
+  meta?: AnyObj
 }
 
 export interface PagePropsType extends GetInitialPropsOption {
