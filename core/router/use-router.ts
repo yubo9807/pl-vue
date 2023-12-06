@@ -11,6 +11,9 @@ import { analyzeRoute } from "./utils"
  */
 function toggle(option: SkipOption, type: 'push' | 'replace') {
   if (isString(option)) {
+    if (config.mode === 'history') {
+      option = config.base + option;
+    }
     option = analyzeRoute(option as string);
   }
   for (const key in option as BaseOption) {

@@ -15,6 +15,8 @@ export function Link(props: LinkProps) {
     props.to = splicingUrl(props.to as BaseOption);
   }
 
+  const href = config.mode === 'hash' ? `${config.base}#${props.to}` : config.base + props.to;
+
   function jump(e: Event) {
     e.preventDefault();
     if (props.type === 'push') {
@@ -24,5 +26,5 @@ export function Link(props: LinkProps) {
     }
   }
 
-  return <a className={props.className} href={config.base + props.to} onclick={jump}>{props.children}</a>
+  return <a className={props.className} href={href} onclick={jump}>{props.children}</a>
 }
