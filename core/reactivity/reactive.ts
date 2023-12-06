@@ -1,4 +1,4 @@
-import { nextTick, printWarn, AnyObj, hasOwn, isMemoryObject } from "../utils";
+import { nextTick, printWarn, AnyObj, hasOwn, isMemoryObject, isObject } from "../utils";
 import { dependencyCollection, distributeUpdates } from "./depend";
 import { isReadonly } from "./readonly";
 
@@ -124,7 +124,7 @@ export function reactive<T extends AnyObj>(target: T): T {
  * @returns 
  */
 export function isReactive<T extends AnyObj>(reactive: T): boolean {
-  return !!reactive[ReactiveFlags.RAW];
+  return isObject(reactive) && !!reactive[ReactiveFlags.RAW];
 }
 
 /**

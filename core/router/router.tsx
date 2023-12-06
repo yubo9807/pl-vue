@@ -107,6 +107,13 @@ function StaticRouter(props: StaticRouterProps) {
   }
 
   let lock = false;
+  if (beforeEach) {
+    lock = true;
+    beforeEach(toRaw(currentRoute), backupRoute, () => {
+      backupRoute = deepClone(currentRoute);
+      lock = false;
+    })
+  }
   if (query.beforeEnter) {
     lock = true;
     query.beforeEnter(toRaw(currentRoute), backupRoute, () => {
