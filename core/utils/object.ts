@@ -10,6 +10,13 @@ export function deepClone<T>(origin: T) {
 	const noCloneTypes = ['null', 'weakset', 'weakmap'];
 	
 	const specialClone = {
+		function(func: Function) {
+			const newFunc = function(...args) {
+				return func.apply(this, args);
+			}
+			newFunc.prototype = _deepClone(func.prototype);
+			return newFunc;
+		},
 		set(set: Set<any>) {
 			const collect = new Set();
 			for (const value of set) {
@@ -26,15 +33,15 @@ export function deepClone<T>(origin: T) {
 		},
 	}
 
-	function _deepClone<T>(origin: T) {
+	function _deepClone<T>(origin: T): T {
 		const type = isType(origin);
-		if (typeof origin !== 'object' || noCloneTypes.includes(type)) {
+		if (!['object', 'function'].includes(type) || noCloneTypes.includes(type)) {
 			return origin;
 		}
 
 		// 防止环形引用问题（已经克隆过的对象不再进行克隆）
-		if (cache.has(origin)) {
-			return cache.get(origin);
+		if (cache.has(origin as AnyObj)) {
+			return cache.get(origin as AnyObj);
 		}
 
 		// 特殊类型克隆处理
@@ -47,7 +54,7 @@ export function deepClone<T>(origin: T) {
 		Object.setPrototypeOf(target, Object.getPrototypeOf(origin));
 
 		// 设置缓存，该对象已经被克隆过
-		cache.set(origin, target);
+		cache.set(origin as AnyObj, target);
 
 		for (const key in origin) {
 			target[key] = _deepClone(origin[key]);
