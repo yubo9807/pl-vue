@@ -19,10 +19,10 @@ export function Link(props: LinkProps) {
 
   function jump(e: Event) {
     e.preventDefault();
-    if (props.type === 'push') {
-      push(props.to);
-    } else {
+    if (props.type === 'replace') {
       replace(props.to);
+    } else {
+      push(props.to);
     }
   }
 
