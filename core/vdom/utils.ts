@@ -56,4 +56,8 @@ export function noRenderValue(value: any) {
 export function createTextNode(text: string) {
   return document.createTextNode(text);
 }
+
+export function appendChild(dom: Node, child: Node) {
+  dom.appendChild(child);
+}
 // #endregion

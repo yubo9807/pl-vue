@@ -1,6 +1,6 @@
 import { binding } from "../reactivity";
 import { objectAssign, AnyObj, createId, printWarn, isArray, isEquals, isFunction, isObject, isString } from '../utils';
-import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode } from "./utils"
+import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild } from "./utils"
 import { isFragment } from "./h";
 import { Tag, Attrs, Children, Tree, Component } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
@@ -65,34 +65,34 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
     if (isAssignmentValueToNode(val)) {
       const textNode = createTextNode(val);
       textNode.nodeValue = val;
-      el.appendChild(textNode);
+      appendChild(el, textNode);
       return;
     }
 
     // 响应式数据
     if (isFunction(val)) {
       const fragment = createElementFragment([val]);
-      el.appendChild(fragment);
+      appendChild(el, fragment);
       return;
     }
 
     // 节点片段
     if (isArray(val)) {
       const fragment = createElementFragment(val);
-      el.appendChild(fragment);
+      appendChild(el, fragment);
       return;
     }
 
     // 节点
     if (isVirtualDomObject(val)) {
       const node = createElementReal(val.tag, val.attrs, val.children);
-      el.appendChild(node);
+      appendChild(el, node);
       return;
     }
 
     if (isObject(val) && isComponent(val.tag)) {
       const node = createElement(val.tag, val.attrs, val.children);
-      el.appendChild(node);
+      appendChild(el, node);
       return;
     }
 
@@ -166,7 +166,7 @@ export function createElementFragment(children: Children) {
     if (isAssignmentValueToNode(val)) {
       const textNode = createTextNode(val);
       textNode.nodeValue = val;
-      fragment.appendChild(textNode);
+      appendChild(fragment, textNode);
       return;
     }
 
@@ -179,21 +179,21 @@ export function createElementFragment(children: Children) {
     // 节点片段
     if (isArray(val)) {
       const fragmentNode = createElementFragment(val);
-      fragment.appendChild(fragmentNode);
+      appendChild(fragment, fragmentNode);
       return;
     }
 
     // 节点
     if (isVirtualDomObject(val)) {
       const node = createElementReal(val.tag, val.attrs, val.children);
-      fragment.appendChild(node);
+      appendChild(fragment, node);
       return;
     }
 
     // 组件
     if (isObject(val) && isComponent(val.tag)) {
       const node = createElement(val.tag, val.attrs, val.children);
-      fragment.appendChild(node);
+      appendChild(fragment, node);
       return;
     }
 
@@ -271,7 +271,7 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
   let parent = null;
 
   const textNode = createTextNode('');  // 用于记录添加位置
-  fragment.appendChild(textNode);
+  appendChild(fragment, textNode);
 
   binding(() => {
     let value = val();
@@ -323,7 +323,7 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
         }
 
         if (lockFirstRun) {
-          fragment.appendChild(node);
+          appendChild(fragment, node);
         } else if (backupNodes.length === 0) {
           parent ??= textNode.parentElement;
           parent.insertBefore(node, textNode.nextSibling);
