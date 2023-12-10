@@ -35,7 +35,7 @@ export function deepClone<T>(origin: T) {
 
 	function _deepClone<T>(origin: T): T {
 		const type = isType(origin);
-		if (!['object', 'function'].includes(type) || noCloneTypes.includes(type)) {
+		if (!['object', 'function'].includes(typeof origin) || noCloneTypes.includes(type)) {
 			return origin;
 		}
 
