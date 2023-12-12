@@ -8,14 +8,14 @@ class RefImpl<T> {
   [ISREF]       = true
   __v_isShallow = false
 
-  _rawValue: T
+  _rawValue: { value: T }
   _value:    T
   getSignal: () => T
   setSignal: (newValue: T) => void
 
   constructor(value: T) {
-    this._rawValue = value;
-    const [ getSignal, setSignal ] = createSignal(value);
+    const [ getSignal, setSignal, raw ] = createSignal(value);
+    this._rawValue = raw;
     this.getSignal = getSignal;
     this.setSignal = setSignal;
     this._value = getSignal();
@@ -27,7 +27,6 @@ class RefImpl<T> {
 
   set value(newValue) {
     this.setSignal(newValue);
-    this._rawValue = newValue;
   }
 
 }

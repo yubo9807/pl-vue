@@ -3,13 +3,13 @@ import { reactive } from "./reactive";
 type Return<T> = [
   GetSignal: () => T,
   SetSignal: (val: T) => void,
+  Raw:       { value: T },
 ]
 
 export function createSignal<T>(value: T): Return<T>{
 
-  const o = reactive({
-    value,
-  })
+  const raw = { value };
+  const o = reactive(raw);
 
   function getSignal(): T {
     return o.value;
@@ -22,6 +22,7 @@ export function createSignal<T>(value: T): Return<T>{
   return [
     getSignal,
     setSignal,
+    raw,
   ]
 
 }

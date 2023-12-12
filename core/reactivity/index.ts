@@ -4,4 +4,4 @@ export { createSignal } from './signal';
 export { readonly } from "./readonly";
 export { computed } from "./computed";
 export { watch, watchEffect } from "./watch";
-export { binding } from './depend';
+export { binding, recycleMemory } from './depend';

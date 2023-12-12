@@ -1,3 +1,5 @@
+import { isMemoryObject, nextTick } from "../utils";
+import { toRaw } from "./reactive";
 
 let func = null;
 const funcsMap: WeakMap<object, Function[]> = new WeakMap();  // 收集依赖的 map 集合
@@ -43,9 +45,19 @@ export function distributeUpdates(key: object) {
 }
 
 /**
- * 清空收集的依赖
- * @param key 
+ * 回收内存，清空收集的依赖
+ * @param key ref 或 reactive 对象
  */
-export function removeDependency(key: object) {
-  funcsMap.delete(key);
+export function recycleMemory(key: object) {
+  function _recycleMemory(key: object) {
+    const obj = toRaw(key);
+    for (const prop in obj) {
+      const val = obj[prop];
+      isMemoryObject(val) && _recycleMemory(val as object);
+    }
+    funcsMap.delete(obj);
+  }
+
+  // 响应式数据本身就在微队列中更新，故这里也需要进行排队等待
+  nextTick(() => _recycleMemory(key));
 }
