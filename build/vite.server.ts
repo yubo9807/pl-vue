@@ -13,11 +13,11 @@ const config = defineConfig({
     emptyOutDir: false,
     minify: true,
     ssr: 'test/server.ts',
-    lib: {
-      entry: 'test/server.ts',
-      fileName: 'server.js',
-      formats: ['cjs'],
-    },
+    rollupOptions: {
+      output: {
+        format: 'cjs',
+      }
+    }
   },
 })
 
