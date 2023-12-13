@@ -45,19 +45,19 @@ export function distributeUpdates(key: object) {
 }
 
 /**
- * 回收内存，清空收集的依赖
+ * 回收依赖，清空收集的依赖
  * @param key ref 或 reactive 对象
  */
-export function recycleMemory(key: object) {
-  function _recycleMemory(key: object) {
+export function recycleDepend(key: object) {
+  function _recycleDepend(key: object) {
     const obj = toRaw(key);
     for (const prop in obj) {
       const val = obj[prop];
-      isMemoryObject(val) && _recycleMemory(val as object);
+      isMemoryObject(val) && _recycleDepend(val as object);
     }
     funcsMap.delete(obj);
   }
 
   // 响应式数据本身就在微队列中更新，故这里也需要进行排队等待
-  nextTick(() => _recycleMemory(key));
+  nextTick(() => _recycleDepend(key));
 }
