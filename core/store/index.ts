@@ -11,7 +11,6 @@ type Obj = Record<string, any>
 class Stroe<S extends Obj, A extends Obj> {
   state:   S
   actions: A
-  #lock = true;
   constructor(state: S, actions: A) {
     this.state = reactive(deepClone(state));
 
@@ -20,17 +19,14 @@ class Stroe<S extends Obj, A extends Obj> {
     for (const key in actions) {
       const self = this;
       function func(...args: unknown[]) {
-        self.#lock = false;                   // 解锁
         const result = actions[key](...args);
         if (isMemoryObject(result) && result[Symbol.toStringTag] === 'Promise') {
           result.then(res => {
             self._merge(state);
-            nextTick(() => self.#lock = true);
             return res;
           })
         } else {
           self._merge(state);
-          nextTick(() => self.#lock = true);  // 重新上锁
           return result;
         }
       }
@@ -47,14 +43,6 @@ class Stroe<S extends Obj, A extends Obj> {
       })
     }
 
-    // 监听数据：若通过直接赋值的方式改变数据，恢复到原先的值
-    watch(() => this.state, () => {
-      if (this.#lock) {  // 上锁时不允许改变任何值
-        console.error('Failed to update state.');
-        this._merge(state);
-      }
-    }, { deep: true });
-
   }
 
   /**
@@ -62,11 +50,12 @@ class Stroe<S extends Obj, A extends Obj> {
    * @param state 
    */
   _merge(state: S) {
-    const targetKsys = Object.keys(state);
+    const newState = deepClone(state);
+    const targetKsys = Object.keys(newState);
 
-    // 只对 state 数据做更改
-    for (const prop in state) {
-      this.state[prop] = state[prop];
+    // 只对 newState 数据做更改
+    for (const prop in newState) {
+      this.state[prop] = newState[prop];
     }
     for (const key in this.state) {
       if (isAction(this.state[key])) continue;

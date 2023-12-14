@@ -44,10 +44,9 @@ class ComputedRefImpl<T> {
  * @param option 
  * @returns 
  */
-export function computed<T>(option: ComputedOption<T>) {
+export function computed<T>(option: ComputedOption<T>): ComputedRefImpl<T> {
   if (isFunction(option)) {
-    // @ts-ignore
-    return new ComputedRefImpl(option);
+    return new ComputedRefImpl(option as Getter<T>);
   }
 
   // @ts-ignore
