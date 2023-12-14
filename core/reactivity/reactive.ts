@@ -62,7 +62,7 @@ export function reactive<T extends AnyObj>(target: T): T {
         }
         return true;
       }
-      
+
       const oldValue = Reflect.get(target, key, receiver);
       if (oldValue === value) return true;
       const result = Reflect.set(target, key, value, receiver);
@@ -91,12 +91,6 @@ export function reactive<T extends AnyObj>(target: T): T {
     deleteProperty(target, key) {
 
       const oldValue = Reflect.get(target, key);
-      if (isMemoryObject(oldValue)) {
-        for (const prop in oldValue) {
-          this.deleteProperty(oldValue, prop);
-        }
-        return true;
-      }
 
       const hasKey = hasOwn(target, key);
       const result = Reflect.deleteProperty(target, key);
