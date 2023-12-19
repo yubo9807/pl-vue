@@ -106,12 +106,12 @@ export function toRefs<T>(target: T) {
 
 
 
-type CustomRefCallback = (track: Function, trigger: Function) => ({ get: Function, set: Function})
+type CustomRefCallback<T> = (track: Function, trigger: Function) => ({ get: () => T, set: (val: T) => void })
 
 class CustomRefImpl<T> extends RefImpl<T> {
   _get: Function
   _set: Function
-  constructor(callback: CustomRefCallback) {
+  constructor(callback: CustomRefCallback<T>) {
     let isRef = false;
     const { get, set } = callback(
       () => isRef = true,
@@ -124,7 +124,7 @@ class CustomRefImpl<T> extends RefImpl<T> {
     this._set = set;
   }
 
-  get value() {
+  get value(): T {
     return this.__v_isRef ? super.value : this._get();
   }
 
@@ -146,6 +146,6 @@ class CustomRefImpl<T> extends RefImpl<T> {
  * @param callback 
  * @returns 
  */
-export function customRef(callback: CustomRefCallback) {
+export function customRef<T>(callback: CustomRefCallback<T>) {
   return new CustomRefImpl(callback);
 }
