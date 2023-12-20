@@ -45,10 +45,10 @@ export function distributeUpdates(key: object) {
 }
 
 /**
- * 回收依赖，清空收集的依赖
+ * 回收依赖，清空当前已收集的依赖
  * @param key ref 或 reactive 对象
  */
-export function recycleDepend(key: object) {
+export function recycleDepend(...keys: object[]) {
   function _recycleDepend(key: object) {
     const obj = toRaw(key);
     for (const prop in obj) {
@@ -57,7 +57,5 @@ export function recycleDepend(key: object) {
     }
     funcsMap.delete(obj);
   }
-
-  // 响应式数据本身就在微队列中更新，故这里也需要进行排队等待
-  nextTick(() => _recycleDepend(key));
+  keys.forEach(_recycleDepend);
 }
