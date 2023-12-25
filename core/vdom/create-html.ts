@@ -50,7 +50,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
           value[key] = value[key]();
         }
       }
-      value = '"' + JSON.stringify(value).slice(1, -1).replaceAll('"', '').replaceAll(',', ';') + '"';
+      value = '"' + JSON.stringify(value).slice(1, -1).replace(/"/g, '').replace(/,/g, ';') + '"';
     }
 
     attrStr += ` ${attr}="${value}"`;

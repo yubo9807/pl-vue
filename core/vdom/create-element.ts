@@ -1,5 +1,5 @@
 import { binding } from "../reactivity";
-import { objectAssign, AnyObj, createId, printWarn, isArray, isEquals, isFunction, isObject, isString } from '../utils';
+import { objectAssign, AnyObj, createId, printWarn, isArray, isEquals, isFunction, isObject, isString, len } from '../utils';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild } from "./utils"
 import { isFragment } from "./h";
 import { Tag, Attrs, Children, Tree, Component } from "./type";
@@ -246,7 +246,7 @@ type BackupNode = {
  */
 function lookupBackupNodes(arr: BackupNode[], val: number) {
   let start = 0;
-  let end = arr.length - 1;
+  let end = len(arr) - 1;
   while (start <= end) {
     var midden = Math.ceil((start + end) / 2);
     if(val === arr[midden].key) {
@@ -286,7 +286,7 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
     value = value.filter(val => !noRenderValue(val));
 
     let i = 0;
-    while (i < value.length) {
+    while (i < len(value)) {
       let val = value[i];
 
       const index = lookupBackupNodes(backupNodes, i);
@@ -324,11 +324,11 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
 
         if (lockFirstRun) {
           appendChild(fragment, node);
-        } else if (backupNodes.length === 0) {
+        } else if (len(backupNodes) === 0) {
           parent ??= textNode.parentElement;
           parent.insertBefore(node, textNode.nextSibling);
         } else {
-          const prevNode = backupNodes[backupNodes.length - 1].node;
+          const prevNode = backupNodes[len(backupNodes) - 1].node;
           const lastNode = prevNode.nextSibling;
           prevNode.parentElement.insertBefore(node, lastNode);
         }
@@ -339,8 +339,8 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
     }
 
     // 检查有没有要删除的节点
-    if (backupNodes.length > value.length) {
-      for (let i = value.length; i < backupNodes.length; i ++) {
+    if (len(backupNodes) > len(value)) {
+      for (let i = len(value); i < len(backupNodes); i ++) {
         const originTree = backupNodes[i].tree;
 
         isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag as Component);  // 组件卸载之前
@@ -352,7 +352,7 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
         }
 
       }
-      backupNodes.splice(value.length, backupNodes.length - value.length);
+      backupNodes.splice(len(value), len(backupNodes) - len(value));
     }
 
     lockFirstRun = false;

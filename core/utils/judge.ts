@@ -1,3 +1,4 @@
+import { len } from "./string";
 import { AnyObj, Key } from "./type";
 
 export type Type = 'string'    | 'number'  | 'boolean' |
@@ -44,7 +45,7 @@ export function hasOwn(target: object | any[], key: Key) {
 export function isEquals(val1: any, val2: any) {
   if (isMemoryObject(val1) && isMemoryObject(val2)) {
     const keys1 = Object.keys(val1), keys2 = Object.keys(val2);
-    if (keys1.length !== keys2.length) return false;
+    if (len(keys1) !== len(keys2)) return false;
     for (const key of keys1) {
       if (!keys2.includes(key)) return false;
       const bool = isEquals(val1[key], val2[key]);

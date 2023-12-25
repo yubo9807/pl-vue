@@ -1,4 +1,5 @@
 import { watch } from '../reactivity';
+import { len } from '../utils';
 import { createElementFragment, createHTML, h, Fragment, renderToString, Component, onMounted, onUnmounted } from '../vdom';
 import { config, setCurrentRoute, variable } from './create-router';
 import { stack } from './router';
@@ -20,9 +21,9 @@ export function Helmet(props) {
     const matched = variable.currentTemplate.match(/\<head\>(.*)\<\/head>/s);
     const headInnerHTML = matched[1].trim();
     const nodes = headInnerHTML.split('\n').filter(val => val.includes('<'));
-    for (let i = 0; i < nodes.length; i++) {
+    for (let i = 0; i < len(nodes); i++) {
       nodes[i] = nodes[i].trim();
-      for (let j = 0; j < regs.length; j++) {
+      for (let j = 0; j < len(regs); j++) {
         if (regs[j].test(nodes[i])) {
           nodes[i] = '';
         }
@@ -45,8 +46,8 @@ export function Helmet(props) {
     const nodes = head.innerHTML.split('\n').filter(val => val.includes('<'));
 
     const removes: number[] = [];  // 删除项
-    tag: for (let i = 0; i < regs.length; i++) {
-      for (let j = i; j < nodes.length; j++) {
+    tag: for (let i = 0; i < len(regs); i++) {
+      for (let j = i; j < len(nodes); j++) {
         if (regs[i].test(nodes[j])) {
           removes.push(i);
           continue tag;
@@ -58,7 +59,7 @@ export function Helmet(props) {
       head.children[val].remove();
     })
 
-    count = props.children.length;
+    count = len(props.children);
     const node = createElementFragment(props.children);
     head.insertBefore(node, head.children[0]);
   })
@@ -98,12 +99,12 @@ export async function ssrOutlet(App: Component, url: string, template: string) {
     const content = renderToString(<App />);
     variable.currentTemplate = template.replace('<!--ssr-outlet-->', content);
 
-    const unWatch = watch(() => stack.length, value => {
+    const unWatch = watch(() => len(stack), value => {
       if (value === 0) {
         const newTemplate = variable.currentTemplate;
         const index = newTemplate.search('</body>');
-        const script = Object.keys(variable.ssrData).length > 0 ? `<script>window.${config.ssrDataKey}=${JSON.stringify(variable.ssrData)}</script>` : '';
-        variable.currentTemplate = newTemplate.slice(0, index) + script + newTemplate.slice(index, newTemplate.length);
+        const script = len(Object.keys(variable.ssrData)) > 0 ? `<script>window.${config.ssrDataKey}=${JSON.stringify(variable.ssrData)}</script>` : '';
+        variable.currentTemplate = newTemplate.slice(0, index) + script + newTemplate.slice(index, len(newTemplate));
         resolve(variable.currentTemplate);
         unWatch();
       }
