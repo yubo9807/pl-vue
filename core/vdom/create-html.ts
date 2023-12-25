@@ -1,4 +1,4 @@
-import { isArray, isFunction, isObject, objectAssign, printWarn } from "../utils";
+import { isArray, isFunction, isObject, isString, objectAssign, printWarn } from "../utils";
 import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr } from "./utils";
 import { isFragment } from "./h";
 import { Attrs, Children, Tag } from "./type";
@@ -32,6 +32,11 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
     if (attr.startsWith('on') || attr === 'ref') continue;
 
     let value = isFunction(attrs[attr]) && isReactiveChangeAttr(attr) ? attrs[attr]() : attrs[attr];
+
+    if (isString(tag) && ['innerHTML', 'innerText'].includes(attr)) {
+      children = [value];
+      continue;
+    }
 
     if (attr === 'className') {
       value && (attrStr += ` class="${value}"`);
