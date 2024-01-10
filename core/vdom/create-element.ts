@@ -105,11 +105,6 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
     const value = attrs[attr];
     if ([void 0, null].includes(value)) continue;
 
-    if (attr.startsWith('data-')) {
-      el.dataset[attr.slice(5)] = value;
-      continue;
-    }
-
     if (attr === 'ref') {
       value.value = el;
       continue;
@@ -119,6 +114,18 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
       value(el);
       continue;
     } 
+
+    if (attr.startsWith('data-')) {
+      const key = attr.slice(5);
+      if (isFunction(value) && isReactiveChangeAttr(attr)) {
+        binding(() => {
+          el.dataset[key] = value();
+        })
+      } else {
+        el.dataset[key] = value;
+      }
+      continue;
+    }
 
     if (isFunction(value) && isReactiveChangeAttr(attr)) {
       binding(() => {
