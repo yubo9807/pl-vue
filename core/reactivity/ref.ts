@@ -3,7 +3,7 @@ import { createSignal } from "./signal";
 
 export const ISREF = '__v_isRef';
 
-class RefImpl<T> {
+export class RefImpl<T> {
 
   [ISREF]       = true
   __v_isShallow = false
@@ -31,7 +31,6 @@ class RefImpl<T> {
 
 }
 
-export type Ref<T> = { value: T }
 /**
  * 原始值转为响应式数据
  * @param value 
@@ -55,7 +54,7 @@ export function isRef(ref: unknown) {
  * @param ref 
  * @returns 
  */
-export function unref<T>(ref: Ref<T>) {
+export function unref<T>(ref: RefImpl<T>) {
   return isRef(ref) ? ref.value : ref;
 }
 
