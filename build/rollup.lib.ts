@@ -81,3 +81,19 @@ builds.forEach(val => {
   esmBuild(val.file, val.external);
   cjsBuild(val.file, val.external);
 })
+
+rollup({
+  input: `core/jsx.ts`,
+  external: ['./utils', './dom'],
+  plugins: [
+    typescript2({
+      tsconfig: 'tsconfig.json',
+    }),
+  ],
+}).then(async bundle => {
+  await bundle.write({
+    format: 'es',
+    file: `lib/jsx.d.ts`,
+  });
+  bundle.close();
+})
