@@ -2,8 +2,9 @@ import { AnyObj } from "./utils"
 import { PropsType } from "./vdom"
 
 type OptionalDeep<T extends Record<string | symbol, any>> = {
-  // [K in keyof T]?: OptionalDeep<() => T[K]>
   [K in keyof T]?: any
+} & {
+  created?: (el: T) => void
 }
 
 type HTMLAttributes<T extends AnyObj> = PropsType<OptionalDeep<T>>
