@@ -5,11 +5,11 @@ import { AnyObj } from "./type";
  * 深度克隆
  * @param origin 被克隆对象
  */
-export function deepClone<T>(origin: T) {
+export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {}) {
 	const cache = new WeakMap();
-	const noCloneTypes = ['null', 'weakset', 'weakmap'];
+	const noCloneTypes = ['null', 'regexp', 'date', 'weakset', 'weakmap'];
 	
-	const specialClone = {
+	const specialClone = Object.assign({
 		function(func: Function) {
 			const newFunc = function(...args) {
 				return func.apply(this, args);
@@ -31,7 +31,7 @@ export function deepClone<T>(origin: T) {
 			}
 			return collect;
 		},
-	}
+	}, extend)
 
 	function _deepClone<T>(origin: T): T {
 		const type = isType(origin);
