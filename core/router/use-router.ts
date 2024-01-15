@@ -1,5 +1,5 @@
 import { toRaw } from "../reactivity";
-import { isString } from "../utils"
+import { isBrowser, isString } from "../utils"
 import { config, currentRoute } from "./create-router"
 import { BaseOption, SkipOption } from "./type";
 import { analyzeRoute } from "./utils"
@@ -20,6 +20,8 @@ function toggle(option: SkipOption, type: 'push' | 'replace') {
     currentRoute[key] = option[key];
   }
   const { fullPath } = currentRoute;
+
+  if (!isBrowser()) return;
   if (config.mode === 'history') {
     history[type === 'push' ? 'pushState' : 'replaceState']({}, '', fullPath);
   } else {

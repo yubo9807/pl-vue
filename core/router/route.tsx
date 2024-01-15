@@ -10,6 +10,7 @@ type RouteProps = PropsType<{
   exact?:       boolean
   beforeEnter?: BeforeEnter
   meta?:        AnyObj
+  redirect?:    string
 }>
 export function Route(props: RouteProps) {}
 
@@ -34,11 +35,12 @@ export function queryRoute(routes: RouteItem[], pathname: string) {
     return formatUrl(path) === pathname;
   });
   if (!query) return;
-  const { path, component, beforeEnter, meta } = query.attrs;
+  const { path, component, beforeEnter, meta, redirect } = query.attrs;
   return {
     path: formatUrl(path),
     component,
     meta,
     beforeEnter,
+    redirect,
   };
 }

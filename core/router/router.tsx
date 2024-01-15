@@ -1,10 +1,11 @@
 import { reactive, ref, toRaw, watch } from "../reactivity";
-import { createId, deepClone, isBrowser, isFunction } from "../utils";
+import { createId, deepClone, isBrowser, isFunction, isString } from "../utils";
 import { Component, PropsType, h, Fragment, renderToString } from "../vdom";
-import { beforeEach, config, currentRoute, variable } from "./create-router";
+import { beforeEach, config, currentRoute, setCurrentRoute, variable } from "./create-router";
 import { queryRoute } from "./route";
-import { PagePropsType } from "./type";
-import { formatUrl } from "./utils";
+import { BeforeEnter, PagePropsType } from "./type";
+import { replace } from "./use-router";
+import { analyzeRoute, formatUrl } from "./utils";
 
 let backupRoute = void 0;  // 旧的 route 信息
 const unwatchs  = [];      // 收集子路由的取消监听事件
@@ -55,21 +56,28 @@ function BrowserRouter(props: BrowserRouterProps) {
       currentRoute.meta = query.meta;
     }
 
-    // 全局守卫
-    if (beforeEach) {
-      beforeEach(toRaw(currentRoute), backupRoute, () => {
+    // 重定向
+    if (query.redirect && query.redirect !== currentRoute.fullPath) {
+      replace(query.redirect);
+      return;
+    }
+
+    function protect(func: BeforeEnter) {
+      func(toRaw(currentRoute), backupRoute, () => {
         backupRoute = deepClone(currentRoute);
         path === currentRoute.path ? next() : routeChange(currentRoute.path);
       })
+    }
+
+    // 全局守卫
+    if (beforeEach) {
+      protect(beforeEach);
       return;
     }
 
     // 独享守卫
     if (query.beforeEnter) {
-      query.beforeEnter(toRaw(currentRoute), backupRoute, () => {
-        backupRoute = deepClone(currentRoute);
-        path === currentRoute.path ? next() : routeChange(currentRoute.path);
-      });
+      protect(query.beforeEnter);
       return;
     }
 
@@ -95,40 +103,79 @@ function BrowserRouter(props: BrowserRouterProps) {
 
 
 export const stack: string[] = reactive([]);  // 执行栈
+function deleteStackItem(id: string) {
+  const index = stack.indexOf(id);
+  stack.splice(index, 1);
+}
+
+let repalceComp: string = null;
 
 type StaticRouterProps = PropsType<{
   notFound?: Component
 }>
 function StaticRouter(props: StaticRouterProps) {
-  const query = queryRoute(props.children, currentRoute.path);
+
+  function routerChange(path: string) {
+    let query = queryRoute(props.children, path);
+
+    // 重定向
+    if (query.redirect && query.redirect !== currentRoute.fullPath) {
+      setCurrentRoute(analyzeRoute(query.redirect));
+      return routerChange(currentRoute.path);
+    }
+
+    function protect(func: BeforeEnter) {
+      repalceComp = `b_${createId()}`;
+      stack.push(repalceComp);
+
+      func(toRaw(currentRoute), backupRoute, () => {
+        backupRoute = deepClone(currentRoute);
+        if (query.path !== currentRoute.path) {
+          StaticRouter(props);
+        } else {
+          resultReplace(repalceComp, query.component, {
+            path: query.path,
+            meta: query.meta,
+          });
+          deleteStackItem(repalceComp);
+        }
+      })
+      return repalceComp;
+    }
+
+    // 全局守卫
+    if (beforeEach) return protect(beforeEach);
+
+    // 独享守卫
+    if (query.beforeEnter) return protect(query.beforeEnter);
+
+    return query;
+  }
+
+  let query = routerChange(currentRoute.path);
+
+  if (isString(query)) {
+    return <>{query}</>
+  }
+
   if (!query) {
     const Comp = props.notFound;
     return Comp ? <Comp /> : <></>;
   }
 
-  let lock = false;
-  if (beforeEach) {
-    lock = true;
-    beforeEach(toRaw(currentRoute), backupRoute, () => {
-      backupRoute = deepClone(currentRoute);
-      lock = false;
-    })
-  }
-  if (query.beforeEnter) {
-    lock = true;
-    query.beforeEnter(toRaw(currentRoute), backupRoute, () => {
-      backupRoute = deepClone(currentRoute);
-      lock = false;
-    })
-  }
-  if (lock) return <></>
-
+  query = query as ReturnType<typeof queryRoute>;
   let Comp = query.component;
   currentRoute.meta = query.meta;
   const attrs: PagePropsType = {
     path: query.path,
     meta: query.meta,
   };
+
+  if (repalceComp) {
+    resultReplace(repalceComp, Comp, attrs);
+    deleteStackItem(repalceComp);
+  }
+
   const replaceStr = `r_${createId()}`;
 
   // 如果是异步组件
@@ -183,6 +230,7 @@ export function Router(props: BrowserRouterProps & StaticRouterProps) {
     : <StaticRouter {...props} />
 }
 
+
 /**
  * 结果替换
  * @param replaceStr 
@@ -191,8 +239,7 @@ export function Router(props: BrowserRouterProps & StaticRouterProps) {
  */
 function resultReplace(replaceStr: string, Comp: Component, attrs: PagePropsType) {
   const string = renderToString(<Comp {...attrs} />);
-  const index = stack.indexOf(replaceStr);
-  stack.splice(index, 1);
+  deleteStackItem(replaceStr);
   const newTemplate = variable.currentTemplate.replace(replaceStr, string);
   variable.currentTemplate = newTemplate;
 }
