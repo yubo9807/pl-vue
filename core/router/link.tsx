@@ -2,7 +2,7 @@ import { isString } from "../utils"
 import { PropsType, h } from "../vdom"
 import { config } from "./create-router"
 import { BaseOption, SkipOption } from "./type"
-import { push, replace } from "./use-router"
+import { push, replace, useRoute } from "./use-router"
 import { splicingUrl } from "./utils"
 
 type LinkProps = PropsType<{
@@ -26,5 +26,19 @@ export function Link(props: LinkProps) {
     }
   }
 
-  return <a className={props.className} href={href} onclick={jump}>{props.children}</a>
+  const route = useRoute();
+
+  return <a
+    className={() => {
+      const currentPath = props.to + '/';
+      const routePath = route.path + '/';
+      return [
+        routePath.startsWith(currentPath) && 'active',
+        routePath === currentPath && 'exact-active',
+        props.className,
+      ]
+    }}
+    href={href}
+    onclick={jump}
+  >{props.children}</a>
 }

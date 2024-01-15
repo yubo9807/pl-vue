@@ -45,6 +45,16 @@ export function noRenderValue(value: any) {
   return [void 0, null, '', true, false].includes(value);
 }
 
+/**
+ * 连接 class
+ * @param args 剩余参数，类名
+ * @returns 
+ */
+export function joinClass(...args: string[]) {
+  const arr = args.filter(val => isAssignmentValueToNode(val))
+  return arr.join(' ').trim().replace(/\s+/, ' ');
+}
+
 
 
 // #region 减少打包代码体积

@@ -1,5 +1,5 @@
 import { isArray, isFunction, isObject, isString, objectAssign, printWarn } from "../utils";
-import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr } from "./utils";
+import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr, joinClass } from "./utils";
 import { isFragment } from "./h";
 import { Attrs, Children, Tag } from "./type";
 
@@ -39,7 +39,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
     }
 
     if (attr === 'className') {
-      value && (attrStr += ` class="${value}"`);
+      value && (attrStr += ` class="${joinClass(...[value].flat())}"`);
       continue;
     }
 

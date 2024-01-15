@@ -1,6 +1,6 @@
 import { binding } from "../reactivity";
 import { objectAssign, AnyObj, createId, printWarn, isArray, isEquals, isFunction, isObject, isString, len } from '../utils';
-import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild } from "./utils"
+import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild, joinClass } from "./utils"
 import { isFragment } from "./h";
 import { Tag, Attrs, Children, Tree, Component } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
@@ -103,7 +103,6 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
   // attrs 赋值
   for (const attr in attrs) {
     const value = attrs[attr];
-    if ([void 0, null].includes(value)) continue;
 
     if (attr === 'ref') {
       value.value = el;
@@ -113,28 +112,10 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
     if (attr === 'created' && isFunction(value)) {
       value(el);
       continue;
-    } 
-
-    if (attr.startsWith('data-')) {
-      const key = attr.slice(5);
-      if (isFunction(value) && isReactiveChangeAttr(attr)) {
-        binding(() => {
-          el.dataset[key] = value();
-        })
-      } else {
-        el.dataset[key] = value;
-      }
-      continue;
     }
 
-    if (isFunction(value) && isReactiveChangeAttr(attr)) {
-      binding(() => {
-        el[attr] = value();
-      })
-      continue;
-    }
+    attrAssign(el, attr, value);
 
-    el[attr] = value;
   }
 
   // 对样式单独处理
@@ -153,6 +134,28 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
 
 }
 
+/**
+ * 特殊属性赋值
+ * @param el 
+ * @param attr 
+ * @param value 
+ */
+function attrAssign(el: HTMLElement, attr: string, value: any) {
+  let assgin = (val: string) => el[attr] = val;
+
+  if (attr === 'className') {
+    assgin = (val: string) => el[attr] = joinClass(...[val].flat());
+  } else if (attr.startsWith('data-')) {
+    assgin = (val: string) => el.dataset[attr.slice(5)] = val;
+  }
+
+  // 响应式数据
+  if (isReactiveChangeAttr(attr) && isFunction(value)) {
+    binding(() => assgin(value()))
+  } else {
+    assgin(value);
+  }
+}
 
 
 

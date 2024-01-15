@@ -40,7 +40,7 @@ export let beforeEach: BeforeEnter = null;
  * @param option 
  * @returns 
  */
-export function initRouter(option: Config) {
+export function initRouter(option: Config = {}) {
   Object.assign(config, option);
   if (isBrowser()) {
     const route = analyzeRoute(getBrowserUrl());
