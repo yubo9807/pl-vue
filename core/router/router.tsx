@@ -59,6 +59,7 @@ function BrowserRouter(props: BrowserRouterProps) {
     // 重定向
     if (query.redirect && query.redirect !== currentRoute.fullPath) {
       replace(query.redirect);
+      routeChange(currentRoute.path);
       return;
     }
 
