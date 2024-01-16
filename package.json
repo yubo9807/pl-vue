@@ -1,6 +1,6 @@
 {
   "name": "pl-vue",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "description": "Pl Vue",
   "main": "lib/index.cjs",
   "module": "lib/index.js",
@@ -50,7 +50,7 @@
   "homepage": "http://plvue.hpyyb.cn",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yubo9807/mvvm_vue3.git"
+    "url": "git+https://github.com/yubo9807/pl-vue.git"
   },
   "files": [
     "lib"
