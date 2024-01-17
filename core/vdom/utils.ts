@@ -1,5 +1,7 @@
 import { isFunction, isObject, isString } from "../utils";
-import { isFragment } from "./h";
+import { h, isFragment } from "./h";
+import { render } from "./render";
+import { PropsType } from "./type";
 
 /**
  * 可以直接赋值给 dom 节点
@@ -53,6 +55,16 @@ export function noRenderValue(value: any) {
 export function joinClass(...args: string[]) {
   const arr = args.filter(val => isAssignmentValueToNode(val))
   return arr.join(' ').trim().replace(/\s+/, ' ');
+}
+
+/**
+ * 使用组件
+ * @param component 组件函数
+ * @param props     组件参数
+ * @returns Node
+ */
+export function useComponent<T extends (props: PropsType<{}>) => any>(component: T, props: Parameters<typeof component>[0] = {}) {
+  return render(h(component, props));
 }
 
 

@@ -9,4 +9,4 @@ export { onBeforeMount } from './hooks/before-mount';
 export { onMounted } from './hooks/mounted';
 export { onBeforeUnmount } from './hooks/before-unmount';
 export { onUnmounted } from './hooks/unmounted';
-export { joinClass } from './utils';
+export { joinClass, useComponent } from './utils';
