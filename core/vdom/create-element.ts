@@ -102,20 +102,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
 
   // attrs 赋值
   for (const attr in attrs) {
-    const value = attrs[attr];
-
-    if (attr === 'ref') {
-      value.value = el;
-      continue;
-    }
-
-    if (attr === 'created' && isFunction(value)) {
-      value(el);
-      continue;
-    }
-
-    attrAssign(el, attr, value);
-
+    attrAssign(el, attr, attrs[attr]);
   }
 
   // 对样式单独处理
@@ -135,14 +122,26 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
 }
 
 /**
- * 特殊属性赋值
+ * 属性赋值
  * @param el 
  * @param attr 
  * @param value 
  */
 function attrAssign(el: HTMLElement, attr: string, value: any) {
+  // 自定义属性
+  if (attr === 'ref' && isObject(value)) {
+    value.value = el;
+    return;
+  }
+  if (attr === 'created' && isFunction(value)) {
+    value(el);
+    return;
+  }
+
+  // 一般属性赋值
   let assgin = (val: string) => el[attr] = val;
 
+  // 特殊属性处理
   if (attr === 'className') {
     assgin = (val: string) => el[attr] = joinClass(...[val].flat());
   } else if (attr.startsWith('data-')) {
@@ -151,7 +150,7 @@ function attrAssign(el: HTMLElement, attr: string, value: any) {
 
   // 响应式数据
   if (isReactiveChangeAttr(attr) && isFunction(value)) {
-    binding(() => assgin(value()))
+    binding(() => assgin(value()));
   } else {
     assgin(value);
   }
@@ -251,19 +250,20 @@ type BackupNode = {
 /**
  * 查询备份数据中是否存在（二分）
  * @param arr 
- * @param val 
+ * @param value 
  * @returns 
  */
-function lookupBackupNodes(arr: BackupNode[], val: number) {
+function lookupBackupNodes(arr: BackupNode[], value: number) {
   let start = 0;
   let end = len(arr) - 1;
   while (start <= end) {
-    var midden = Math.ceil((start + end) / 2);
-    if(val === arr[midden].key) {
+    const midden = Math.ceil((start + end) / 2);
+    const val = arr[midden];
+    if(value === val.key) {
       return midden;
-    } else if (val < arr[midden].key) {  // 在左边
+    } else if (value < val.key) {  // 在左边
       end = midden - 1;
-    } else if (val > arr[midden].key) {  // 在右边
+    } else if (value > val.key) {  // 在右边
       start = midden + 1;
     }
   }
