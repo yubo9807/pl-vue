@@ -58,46 +58,12 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
   const el = document.createElement(tag as string);
 
   children.forEach(val => {
-
-    if (noRenderValue(val)) return;
-
-    // 原始值
-    if (isAssignmentValueToNode(val)) {
-      const textNode = createTextNode(val);
-      textNode.nodeValue = val;
-      appendChild(el, textNode);
-      return;
-    }
-
-    // 响应式数据
     if (isFunction(val)) {
       const fragment = createElementFragment([val]);
-      appendChild(el, fragment);
-      return;
+      appendChild(el, fragment);  // 响应式数据交给节点片段去处理
+    } else {
+      nodeMount(el, val);
     }
-
-    // 节点片段
-    if (isArray(val)) {
-      const fragment = createElementFragment(val);
-      appendChild(el, fragment);
-      return;
-    }
-
-    // 节点
-    if (isVirtualDomObject(val)) {
-      const node = createElementReal(val.tag, val.attrs, val.children);
-      appendChild(el, node);
-      return;
-    }
-
-    if (isObject(val) && isComponent(val.tag)) {
-      const node = createElement(val.tag, val.attrs, val.children);
-      appendChild(el, node);
-      return;
-    }
-
-    printWarn(`render: 不支持 ${val} 值渲染`);
-
   })
 
   // attrs 赋值
@@ -168,49 +134,55 @@ export function createElementFragment(children: Children) {
   const fragment = document.createDocumentFragment();
 
   children.forEach(val => {
-
-    if (noRenderValue(val)) return;
-
-    // 原始值
-    if (isAssignmentValueToNode(val)) {
-      const textNode = createTextNode(val);
-      textNode.nodeValue = val;
-      appendChild(fragment, textNode);
-      return;
-    }
-
-    // 响应式数据
     if (isFunction(val)) {
-      reactivityNode(fragment, val);
-      return;
+      reactivityNode(fragment, val);  // 响应式数据挂载
+    } else {
+      nodeMount(fragment, val);
     }
-  
-    // 节点片段
-    if (isArray(val)) {
-      const fragmentNode = createElementFragment(val);
-      appendChild(fragment, fragmentNode);
-      return;
-    }
-
-    // 节点
-    if (isVirtualDomObject(val)) {
-      const node = createElementReal(val.tag, val.attrs, val.children);
-      appendChild(fragment, node);
-      return;
-    }
-
-    // 组件
-    if (isObject(val) && isComponent(val.tag)) {
-      const node = createElement(val.tag, val.attrs, val.children);
-      appendChild(fragment, node);
-      return;
-    }
-
-    printWarn(`render: 不支持 ${val} 值渲染`);
-
   })
 
   return fragment;
+
+}
+
+/**
+ * 节点挂载
+ * @param el 
+ * @param val 
+ */
+function nodeMount(el: HTMLElement | DocumentFragment, val: any) {
+  if (noRenderValue(val)) return;
+
+  // 原始值
+  if (isAssignmentValueToNode(val)) {
+    const textNode = createTextNode(val);
+    textNode.nodeValue = val;
+    appendChild(el, textNode);
+    return;
+  }
+
+  // 节点片段
+  if (isArray(val)) {
+    const fragment = createElementFragment(val);
+    appendChild(el, fragment);
+    return;
+  }
+
+  // 节点
+  if (isVirtualDomObject(val)) {
+    const node = createElementReal(val.tag, val.attrs, val.children);
+    appendChild(el, node);
+    return;
+  }
+
+  // 组件
+  if (isObject(val) && isComponent(val.tag)) {
+    const node = createElement(val.tag, val.attrs, val.children);
+    appendChild(el, node);
+    return;
+  }
+
+  printWarn(`render: 不支持 ${val} 值渲染`);
 
 }
 
