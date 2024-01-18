@@ -1,4 +1,4 @@
-import { isMemoryObject, nextTick } from "../utils";
+import { customForEach, isMemoryObject } from "../utils";
 import { toRaw } from "./reactive";
 
 let func = null;
@@ -34,7 +34,7 @@ export function dependencyCollection(key: object) {
  */
 export function distributeUpdates(key: object) {
   const funcs = funcsMap.get(key);
-  funcs && funcs.forEach((fn, index) => {
+  funcs && customForEach(funcs, (fn, index) => {
     const del = fn();
     // 清理下内存，将不用的函数删除
     if (del === true) {
@@ -57,5 +57,5 @@ export function recycleDepend(...keys: object[]) {
     }
     funcsMap.delete(obj);
   }
-  keys.forEach(_recycleDepend);
+  customForEach(keys, _recycleDepend);
 }

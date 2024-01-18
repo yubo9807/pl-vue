@@ -1,5 +1,5 @@
 import { binding } from "../reactivity";
-import { objectAssign, AnyObj, createId, printWarn, isArray, isEquals, isFunction, isObject, isString, len } from '../utils';
+import { objectAssign, AnyObj, createId, printWarn, isArray, isEquals, isFunction, isObject, isString, len, customForEach } from '../utils';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild, joinClass } from "./utils"
 import { isFragment } from "./h";
 import { Tag, Attrs, Children, Tree, Component } from "./type";
@@ -57,7 +57,7 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
 
   const el = document.createElement(tag as string);
 
-  children.forEach(val => {
+  customForEach(children, val => {
     if (isFunction(val)) {
       const fragment = createElementFragment([val]);
       appendChild(el, fragment);  // 响应式数据交给节点片段去处理
@@ -133,7 +133,7 @@ export function createElementFragment(children: Children) {
 
   const fragment = document.createDocumentFragment();
 
-  children.forEach(val => {
+  customForEach(children, val => {
     if (isFunction(val)) {
       reactivityNode(fragment, val);  // 响应式数据挂载
     } else {

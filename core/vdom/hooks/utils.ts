@@ -1,4 +1,4 @@
-import { isObject, objectAssign } from "../../utils";
+import { customForEach, isObject, objectAssign } from "../../utils";
 import { getComponentId } from "../../vdom/h";
 import { Tree } from "../../vdom/type";
 import { isComponent } from "../../vdom/utils";
@@ -36,7 +36,7 @@ export function collectCompId(tree: Tree) {
       const newTree = tag(props);
       recursion(newTree);
     } else {
-      children.forEach(val => {
+      customForEach(children, val => {
         recursion(val);
       })
     }

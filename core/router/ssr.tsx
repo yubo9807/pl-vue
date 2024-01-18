@@ -1,5 +1,5 @@
 import { watch } from '../reactivity';
-import { len } from '../utils';
+import { customForEach, len } from '../utils';
 import { createElementFragment, createHTML, h, Fragment, renderToString, Component, onMounted, onUnmounted } from '../vdom';
 import { config, setCurrentRoute, variable } from './create-router';
 import { stack } from './router';
@@ -8,7 +8,7 @@ import { analyzeRoute } from './utils';
 export function Helmet(props) {
 
   const regs: RegExp[] = [];
-  props.children.forEach(tree => {
+  customForEach(props.children, tree => {
     if (tree.tag === 'title') {
       regs.push(new RegExp('<title'));
     } else if (tree.tag === 'meta' && tree.attrs.name) {
@@ -29,7 +29,7 @@ export function Helmet(props) {
         }
       }
     }
-    props.children.forEach(val => {
+    customForEach(props.children, val => {
       const html = createHTML(val.tag, val.attrs, val.children);
       nodes.push(html);
     })
@@ -54,7 +54,7 @@ export function Helmet(props) {
         }
       }
     }
-    removes.forEach(val => {
+    customForEach(removes, val => {
       backupChild.push(head.children[val].cloneNode(true));
       head.children[val].remove();
     })
@@ -70,7 +70,7 @@ export function Helmet(props) {
     for (let i = 0; i < count; i++) {
       head.children[0].remove();
     }
-    backupChild.forEach(node => {
+    customForEach(backupChild, node => {
       head.insertBefore(node, head.childNodes[0]);
     })
   })

@@ -1,3 +1,4 @@
+import { customForEach } from "../../utils";
 import { hookLock } from "./utils";
 
 const collect = [];
@@ -21,9 +22,7 @@ export function onBeforeMount(fn: Function) {
  * 执行所有 onBeforeMount 钩子
  */
 export function triggerBeforeMount() {
-  collect.forEach(fn => {
-    fn();
-  })
+  customForEach(collect, fn => fn());
   collect.length = 0;
   isBeforeMount = true;
 }

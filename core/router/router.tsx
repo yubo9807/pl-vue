@@ -1,5 +1,5 @@
 import { reactive, ref, toRaw, watch } from "../reactivity";
-import { createId, deepClone, isBrowser, isFunction, isString } from "../utils";
+import { createId, customForEach, deepClone, isBrowser, isFunction, isString } from "../utils";
 import { Component, PropsType, h, Fragment, renderToString } from "../vdom";
 import { beforeEach, config, currentRoute, setCurrentRoute, variable } from "./create-router";
 import { queryRoute } from "./route";
@@ -91,7 +91,7 @@ function BrowserRouter(props: BrowserRouterProps) {
     if (backupRoute) {
       const arr1 = backupRoute.path.split('/'), arr2 = value.split('/');
       if (arr1[1] !== arr2[1]) {
-        unwatchs.forEach(unwatch => unwatch());
+        customForEach(unwatchs, unwatch => unwatch());
       }
     }
     routeChange(value);
@@ -222,7 +222,7 @@ function StaticRouter(props: StaticRouterProps) {
  */
 export function Router(props: BrowserRouterProps & StaticRouterProps) {
   if (props.prefix) {
-    props.children.forEach(val => {
+    customForEach(props.children, val => {
       val.attrs.path = formatUrl(props.prefix + val.attrs.path);
     })
   }

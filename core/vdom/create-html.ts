@@ -1,4 +1,4 @@
-import { isArray, isFunction, isObject, isString, objectAssign, printWarn } from "../utils";
+import { customForEach, isArray, isFunction, isObject, isString, objectAssign, printWarn } from "../utils";
 import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr, joinClass } from "./utils";
 import { isFragment } from "./h";
 import { Attrs, Children, Tag } from "./type";
@@ -72,7 +72,7 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
  */
 export function createHTMLFragment(children: Children) {
   let text = '';
-  children.forEach(val => {
+  customForEach(children, val => {
 
     // 原始值
     if (isAssignmentValueToNode(val)) {

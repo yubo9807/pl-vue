@@ -1,4 +1,4 @@
-import { nextTick } from "../../utils";
+import { customForEach, nextTick } from "../../utils";
 import { hookLock } from "./utils";
 
 const collect = [];
@@ -22,9 +22,7 @@ export function onMounted(fn: Function) {
  * 执行所有 onMounted 钩子
  */
 export function triggerMounted() {
-  collect.forEach(fn => {
-    fn();
-  })
+  customForEach(collect, fn => fn());
   collect.length = 0;
   isMounted = true;
 }

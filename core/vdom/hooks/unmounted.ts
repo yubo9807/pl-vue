@@ -1,3 +1,4 @@
+import { customForEach } from "../../utils";
 import { getSubComponent } from "../../vdom/component-tree";
 import { getComponentId } from "../../vdom/h";
 import { currentComp } from "../../vdom/instance";
@@ -31,12 +32,10 @@ export function triggerUnmounted(comp: Component) {
   const keys = getSubComponent(comp).map(val => val.compId);
   keys.unshift(getComponentId(comp));
   const funcs = [];
-  keys.forEach(key => {
+  customForEach(keys, key => {
     const arr = map.get(key) || [];
     funcs.push(...arr);
     map.delete(key);
   })
-  funcs.forEach(func => {
-    func();
-  })
+  customForEach(funcs, func => func());
 }
