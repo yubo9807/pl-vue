@@ -32,13 +32,9 @@ export function reactive<T extends AnyObj>(target: T): T {
     get(target, key, receiver) {
       if (key === ReactiveFlags.RAW) return target;  // 返回原始值
 
-      if (isMemoryObject(target[key])) {
-        return reactive(target[key]);
-      }
-
       const result = Reflect.get(target, key, receiver);
       dependencyCollection(target);
-      return result;
+      return isMemoryObject(result) ? reactive(result) : result;
     },
 
 
@@ -46,22 +42,6 @@ export function reactive<T extends AnyObj>(target: T): T {
     // 赋值/修改
     set(target, key, value, receiver) {
       if (target[ReactiveFlags.IS_READONLY]) return true;
-
-      // 如果是一个对象，需要递归去设置每个值，来确保具体更新的值
-      if (isMemoryObject(target[key])) {
-        const object = target[key];
-        const collect: Set<string | symbol> = new Set();  // 收集已经更新的值
-        for (const prop in value) {  // 重新设置每个值
-          collect.add(prop);
-          this.set(object, prop, value[prop], receiver[key]);
-        }
-        for (const prop in object) {
-          if (!collect.has(prop)) {  // 需要删除的值
-            this.deleteProperty(object, prop);
-          }
-        }
-        return true;
-      }
 
       const oldValue = Reflect.get(target, key, receiver);
       if (oldValue === value) return true;
@@ -74,8 +54,7 @@ export function reactive<T extends AnyObj>(target: T): T {
       updateKeysMap.set(target, updateKeys);
 
       nextTick(() => {  // 利用时间循环机制，防止同一时刻多次将数据更新
-        const newValue = Reflect.get(target, key, receiver);  // 拿到最最新的值
-        if (result && newValue === value && size === 1) {
+        if (result && size === 1) {
           // console.log(`%c update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`, 'color: orange');
           distributeUpdates(target);  // 在同一时刻多次改变数据，只更新一次即可
         }
