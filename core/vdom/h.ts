@@ -20,15 +20,6 @@ export function h(tag: Tag, attrs: Attrs, ...children: Children) {
   return tree;
 }
 
-/**
- * 获取组件 id
- * @param comp 
- * @returns 
- */
-export function getComponentId(comp: Component) {
-  return comp.prototype._id;
-}
-
 
 
 export function Fragment({ children }) {
@@ -44,5 +35,5 @@ Fragment.prototype[FragmentMark] = FragmentMark;
  * @returns 
  */
 export function isFragment(tag: string | Function) {
-  return isFunction(tag) && (tag as Function).prototype[FragmentMark] === FragmentMark;
+  return isFunction(tag) && (tag as Function).prototype && (tag as Function).prototype[FragmentMark] === FragmentMark;
 }

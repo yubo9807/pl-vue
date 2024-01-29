@@ -1,7 +1,7 @@
 import { Attrs, Component } from "./type";
 
 
-export let currentComp = null;
+export let currentComp: Component = null;
 /**
  * 收集实例数据
  * @param comp 
@@ -19,7 +19,7 @@ let currentExportData = null;
  * 定义组件数据出口
  * @param data 
  */
-export function defineExpose(data: object) {
+export function defineExpose<T extends object>(data: T) {
   currentExportData = data;
 }
 

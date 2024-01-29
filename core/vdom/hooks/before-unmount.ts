@@ -1,11 +1,10 @@
 import { customForEach } from "../../utils";
 import { getSubComponent } from "../../vdom/component-tree";
-import { getComponentId } from "../../vdom/h";
 import { currentComp } from "../../vdom/instance";
 import { Component } from "../../vdom/type";
 import { hookLock } from "./utils";
 
-const map = new Map();
+const map = new WeakMap();
 
 /**
  * 注册 onBeforeUnmount 钩子
@@ -15,13 +14,12 @@ const map = new Map();
  */
 export function onBeforeUnmount(fn: Function) {
   if (hookLock) return;
-  const key = getComponentId(currentComp);
-  const arr = map.get(key) || [];
+  const arr = map.get(currentComp) || [];
   const isExist = arr.some(func => func === fn);
   if (isExist) return;
 
   arr.push(fn);
-  map.set(key, arr);
+  map.set(currentComp, arr);
 }
 
 /**
@@ -29,8 +27,8 @@ export function onBeforeUnmount(fn: Function) {
  * @param comp 组件名
  */
 export function triggerBeforeUnmount(comp: Component) {
-  const keys = getSubComponent(comp).map(val => val.compId);
-  keys.unshift(getComponentId(comp));
+  const keys = getSubComponent(comp).map(val => val.comp);
+  keys.unshift(comp);
   const funcs = [];
   customForEach(keys, key => {
     const arr = map.get(key) || [];

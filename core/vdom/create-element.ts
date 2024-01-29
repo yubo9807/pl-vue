@@ -1,5 +1,5 @@
 import { binding } from "../reactivity";
-import { objectAssign, AnyObj, createId, printWarn, isArray, isEquals, isFunction, isObject, isString, len, customForEach } from '../utils';
+import { objectAssign, AnyObj, printWarn, isArray, isEquals, isFunction, isObject, isString, len, customForEach } from '../utils';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild, joinClass } from "./utils"
 import { isFragment } from "./h";
 import { Tag, Attrs, Children, Tree, Component } from "./type";
@@ -21,12 +21,8 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
   if (isString(tag)) {  // 节点
     return createElementReal(tag, attrs, children);
   }
-  if (isFragment(tag)) {  // 节点片段
-    return createElementFragment(children);
-  }
   if (isComponent(tag)) {  // 组件
     tag = tag as Component;
-    tag.prototype._id = createId();
     recordCurrentComp(tag);
     const props = objectAssign(attrs, { children });
     const tree = tag(props);
@@ -36,6 +32,9 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
     }
     compTreeMap.set(tag, filterElement(tree.children));  // 收集组件
     return createElement(tree.tag, tree.attrs, tree.children);
+  }
+  if (isFragment(tag)) {  // 节点片段
+    return createElementFragment(children);
   }
 }
 

@@ -1,10 +1,8 @@
 import { deepClone, objectAssign, isObject, customForEach } from '../utils';
 import { Attrs, Children, Component } from './type';
 import { isAssignmentValueToNode, isComponent } from './utils';
-import { getComponentId } from './h';
 
 type CompTree = {
-  compId:    string
   comp:      Component
   props:     Attrs
   children?: Children
@@ -21,7 +19,7 @@ export function filterElement(children: Children, collect: CompTree[] = []) {
   customForEach(children, tree => {
     if (isObject(tree)) {
       if (isComponent(tree.tag)) {
-        collect.push({ comp: tree.tag, compId: getComponentId(tree.tag), props: objectAssign(tree.attrs, { children }) });
+        collect.push({ comp: tree.tag, props: objectAssign(tree.attrs, { children }) });
       } else if (isAssignmentValueToNode(tree.tag)) {
         filterElement(tree.children, collect);
       }
