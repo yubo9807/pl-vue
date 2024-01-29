@@ -4,7 +4,7 @@ import { triggerMounted } from "./hooks/mounted";
 import { setLock } from "./hooks/utils";
 import { createElement } from "./create-element";
 import { createHTML } from "./create-html";
-import { BaseComponent, ClassComponent, Component } from "./type";
+import { BaseComponent, ClassComponent, Component, GetClassCompPropsType, GetCompPropsType } from "./type";
 import { h } from "./h";
 
 /**
@@ -43,10 +43,10 @@ export function renderToString({ tag, attrs, children }): string {
 export function useComponent<C extends Component>(
   Comp: C,
   props?: C extends ClassComponent
-    ? Parameters<InstanceType<typeof Comp>['render']>[0]
-    : C extends BaseComponent 
-    ? Parameters<typeof Comp>[0]
-    : Parameters<BaseComponent>[0]
+    ? GetClassCompPropsType<typeof Comp>
+    : C extends BaseComponent
+    ? GetCompPropsType<typeof Comp>
+    : never
 ) {
   return render(h(Comp, props));
 }
