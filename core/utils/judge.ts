@@ -19,6 +19,15 @@ export function isType(o: any): Type {
 }
 
 /**
+ * 函数是否是为类声明
+ * @param func 
+ * @returns 
+ */
+export function isClass(func: Function) {
+  return func.toString().slice(0, 5) === 'class';
+}
+
+/**
  * 从内存上看是否是一个对象
  * @param o
  */

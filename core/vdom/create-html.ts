@@ -1,7 +1,7 @@
 import { customForEach, isArray, isFunction, isObject, isString, objectAssign, printWarn } from "../utils";
-import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr, joinClass } from "./utils";
+import { isAssignmentValueToNode, isClassComponent, isComponent, isReactiveChangeAttr, joinClass } from "./utils";
 import { isFragment } from "./h";
-import { Attrs, Children, Tag } from "./type";
+import { Attrs, BaseComponent, Children, Tag } from "./type";
 
 
 /**
@@ -20,6 +20,10 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
 
   // 组件
   if (isComponent(tag)) {
+    tag = tag as BaseComponent;
+    if (isClassComponent(tag)) {
+      return createHTML(tag.prototype.render, {}, []);
+    }
     const props = objectAssign(attrs, { children });
     const h = (tag as Function)(props);
     return createHTML(h.tag, h.attrs, h.children);

@@ -1,5 +1,5 @@
 import { isFunction, len } from "../utils";
-import { Attrs, Children, Component, Tag } from "./type";
+import { Attrs, Children, Tag } from "./type";
 import { isComponent } from "./utils";
 
 export function h(tag: Tag, attrs: Attrs, ...children: Children) {
@@ -35,5 +35,6 @@ Fragment.prototype[FragmentMark] = FragmentMark;
  * @returns 
  */
 export function isFragment(tag: string | Function) {
-  return isFunction(tag) && (tag as Function).prototype && (tag as Function).prototype[FragmentMark] === FragmentMark;
+  // @ts-ignore
+  return isFunction(tag) && tag.prototype && tag.prototype[FragmentMark] === FragmentMark;
 }

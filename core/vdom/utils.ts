@@ -1,7 +1,7 @@
-import { isFunction, isObject, isString } from "../utils";
+import { isClass, isFunction, isObject, isString } from "../utils";
 import { h, isFragment } from "./h";
 import { render } from "./render";
-import { PropsType } from "./type";
+import { BaseComponent, ClassComponent, Component } from "./type";
 
 /**
  * 可以直接赋值给 dom 节点
@@ -39,6 +39,15 @@ export function isComponent(tag) {
 }
 
 /**
+ * 是否为一个类声明组件
+ * @param o 
+ * @returns 
+ */
+export function isClassComponent(comp: BaseComponent) {
+  return isClass(comp) && comp.prototype && comp.prototype.render;
+}
+
+/**
  * 不进行渲染的值
  * @param value 
  * @returns 
@@ -59,14 +68,20 @@ export function joinClass(...args: string[]) {
 
 /**
  * 使用组件
- * @param component 组件函数
+ * @param Comp 组件函数
  * @param props     组件参数
  * @returns Node
  */
-export function useComponent<T extends (props: PropsType<{}>) => any>(component: T, props: Parameters<typeof component>[0] = {}) {
-  return render(h(component, props));
+export function useComponent<C extends Component>(
+  Comp: C,
+  props?: C extends ClassComponent
+    ? Parameters<InstanceType<typeof Comp>['render']>[0]
+    : C extends BaseComponent 
+    ? Parameters<typeof Comp>[0]
+    : never
+): HTMLElement {
+  return render(h(Comp, props));
 }
-
 
 
 // #region 减少打包代码体积

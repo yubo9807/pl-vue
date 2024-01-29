@@ -1,8 +1,8 @@
 import { binding } from "../reactivity";
 import { objectAssign, AnyObj, printWarn, isArray, isEquals, isFunction, isObject, isString, len, customForEach } from '../utils';
-import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild, joinClass } from "./utils"
+import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild, joinClass, isClassComponent } from "./utils"
 import { isFragment } from "./h";
-import { Tag, Attrs, Children, Tree, Component } from "./type";
+import { Tag, Attrs, Children, Tree, Component, BaseComponent } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount } from "./hooks/before-unmount";
 import { triggerUnmounted } from "./hooks/unmounted";
@@ -21,8 +21,20 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
   if (isString(tag)) {  // 节点
     return createElementReal(tag, attrs, children);
   }
-  if (isComponent(tag)) {  // 组件
-    tag = tag as Component;
+  if (isFunction(tag)) {  
+    tag = tag as BaseComponent;
+
+    // 节点片段
+    if (isFragment(tag)) {  
+      return createElementFragment(children);
+    }
+
+    // 类组件
+    if (isClassComponent(tag)) {
+      return createElement(tag.prototype.render, {}, []);
+    }
+
+    // 组件
     recordCurrentComp(tag);
     const props = objectAssign(attrs, { children });
     const tree = tag(props);
@@ -32,9 +44,6 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
     }
     compTreeMap.set(tag, filterElement(tree.children));  // 收集组件
     return createElement(tree.tag, tree.attrs, tree.children);
-  }
-  if (isFragment(tag)) {  // 节点片段
-    return createElementFragment(children);
   }
 }
 
@@ -50,7 +59,7 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
  */
 function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['']) {
 
-  if (isFragment(tag)) {
+  if (isFunction(tag) && isFragment(tag as Function)) {
     return createElement(tag, attrs, children);
   }
 
