@@ -66,22 +66,6 @@ export function joinClass(...args: string[]) {
   return arr.join(' ').trim().replace(/\s+/, ' ');
 }
 
-/**
- * 使用组件
- * @param Comp 组件函数
- * @param props     组件参数
- * @returns Node
- */
-export function useComponent<C extends Component>(
-  Comp: C,
-  props?: C extends ClassComponent
-    ? Parameters<InstanceType<typeof Comp>['render']>[0]
-    : C extends BaseComponent 
-    ? Parameters<typeof Comp>[0]
-    : never
-): HTMLElement {
-  return render(h(Comp, props));
-}
 
 
 // #region 减少打包代码体积

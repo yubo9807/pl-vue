@@ -1,12 +1,12 @@
 import { AnyObj } from "../utils"
-import { Component, PropsType, Tree } from "../vdom"
+import { BaseComponent, PropsType, Tree } from "../vdom"
 import { config } from "./create-router"
 import { BeforeEnter } from "./type"
 import { formatUrl } from "./utils"
 
 type RouteProps = PropsType<{
   path:         string
-  component:    Component | (() => Promise<Component>)
+  component:    BaseComponent | (() => Promise<BaseComponent>)
   exact?:       boolean
   beforeEnter?: BeforeEnter
   meta?:        AnyObj

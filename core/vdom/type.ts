@@ -16,7 +16,7 @@ export type PropsType<T extends AnyObj> = T & {
   children?: Children
 }
 
-export type BaseComponent = (props?: PropsType<{}>) => any
+export type BaseComponent = (props?: PropsType<{ [k: string]: any }>) => any
 export type ClassComponent = new (props?: PropsType<{}>) => any
 
 export type Component = BaseComponent | ClassComponent

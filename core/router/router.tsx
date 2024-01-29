@@ -1,6 +1,6 @@
 import { reactive, ref, toRaw, watch } from "../reactivity";
 import { createId, customForEach, deepClone, isBrowser, isFunction, isString } from "../utils";
-import { Component, PropsType, h, Fragment, renderToString } from "../vdom";
+import { Component, PropsType, h, Fragment, renderToString, BaseComponent } from "../vdom";
 import { beforeEach, config, currentRoute, setCurrentRoute, variable } from "./create-router";
 import { queryRoute } from "./route";
 import { BeforeEnter, PagePropsType } from "./type";
@@ -11,13 +11,13 @@ let backupRoute = void 0;  // 旧的 route 信息
 const unwatchs  = [];      // 收集子路由的取消监听事件
 
 type BrowserRouterProps = PropsType<{
-  loading?:  Component
-  notFound?: Component
+  loading?:  BaseComponent
+  notFound?: BaseComponent
   prefix?:   string
 }>
 function BrowserRouter(props: BrowserRouterProps) {
 
-  const Comp = ref<Component>();
+  const Comp = ref<BaseComponent>();
   let attrs: PagePropsType = {};
 
   function routeChange(path: string) {
@@ -238,7 +238,7 @@ export function Router(props: BrowserRouterProps & StaticRouterProps) {
  * @param Comp 
  * @param attrs 
  */
-function resultReplace(replaceStr: string, Comp: Component, attrs: PagePropsType) {
+function resultReplace(replaceStr: string, Comp: BaseComponent, attrs: PagePropsType) {
   const string = renderToString(<Comp {...attrs} />);
   deleteStackItem(replaceStr);
   const newTemplate = variable.currentTemplate.replace(replaceStr, string);
@@ -250,7 +250,7 @@ function resultReplace(replaceStr: string, Comp: Component, attrs: PagePropsType
  * @param Comp 
  * @returns 如果能运行返回 getInitialProps 本身
  */
-function isExistGetInitialProps(Comp: Component) {
+function isExistGetInitialProps(Comp: BaseComponent) {
   const { getInitialProps } = Comp.prototype;
   if (getInitialProps && isFunction(getInitialProps)) {
     return getInitialProps;
