@@ -6,12 +6,15 @@ import { push, replace, useRoute } from "./use-router"
 import { splicingUrl } from "./utils"
 
 type LinkProps = PropsType<{
-  to:         SkipOption
-  className?: string
-  type?:      'push' | 'replace'
+  to:          SkipOption
+  className?:  string
+  type?:       'push' | 'replace'
+  [k: string]: any
 }>
 export function Link(props: LinkProps) {
-  if (!isString(props.to)) {
+  const { to, type, className, children, ...args } = props;
+
+  if (!isString(to)) {
     props.to = splicingUrl(props.to as BaseOption);
   }
 
@@ -19,7 +22,7 @@ export function Link(props: LinkProps) {
 
   function jump(e: Event) {
     e.preventDefault();
-    if (props.type === 'replace') {
+    if (type === 'replace') {
       replace(props.to);
     } else {
       push(props.to);
@@ -35,10 +38,11 @@ export function Link(props: LinkProps) {
       return [
         routePath.startsWith(currentPath) && 'active',
         routePath === currentPath && 'exact-active',
-        props.className,
+        className,
       ]
     }}
     href={href}
     onclick={jump}
-  >{props.children}</a>
+    {...args}
+  >{children}</a>
 }
