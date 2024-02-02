@@ -42,7 +42,7 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
     if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
       return createTextNode(tree);
     }
-    compTreeMap.set(tag, filterElement(tree.children));  // 收集组件
+    compTreeMap.set(tag, filterElement([tree, ...tree.children]));  // 收集组件
     return createElement(tree.tag, tree.attrs, tree.children);
   }
 }
