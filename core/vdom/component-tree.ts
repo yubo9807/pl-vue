@@ -17,12 +17,16 @@ export const compTreeMap: WeakMap<Component, CompTree[]> = new WeakMap();
  */
 export function filterElement(children: Children, collect: CompTree[] = []) {
   customForEach(children, tree => {
-    if (isObject(tree)) {
-      if (isComponent(tree.tag)) {
-        collect.push({ comp: tree.tag, props: objectAssign(tree.attrs, { children }) });
-      } else if (isAssignmentValueToNode(tree.tag)) {
-        filterElement(tree.children, collect);
-      }
+    if (!isObject(tree)) return;
+    if (isComponent(tree.tag)) {
+      collect.push({ comp: tree.tag, props: objectAssign(tree.attrs, { children }) });
+      customForEach(tree.children, val => {
+        if (isComponent(val)) {
+          collect.push({ comp: val, props: {} });
+        }
+      })
+    } else if (isAssignmentValueToNode(tree.tag)) {
+      filterElement(tree.children, collect);
     }
   })
   return collect;

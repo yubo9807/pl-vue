@@ -221,11 +221,12 @@ function StaticRouter(props: StaticRouterProps) {
  * @returns 
  */
 export function Router(props: BrowserRouterProps & StaticRouterProps) {
-  if (props.prefix) {
-    customForEach(props.children, val => {
+  customForEach(props.children, val => {
+    if (props.prefix) {
       val.attrs.path = formatUrl(props.prefix + val.attrs.path);
-    })
-  }
+    }
+    val.children = [val.attrs.component];
+  })
   return isBrowser()
     ? <BrowserRouter {...props} />
     : <StaticRouter {...props} />

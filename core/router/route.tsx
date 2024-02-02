@@ -6,11 +6,14 @@ import { formatUrl } from "./utils"
 
 type RouteProps = PropsType<{
   path:         string
-  component:    BaseComponent | (() => Promise<BaseComponent>)
   exact?:       boolean
   beforeEnter?: BeforeEnter
   meta?:        AnyObj
   redirect?:    string
+} & {
+  component: BaseComponent | (() => Promise<BaseComponent>)
+} | {
+  redirect:  string
 }>
 export function Route(props: RouteProps) {}
 
