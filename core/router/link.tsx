@@ -1,7 +1,7 @@
 import { isString } from "../utils"
 import { PropsType, h } from "../vdom"
 import { config } from "./create-router"
-import { BaseOption, SkipOption } from "./type"
+import { SkipOption } from "./type"
 import { push, replace, useRoute } from "./use-router"
 import { splicingUrl } from "./utils"
 
@@ -14,8 +14,10 @@ type LinkProps = PropsType<{
 export function Link(props: LinkProps) {
   const { to, type, className, children, ...args } = props;
 
+  const route = useRoute();
+
   if (!isString(to)) {
-    props.to = splicingUrl(props.to as BaseOption);
+    props.to = splicingUrl(Object.assign({}, route, to));
   }
 
   const href = config.mode === 'hash' ? `${config.base}#${props.to}` : config.base + props.to;
@@ -28,8 +30,6 @@ export function Link(props: LinkProps) {
       push(props.to);
     }
   }
-
-  const route = useRoute();
 
   return <a
     className={() => {
