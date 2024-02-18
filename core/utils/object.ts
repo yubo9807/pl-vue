@@ -1,4 +1,4 @@
-import { isArray, isType } from "./judge";
+import { isArray, isObject, isType } from "./judge";
 import { AnyObj } from "./type";
 
 /**
@@ -6,7 +6,7 @@ import { AnyObj } from "./type";
  * @param origin 被克隆对象
  */
 export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {}) {
-	const cache = new WeakMap();
+	const cache: any = isObject(origin) ? new WeakMap() : new Map();
 	const noCloneTypes = ['null', 'regexp', 'date', 'weakset', 'weakmap'];
 	
 	const specialClone = Object.assign({
@@ -33,36 +33,38 @@ export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {
 		},
 	}, extend)
 
-	function _deepClone<T>(origin: T): T {
-		const type = isType(origin);
-		if (!['object', 'function'].includes(typeof origin) || noCloneTypes.includes(type)) {
-			return origin;
+	function _deepClone<T>(_origin: T): T {
+		const type = isType(_origin);
+		if (!['object', 'function'].includes(typeof _origin) || noCloneTypes.includes(type)) {
+			return _origin;
 		}
 
 		// 防止环形引用问题（已经克隆过的对象不再进行克隆）
-		if (cache.has(origin as AnyObj)) {
-			return cache.get(origin as AnyObj);
+		if (cache.has(origin)) {
+			return cache.get(origin);
 		}
 
 		// 特殊类型克隆处理
 		if (specialClone[type]) {
-			return specialClone[type](origin);
+			return specialClone[type](_origin);
 		}
 
 		// 创建一个新的对象
-		const target: AnyObj = isArray(origin) ? [] : {};
-		Object.setPrototypeOf(target, Object.getPrototypeOf(origin));
+		const target: AnyObj = isArray(_origin) ? [] : {};
+		Object.setPrototypeOf(target, Object.getPrototypeOf(_origin));
 
 		// 设置缓存，该对象已经被克隆过
-		cache.set(origin as AnyObj, target);
+		cache.set(origin, target);
 
-		for (const key in origin) {
-			target[key] = _deepClone(origin[key]);
+		for (const key in _origin) {
+			target[key] = _deepClone(_origin[key]);
 		}
 		return target as T;
 	}
 
-  return _deepClone(origin);
+	const result = _deepClone(origin);
+	cache.delete(origin);
+  return result;
 }
 
 
