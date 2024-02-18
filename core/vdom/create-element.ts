@@ -1,4 +1,4 @@
-import { binding } from "../reactivity";
+import { binding, watch } from "../reactivity";
 import { objectAssign, AnyObj, printWarn, isArray, isEquals, isFunction, isObject, isString, len, customForEach } from '../utils';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild, joinClass, isClassComponent } from "./utils"
 import { isFragment } from "./h";
@@ -253,9 +253,9 @@ function lookupBackupNodes(arr: BackupNode[], value: number) {
 /**
  * 响应式节点变化
  * @param fragment 
- * @param val 
+ * @param func 
  */
-function reactivityNode(fragment: DocumentFragment, val: () => any) {
+function reactivityNode(fragment: DocumentFragment, func: () => any) {
   let backupNodes: BackupNode[] = [];
   let lockFirstRun = true;  // 锁：第一次运行
   let parent = null;
@@ -264,15 +264,13 @@ function reactivityNode(fragment: DocumentFragment, val: () => any) {
   appendChild(fragment, textNode);
 
   binding(() => {
-    let value = val();
+    let value = func();
     if (value && isObject(value) && isFragment(value.tag)) {
       printWarn('不支持响应式节点片段渲染');
       return;
     }
 
-    if (!isArray(value)) {
-      value = [value];
-    }
+    if (!isArray(value)) value = [value];
     value = value.filter(val => !noRenderValue(val));
 
     let i = 0;
