@@ -1,4 +1,4 @@
-import { binding, watch } from "../reactivity";
+import { binding } from "../reactivity";
 import { objectAssign, AnyObj, printWarn, isArray, isEquals, isFunction, isObject, isString, len, customForEach } from '../utils';
 import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild, joinClass, isClassComponent } from "./utils"
 import { isFragment } from "./h";

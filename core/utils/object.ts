@@ -6,7 +6,7 @@ import { AnyObj } from "./type";
  * @param origin 被克隆对象
  */
 export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {}) {
-	const cache: any = isObject(origin) ? new WeakMap() : new Map();
+	const cache: any = new WeakMap();
 	const noCloneTypes = ['null', 'regexp', 'date', 'weakset', 'weakmap'];
 	
 	const specialClone = Object.assign({
@@ -40,8 +40,8 @@ export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {
 		}
 
 		// 防止环形引用问题（已经克隆过的对象不再进行克隆）
-		if (cache.has(origin)) {
-			return cache.get(origin);
+		if (cache.has(_origin)) {
+			return cache.get(_origin);
 		}
 
 		// 特殊类型克隆处理
@@ -54,7 +54,7 @@ export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {
 		Object.setPrototypeOf(target, Object.getPrototypeOf(_origin));
 
 		// 设置缓存，该对象已经被克隆过
-		cache.set(origin, target);
+		cache.set(_origin, target);
 
 		for (const key in _origin) {
 			target[key] = _deepClone(_origin[key]);
@@ -63,7 +63,6 @@ export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {
 	}
 
 	const result = _deepClone(origin);
-	cache.delete(origin);
   return result;
 }
 
