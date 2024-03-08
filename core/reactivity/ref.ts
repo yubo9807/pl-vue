@@ -1,4 +1,4 @@
-import { AnyObj, Key } from "../utils";
+import { AnyObj } from "../utils";
 import { createSignal } from "./signal";
 
 export const ISREF = '__v_isRef';
@@ -6,7 +6,6 @@ export const ISREF = '__v_isRef';
 export class RefImpl<T> {
 
   [ISREF]       = true
-  __v_isShallow = false
 
   _rawValue: { value: T }
   _value:    T
@@ -58,14 +57,14 @@ export function unref<T>(ref: RefImpl<T>) {
   return isRef(ref) ? ref.value : ref;
 }
 
-class ObjectRefImpl {
+class ObjectRefImpl<T extends object> {
 
-  __v_isRef = true
+  [ISREF]       = true
 
   _defaultValue: any
-  _key:    Key
-  _object: AnyObj
-  constructor(target: AnyObj, key: Key, defaultValue = void 0) {
+  _key:    keyof T
+  _object: T
+  constructor(target: T, key: keyof T, defaultValue = void 0) {
     this._defaultValue = defaultValue;
     this._key          = key;
     this._object       = target;
@@ -87,7 +86,7 @@ class ObjectRefImpl {
  * @param defaultValue 
  * @returns 
  */
-export function toRef<T>(target: T, key: Key, defaultValue = void 0) {
+export function toRef<T extends object>(target: T, key: keyof T, defaultValue = void 0) {
   return new ObjectRefImpl(target, key, defaultValue);
 };
 
@@ -95,7 +94,7 @@ export function toRef<T>(target: T, key: Key, defaultValue = void 0) {
  * @param target 
  * @returns 
  */
-export function toRefs<T>(target: T) {
+export function toRefs<T extends object>(target: T) {
   const obj: AnyObj = {};
   for (const key in target) {
     obj[key] = new ObjectRefImpl(target, key);
