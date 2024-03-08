@@ -4,6 +4,7 @@ import { AnyObj } from "./type";
 /**
  * 深度克隆
  * @param origin 被克隆对象
+ * @param extend 扩展克隆方法
  */
 export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {}) {
 	const cache: any = new WeakMap();
@@ -34,6 +35,9 @@ export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {
 	}, extend)
 
 	function _deepClone<T>(_origin: T): T {
+		if (_origin instanceof HTMLElement) {
+			return _origin.cloneNode(true) as T;
+		}
 		const type = isType(_origin);
 		if (!['object', 'function'].includes(typeof _origin) || noCloneTypes.includes(type)) {
 			return _origin;
@@ -57,13 +61,14 @@ export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {
 		cache.set(_origin, target);
 
 		for (const key in _origin) {
-			target[key] = _deepClone(_origin[key]);
+			if (_origin.hasOwnProperty(key)) {
+				target[key] = _deepClone(_origin[key]);
+			}
 		}
 		return target as T;
 	}
 
-	const result = _deepClone(origin);
-  return result;
+	return _deepClone(origin);
 }
 
 
