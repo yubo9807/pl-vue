@@ -31,7 +31,9 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
 
     // 类组件
     if (isClassComponent(tag)) {
-      return createElement(tag.prototype.render, attrs, children);
+      // @ts-ignore
+      const t = new tag({ ...attrs, children });
+      return createElement(t.render.bind(t), {}, []);
     }
 
     // 组件

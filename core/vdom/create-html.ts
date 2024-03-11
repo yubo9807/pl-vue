@@ -22,7 +22,9 @@ export function createHTML(tag: Tag, attrs: Attrs = {}, children: Children = [''
   if (isComponent(tag)) {
     tag = tag as BaseComponent;
     if (isClassComponent(tag)) {
-      return createHTML(tag.prototype.render, {}, []);
+      // @ts-ignore
+      const t = new tag({ ...attrs, children });
+      return createHTML(t.render.bind(t));
     }
     const props = objectAssign(attrs, { children });
     const h = (tag as Function)(props);

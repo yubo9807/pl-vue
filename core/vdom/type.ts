@@ -17,9 +17,9 @@ export type PropsType<T extends AnyObj> = T & {
 }
 
 export type BaseComponent = (props?: PropsType<{ [k: string]: any }>) => any
-export type ClassComponent = new (props?: PropsType<{}>) => any
+export type ClassComponent = new (props?: PropsType<{}>) => void
 
 export type Component = BaseComponent | ClassComponent
 
 export type GetCompPropsType<Comp extends BaseComponent> = Parameters<Comp>[0]
-export type GetClassCompPropsType<ClassComp extends ClassComponent> = Parameters<InstanceType<ClassComp>['render']>[0]
+export type GetClassCompPropsType<ClassComp extends ClassComponent> = ConstructorParameters<ClassComp>[0]
