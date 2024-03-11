@@ -29,15 +29,17 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
       return createElementFragment(children);
     }
 
+    recordCurrentComp(tag);
+
     // 类组件
     if (isClassComponent(tag)) {
       // @ts-ignore
       const t = new tag({ ...attrs, children });
-      return createElement(t.render.bind(t), {}, []);
+      tag = t.render.bind(t);
     }
 
     // 组件
-    recordCurrentComp(tag);
+    tag = tag as BaseComponent
     const props = objectAssign(attrs, { children });
     const tree = tag(props);
     collectExportsData(tag, attrs);
