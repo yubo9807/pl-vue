@@ -1,4 +1,4 @@
-import { isArray, isObject, isType } from "./judge";
+import { isArray, isBrowser, isType } from "./judge";
 import { AnyObj } from "./type";
 
 /**
@@ -35,7 +35,7 @@ export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {
 	}, extend)
 
 	function _deepClone<T>(_origin: T): T {
-		if (_origin instanceof HTMLElement) {
+		if (isBrowser() && _origin instanceof HTMLElement) {
 			return _origin.cloneNode(true) as T;
 		}
 		const type = isType(_origin);
