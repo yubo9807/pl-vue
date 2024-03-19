@@ -1,4 +1,4 @@
-import { RefImpl } from "../reactivity/ref"
+import { RefImpl } from "../reactivity"
 import { AnyObj } from "../utils"
 
 export type Tag = string | Component

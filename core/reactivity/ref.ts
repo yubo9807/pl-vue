@@ -1,11 +1,11 @@
 import { AnyObj } from "../utils";
 import { createSignal } from "./signal";
 
-export const ISREF = '__v_isRef';
+export const ISREF = Symbol('__v_isRef');
 
 export class RefImpl<T> {
 
-  [ISREF]       = true
+  [ISREF] = true;
 
   _rawValue: { value: T }
   _value:    T
@@ -117,13 +117,13 @@ class CustomRefImpl<T> extends RefImpl<T> {
     );
 
     super(get());
-    this.__v_isRef = isRef;
+    this[ISREF] = isRef;
     this._get = get;
     this._set = set;
   }
 
   get value(): T {
-    return this.__v_isRef ? super.value : this._get();
+    return this[ISREF] ? super.value : this._get();
   }
 
   // 方法重写，阻断，将 val 指给 set 函数
