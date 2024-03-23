@@ -4,6 +4,7 @@ export { createHTML, createHTMLFragment } from './create-html';
 export { render, useComponent } from './render';
 export { renderToString } from './render';
 export { defineExpose } from './instance';
+export { useGlobalComponent } from './component-global';
 export * from './type';
 export { onBeforeMount } from './hooks/before-mount';
 export { onMounted } from './hooks/mounted';

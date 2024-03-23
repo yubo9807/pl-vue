@@ -7,6 +7,7 @@ import { compTreeMap, filterElement } from './component-tree';
 import { triggerBeforeUnmount } from "./hooks/before-unmount";
 import { triggerUnmounted } from "./hooks/unmounted";
 import { collectExportsData, recordCurrentComp } from "./instance";
+import { getGlobalComponent } from "./component-global";
 
 
 
@@ -65,6 +66,11 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
 
   if (isFunction(tag) && isFragment(tag as Function)) {
     return createElement(tag, attrs, children);
+  }
+
+  const globalComp = getGlobalComponent(tag as string);
+  if (globalComp) {
+    return createElement(globalComp, attrs, children);
   }
 
   const el = document.createElement(tag as string);

@@ -1,27 +1,24 @@
-import { PropsType, h, onMounted, ref, useComponent } from "~/core";
+import { h, onMounted, ref, useGlobalComponent } from "~/core";
+import Comp from "./components/MyComp";
+
+useGlobalComponent('my-comp', Comp);
 
 function App() {
   const count = ref(0);
+
+  const myCompRef = ref();
+  onMounted(() => {
+    console.log(myCompRef.value);
+  })
 
   return <div>
     {/* 响应式数据一律以函数形式返回 */}
     <h1>{() => count.value}</h1>
     <button onclick={() => count.value++}>click</button>
-    <Comp a={1212} />
+    <my-comp ref={myCompRef} title="hello">
+      <p>hhhhhhhh</p>
+    </my-comp>
   </div>
-}
-
-class Comp {
-  o
-  constructor(props: PropsType<{ a: number }>) {
-    this.o = props
-  }
-  render() {
-    onMounted(() => {
-      console.log(this.o)
-    })
-    return <div>111</div>
-  }
 }
 
 export default App;
