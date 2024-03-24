@@ -1,14 +1,13 @@
 import { isClass, isFunction, isObject, isString } from "../utils";
-import { h, isFragment } from "./h";
-import { render } from "./render";
-import { BaseComponent, ClassComponent, Component } from "./type";
+import { isFragment } from "./h";
+import { BaseComponent, Component } from "./type";
 
 /**
  * 可以直接赋值给 dom 节点
  * @param value 
  * @returns 
  */
-export function isAssignmentValueToNode(value: any) {
+export function isAssignmentValueToNode(value: any): value is string {
   return ['string', 'number'].includes(typeof value) && value !== '';
 }
 
@@ -34,7 +33,7 @@ export function isVirtualDomObject(o) {
  * @param o 
  * @returns 
  */
-export function isComponent(tag) {
+export function isComponent(tag): tag is Component {
   return isFunction(tag) && !isFragment(tag);
 }
 

@@ -64,7 +64,7 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
  */
 function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['']) {
 
-  if (isFunction(tag) && isFragment(tag as Function)) {
+  if (isFragment(tag)) {
     return createElement(tag, attrs, children);
   }
 
@@ -148,7 +148,6 @@ function attrAssign(el: HTMLElement, attr: string, value: any) {
  * @returns 
  */
 export function createElementFragment(children: Children) {
-
   const fragment = document.createDocumentFragment();
 
   customForEach(children, val => {
@@ -160,7 +159,6 @@ export function createElementFragment(children: Children) {
   })
 
   return fragment;
-
 }
 
 /**
@@ -211,7 +209,7 @@ function nodeMount(el: HTMLElement | DocumentFragment, val: any) {
  * @param value 
  * @returns 
  */
-function createNode(value) {
+function createNode(value: Tree | string) {
 
   // 文本节点
   if (isAssignmentValueToNode(value)) {
@@ -220,7 +218,7 @@ function createNode(value) {
 
   // 节点
   if (isVirtualDomObject(value)) {
-    return createElement(value.tag, value.attrs, value.children);
+    return createElementReal(value.tag, value.attrs, value.children);
   }
 
   // 组件

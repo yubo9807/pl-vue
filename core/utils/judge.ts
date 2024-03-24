@@ -1,5 +1,5 @@
 import { len } from "./string";
-import { AnyObj, Key } from "./type";
+import { AnyObj, Key, WideClass } from "./type";
 
 export type Type = 'string'    | 'number'  | 'boolean' |
                    'symbol'    | 'bigint'  |
@@ -23,7 +23,7 @@ export function isType(o: any): Type {
  * @param func 
  * @returns 
  */
-export function isClass(func: Function) {
+export function isClass(func: Function): func is WideClass {
   return func.toString().slice(0, 5) === 'class';
 }
 
@@ -31,7 +31,7 @@ export function isClass(func: Function) {
  * 从内存上看是否是一个对象
  * @param o
  */
-export function isMemoryObject(o: any) {
+export function isMemoryObject(o: any): o is AnyObj {
   return ['object', 'array'].includes(isType(o));
 }
 
@@ -82,7 +82,7 @@ export function isBrowser() {
  * @param obj 
  * @returns 
  */
-export function isObject(obj: AnyObj) {
+export function isObject(obj: AnyObj): obj is AnyObj {
   return isType(obj) === 'object';
 }
 
@@ -91,7 +91,7 @@ export function isObject(obj: AnyObj) {
  * @param obj 
  * @returns 
  */
-export function isArray(arr: AnyObj) {
+export function isArray(arr: AnyObj): arr is any[] {
   return Array.isArray(arr);
 }
 
@@ -100,11 +100,11 @@ export function isArray(arr: AnyObj) {
  * @param obj 
  * @returns 
  */
-export function isString(text: any) {
+export function isString(text: any): text is string {
   return typeof text === 'string';
 }
 
-export function isFunction(value: any) {
+export function isFunction(value: any): value is Function {
   return typeof value === 'function';
 }
 // #region
