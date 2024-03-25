@@ -1,6 +1,6 @@
 import { isClass, isFunction, isObject, isString } from "../utils";
 import { isFragment } from "./h";
-import { BaseComponent, Component } from "./type";
+import { BaseComponent, ClassComponent, Component } from "./type";
 
 /**
  * 可以直接赋值给 dom 节点
@@ -19,6 +19,14 @@ export function isReactiveChangeAttr(attr: string) {
   return !/^on/.test(attr);
 }
 
+/**
+ * 是否为一个真实 dom 对象
+ * @param o 
+ * @returns 
+ */
+export function isDomRealObject(o) {
+  return isObject(o) && isString(o.tag);
+}
 /**
  * 是否为一个虚拟 dom 对象
  * @param o 
@@ -42,7 +50,7 @@ export function isComponent(tag): tag is Component {
  * @param o 
  * @returns 
  */
-export function isClassComponent(comp: BaseComponent) {
+export function isClassComponent(comp: Component) {
   return isClass(comp) && comp.prototype && comp.prototype.render;
 }
 

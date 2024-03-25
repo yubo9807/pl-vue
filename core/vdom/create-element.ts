@@ -1,6 +1,6 @@
 import { binding } from "../reactivity";
 import { objectAssign, AnyObj, printWarn, isArray, isEquals, isFunction, isObject, isString, len, customForEach } from '../utils';
-import { isAssignmentValueToNode, isReactiveChangeAttr, isVirtualDomObject, isComponent, noRenderValue, createTextNode, appendChild, joinClass, isClassComponent } from "./utils"
+import { isAssignmentValueToNode, isReactiveChangeAttr, isComponent, noRenderValue, createTextNode, appendChild, joinClass, isClassComponent, isDomRealObject } from "./utils"
 import { isFragment } from "./h";
 import { Tag, Attrs, Children, Tree, Component, BaseComponent } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
@@ -19,39 +19,49 @@ import { getGlobalComponent } from "./component-global";
  * @returns 
  */
 export function createElement(tag: Tag, attrs: Attrs, children: Children) {
-  if (isString(tag)) {  // 节点
+  // 节点
+  if (isString(tag)) {
     return createElementReal(tag, attrs, children);
   }
-  if (isFunction(tag)) {  
-    tag = tag as BaseComponent;
 
-    // 节点片段
-    if (isFragment(tag)) {  
-      return createElementFragment(children);
-    }
+  // 节点片段
+  if (isFragment(tag)) {
+    return createElementFragment(children);
+  }
 
-    recordCurrentComp(tag);
-
-    // 类组件
-    if (isClassComponent(tag)) {
-      // @ts-ignore
-      const t = new tag({ ...attrs, children });
-      tag = t.render.bind(t);
-    }
-
-    // 组件
-    tag = tag as BaseComponent
-    const props = objectAssign(attrs, { children });
-    const tree = tag(props);
-    collectExportsData(tag, attrs);
-    if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
-      return createTextNode(tree);
-    }
-    compTreeMap.set(tag, filterElement([tree, ...tree.children]));  // 收集组件
-    return createElement(tree.tag, tree.attrs, tree.children);
+  // 组件
+  if (isComponent(tag)) {  
+    return createComponent(tag, attrs, children);
   }
 }
 
+/**
+ * 组件生成节点
+ * @param tag 
+ * @param attrs 
+ * @param children 
+ * @returns 
+ */
+function createComponent(tag: Component, attrs: Attrs, children: Children) {
+  recordCurrentComp(tag);
+
+  // 类组件
+  if (isClassComponent(tag)) {
+    // @ts-ignore
+    const t = new tag({ ...attrs, children });
+    tag = t.render.bind(t);
+  }
+
+  // 组件
+  const props = objectAssign(attrs, { children });
+  const tree = (tag as BaseComponent)(props);
+  collectExportsData(tag, attrs);
+  if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
+    return createTextNode(tree);
+  }
+  compTreeMap.set(tag, filterElement([tree, ...tree.children]));  // 收集组件
+  return createElement(tree.tag, tree.attrs, tree.children);
+}
 
 
 
@@ -62,17 +72,7 @@ export function createElement(tag: Tag, attrs: Attrs, children: Children) {
  * @param children 
  * @returns 
  */
-function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['']) {
-
-  if (isFragment(tag)) {
-    return createElement(tag, attrs, children);
-  }
-
-  const globalComp = getGlobalComponent(tag as string);
-  if (globalComp) {
-    return createElement(globalComp, attrs, children);
-  }
-
+function createElementReal(tag: string, attrs: AnyObj = {}, children: Children = ['']) {
   const el = document.createElement(tag as string);
 
   customForEach(children, val => {
@@ -102,7 +102,6 @@ function createElementReal(tag: Tag, attrs: AnyObj = {}, children: Children = ['
   }
 
   return el;
-
 }
 
 /**
@@ -169,14 +168,6 @@ export function createElementFragment(children: Children) {
 function nodeMount(el: HTMLElement | DocumentFragment, val: any) {
   if (noRenderValue(val)) return;
 
-  // 原始值
-  if (isAssignmentValueToNode(val)) {
-    const textNode = createTextNode(val);
-    textNode.nodeValue = val;
-    appendChild(el, textNode);
-    return;
-  }
-
   // 节点片段
   if (isArray(val)) {
     const fragment = createElementFragment(val);
@@ -184,22 +175,13 @@ function nodeMount(el: HTMLElement | DocumentFragment, val: any) {
     return;
   }
 
-  // 节点
-  if (isVirtualDomObject(val)) {
-    const node = createElementReal(val.tag, val.attrs, val.children);
-    appendChild(el, node);
-    return;
-  }
-
-  // 组件
-  if (isObject(val) && isComponent(val.tag)) {
-    const node = createElement(val.tag, val.attrs, val.children);
+  if (isAssignmentValueToNode(val) || isObject(val)) {
+    const node = createNode(val as Tree);
     appendChild(el, node);
     return;
   }
 
   printWarn(`render: 不支持 ${val} 值渲染`);
-
 }
 
 
@@ -210,29 +192,36 @@ function nodeMount(el: HTMLElement | DocumentFragment, val: any) {
  * @returns 
  */
 function createNode(value: Tree | string) {
-
   // 文本节点
   if (isAssignmentValueToNode(value)) {
     return createTextNode(value);
   }
 
+  // 全局组件，改写节点树
+  const globalComp = getGlobalComponent(value.tag as string);
+  if (globalComp) value.tag = globalComp;
+
   // 节点
-  if (isVirtualDomObject(value)) {
-    return createElementReal(value.tag, value.attrs, value.children);
+  if (isDomRealObject(value)) {
+    return createElementReal(value.tag as string, value.attrs, value.children);
+  }
+
+  // 节点片段
+  if (isFragment(value.tag)) {
+    return createElementFragment(value.children);
   }
 
   // 组件
-  if (isObject(value) && isComponent(value.tag)) {
-    return createElement(value.tag, value.attrs, value.children);
+  if (isComponent(value.tag)) {
+    return createComponent(value.tag, value.attrs, value.children);
   }
-
 }
 
 
 type BackupNode = {
   key: number
   tree: Tree
-  node: HTMLElement
+  node: ReturnType<typeof createNode>
 }
 
 /**
@@ -340,6 +329,7 @@ function reactivityNode(fragment: DocumentFragment, func: () => any) {
         const originTree = backupNodes[i].tree;
 
         isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag as Component);  // 组件卸载之前
+        // @ts-ignore 节点片段无法删除
         backupNodes[i].node.remove();
         if (isComponent(originTree.tag)) {                                                 // 组件卸载之后
           const comp = originTree.tag as Component;
