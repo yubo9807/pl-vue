@@ -30,7 +30,7 @@ export function Helmet(props) {
       }
     }
     customForEach(props.children, val => {
-      const html = currentApp.createHTML(val.tag, val.attrs, val.children);
+      const html = currentApp.createHTML(val);
       nodes.push(html);
     })
     const newHeadInnerHTML = nodes.filter(val => val).join('\n');
@@ -60,7 +60,7 @@ export function Helmet(props) {
     })
 
     count = len(props.children);
-    const node = currentApp.createElementFragment(props.children);
+    const node = currentApp.createNodeFragment(props.children);
     head.insertBefore(node, head.children[0]);
   })
 

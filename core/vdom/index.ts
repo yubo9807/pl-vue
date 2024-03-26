@@ -1,10 +1,11 @@
 export { h, Fragment } from './h';
-export { createApp, App } from './app';
+export { createApp } from './app';
 export { useComponent } from './render';
 export { defineExpose } from './instance';
-export * from './type';
 export { onBeforeMount } from './hooks/before-mount';
 export { onMounted } from './hooks/mounted';
 export { onBeforeUnmount } from './hooks/before-unmount';
 export { onUnmounted } from './hooks/unmounted';
 export { joinClass } from './utils';
+export type { App } from './app';
+export type * from './type';

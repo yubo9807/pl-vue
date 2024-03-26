@@ -1,9 +1,9 @@
-import { nextTick, printWarn, AnyObj, hasOwn, isMemoryObject, isObject } from "../utils";
+import { nextTick, printWarn, AnyObj, hasOwn, isMemoryObject, isObject, CustomWeakMap } from "../utils";
 import { dependencyCollection, distributeUpdates } from "./depend";
 import { isReadonly } from "./readonly";
 
-const rawMap = new WeakMap();
-const updateKeysMap: WeakMap<object, Set<string | symbol>> = new WeakMap();
+const rawMap = new CustomWeakMap();
+const updateKeysMap: WeakMap<object, Set<string | symbol>> = new CustomWeakMap();
 
 export const ReactiveFlags = {
   RAW:         Symbol('__v_raw'),

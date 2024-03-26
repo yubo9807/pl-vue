@@ -1,4 +1,4 @@
-import { deepClone, objectAssign, isObject, customForEach } from '../utils';
+import { deepClone, objectAssign, isObject, customForEach, CustomWeakMap } from '../utils';
 import { Attrs, Children, Component } from './type';
 import { isAssignmentValueToNode, isComponent } from './utils';
 
@@ -7,7 +7,7 @@ type CompTree = {
   props:     Attrs
   children?: Children
 }
-export const compTreeMap: WeakMap<Component, CompTree[]> = new WeakMap();
+export const compTreeMap: WeakMap<Component, CompTree[]> = new CustomWeakMap();
 
 /**
  * 过滤掉元素，对组件进行收集

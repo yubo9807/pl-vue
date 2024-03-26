@@ -12,7 +12,7 @@ export class App extends Element {
     this.config = config;
   }
 
-  use = (plugin: Plugin) => {
+  use(plugin: Plugin) {
     plugin.install(this);
     return this;
   }
@@ -49,7 +49,7 @@ export class App extends Element {
    * @param name 
    * @param Comp 
    */
-  useComponent = (name: string, Comp: Component) => {
+  component(name: string, Comp: Component) {
     this.#compMap.set(name, Comp);
     return this;
   }

@@ -8,6 +8,6 @@ const router = createRouter();
 
 const app = createApp();
 app.use(store).use(router);
-app.useComponent("my-comp", Comp);
+app.component("my-comp", Comp);
 
 export default app;

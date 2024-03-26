@@ -1,3 +1,4 @@
+import { CustomWeakMap } from "./class";
 import { isArray, isBrowser, isType } from "./judge";
 import { AnyObj } from "./type";
 
@@ -7,7 +8,7 @@ import { AnyObj } from "./type";
  * @param extend 扩展克隆方法
  */
 export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {}) {
-	const cache: any = new WeakMap();
+	const cache: any = new CustomWeakMap();
 	const noCloneTypes = ['null', 'regexp', 'date', 'weakset', 'weakmap'];
 	
 	const specialClone = Object.assign({

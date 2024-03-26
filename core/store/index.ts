@@ -1,5 +1,5 @@
 import { reactive } from "../reactivity";
-import { AnyObj, deepClone, isFunction, isMemoryObject } from "../utils";
+import { AnyObj, deepClone, isFunction, isMemoryObject, CustomWeakMap } from "../utils";
 
 const actionFlag = Symbol('action');
 function isAction(func: Function) {
@@ -66,7 +66,7 @@ class Stroe<S extends Obj, A extends Obj> {
 }
 
 
-const collectMap: WeakMap<Obj, Obj> = new WeakMap();
+const collectMap: WeakMap<Obj, Obj> = new CustomWeakMap();
 
 /**
  * 定义 Store

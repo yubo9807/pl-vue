@@ -1,10 +1,10 @@
-import { customForEach } from "../../utils";
+import { CustomWeakMap, customForEach } from "../../utils";
 import { getSubComponent } from "../../vdom/component-tree";
 import { currentComp } from "../../vdom/instance";
 import { Component } from "../../vdom/type";
 import { hookLock } from "./utils";
 
-const map = new WeakMap();
+const map = new CustomWeakMap();
 
 /**
  * 注册 onUnmounted 钩子

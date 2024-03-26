@@ -1,8 +1,8 @@
 import { binding } from "../reactivity";
 import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals } from '../utils';
-import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isDomRealObject, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
+import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
-import { Tag, Attrs, Children, Tree, Component, BaseComponent, IntailOption } from "./type";
+import { Attrs, Children, Tree, Component, BaseComponent, IntailOption } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { collectExportsData, recordCurrentComp } from "./instance";
 import { triggerBeforeMount } from "./hooks/before-mount";
@@ -22,7 +22,7 @@ export class Element extends Static {
    * @param param0 
    * @returns 
    */
-  render = (tree: Tree): HTMLElement => {
+  render(tree: Tree): HTMLElement {
     const dom = this.createElement(tree);
 
     // 执行钩子函数
@@ -34,9 +34,8 @@ export class Element extends Static {
 
   /**
    * 创建元素
-   * @param tag 
-   * @param attrs 
-   * @param children 
+   * @param tree 
+   * @param 
    * @returns 
    */
   createElement(tree: Tree) {
@@ -44,12 +43,12 @@ export class Element extends Static {
 
     // 节点
     if (isString(tag)) {
-      return this.createElementReal(tag, attrs, children);
+      return this.createRealNode(tag, attrs, children);
     }
 
     // 节点片段
     if (isFragment(tag)) {
-      return this.createElementFragment(children);
+      return this.createNodeFragment(children);
     }
 
     // 组件
@@ -57,6 +56,7 @@ export class Element extends Static {
       return this.createComponent(tag, attrs, children);
     }
   }
+
 
   /**
    * 组件生成节点
@@ -87,7 +87,6 @@ export class Element extends Static {
   }
 
 
-
   /**
    * 创建真实节点
    * @param tag 
@@ -95,13 +94,13 @@ export class Element extends Static {
    * @param children 
    * @returns 
    */
-  createElementReal(tag: string, attrs: AnyObj = {}, children: Children = ['']) {
+  createRealNode(tag: string, attrs: AnyObj = {}, children: Children = ['']) {
     const el = document.createElement(tag as string);
 
     customForEach(children, val => {
       this.intercept(val);
       if (isFunction(val)) {
-        const fragment = this.createElementFragment([val]);
+        const fragment = this.createNodeFragment([val]);
         appendChild(el, fragment);  // 响应式数据交给节点片段去处理
       } else {
         this.#nodeMount(el, val);
@@ -128,12 +127,13 @@ export class Element extends Static {
     return el;
   }
 
+
   /**
    * 创建节点片段
    * @param children 
    * @returns 
    */
-  createElementFragment(children: Children) {
+  createNodeFragment(children: Children) {
     const fragment = document.createDocumentFragment();
 
     customForEach(children, val => {
@@ -158,7 +158,7 @@ export class Element extends Static {
 
     // 节点片段
     if (isArray(val)) {
-      const fragment = this.createElementFragment(val);
+      const fragment = this.createNodeFragment(val);
       appendChild(el, fragment);
       return;
     }
@@ -173,7 +173,6 @@ export class Element extends Static {
   }
 
 
-
   /**
    * 创建一个节点
    * @param value 
@@ -186,13 +185,13 @@ export class Element extends Static {
     }
 
     // 节点
-    if (isDomRealObject(value)) {
-      return this.createElementReal(value.tag as string, value.attrs, value.children);
+    if (isRealNode(value)) {
+      return this.createRealNode(value.tag as string, value.attrs, value.children);
     }
 
     // 节点片段
     if (isFragment(value.tag)) {
-      return this.createElementFragment(value.children);
+      return this.createNodeFragment(value.children);
     }
 
     // 组件

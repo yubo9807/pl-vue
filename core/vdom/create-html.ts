@@ -1,7 +1,7 @@
 import { customForEach, isArray, isFunction, isObject, isString, objectAssign, printWarn } from "../utils";
 import { isAssignmentValueToNode, isClassComponent, isComponent, isReactiveChangeAttr, joinClass } from "./utils";
 import { isFragment } from "./h";
-import { Attrs, BaseComponent, Children, IntailOption, Tag, Tree } from "./type";
+import { Children, IntailOption, Tree } from "./type";
 import { setLock } from "./hooks/utils";
 
 export class Static {
@@ -21,10 +21,10 @@ export class Static {
 
   /**
    * 服务端渲染函数
-   * @param param0 
+   * @param tree 
    * @returns 
    */
-  renderToString = (tree: Tree): string => {
+  renderToString(tree: Tree): string {
     setLock(true);
     const html = this.createHTML(tree);
     setLock(false);
@@ -33,9 +33,7 @@ export class Static {
 
   /**
    * 创建 innerHTML，用于服务端渲染
-   * @param tag 
-   * @param attrs 
-   * @param children 
+   * @param tree 
    */
   createHTML(tree: Tree) {
     const { tag, attrs, children } = this.intercept(tree);
