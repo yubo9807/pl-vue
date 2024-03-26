@@ -29,6 +29,7 @@ export class App extends Element {
         tree.tag = globalComp;
       }
     }
+    return tree;
   }
 
   // #region 全局组件

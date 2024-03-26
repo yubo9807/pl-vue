@@ -13,15 +13,17 @@ import { Static } from "./create-html";
 
 export class Element extends Static {
 
-  intercept(tree: Tree) {}
+  constructor(option: IntailOption) {
+    super(option);
+  }
 
   /**
    * 创建组件虚拟 DOM 树的函数
    * @param param0 
    * @returns 
    */
-  render = ({ tag, attrs, children }): HTMLElement => {
-    const dom = this.createElement(tag, attrs, children);
+  render = (tree: Tree): HTMLElement => {
+    const dom = this.createElement(tree);
 
     // 执行钩子函数
     triggerBeforeMount();
@@ -37,8 +39,9 @@ export class Element extends Static {
    * @param children 
    * @returns 
    */
-  createElement(tag: Tag, attrs: Attrs, children: Children) {
-    this.intercept({ tag, attrs, children });
+  createElement(tree: Tree) {
+    const { tag, attrs, children } = this.intercept(tree);
+
     // 节点
     if (isString(tag)) {
       return this.createElementReal(tag, attrs, children);
@@ -80,7 +83,7 @@ export class Element extends Static {
       return createTextNode(tree);
     }
     compTreeMap.set(tag, filterElement([tree, ...tree.children]));  // 收集组件
-    return this.createElement(tree.tag, tree.attrs, tree.children);
+    return this.createElement(tree);
   }
 
 

@@ -1,7 +1,7 @@
 import { customForEach, isArray, isFunction, isObject, isString, objectAssign, printWarn } from "../utils";
 import { isAssignmentValueToNode, isClassComponent, isComponent, isReactiveChangeAttr, joinClass } from "./utils";
 import { isFragment } from "./h";
-import { Attrs, BaseComponent, Children, IntailOption, Tag } from "./type";
+import { Attrs, BaseComponent, Children, IntailOption, Tag, Tree } from "./type";
 import { setLock } from "./hooks/utils";
 
 export class Static {
@@ -12,13 +12,21 @@ export class Static {
   }
 
   /**
+   * 树形结构拦截
+   * @param tree 
+   */
+  intercept(tree: Tree): Tree {
+    return tree;
+  }
+
+  /**
    * 服务端渲染函数
    * @param param0 
    * @returns 
    */
-  renderToString = ({ tag, attrs, children }): string => {
+  renderToString = (tree: Tree): string => {
     setLock(true);
-    const html = this.createHTML(tag, attrs, children);
+    const html = this.createHTML(tree);
     setLock(false);
     return html;
   }
@@ -29,7 +37,9 @@ export class Static {
    * @param attrs 
    * @param children 
    */
-  createHTML(tag: Tag, attrs: Attrs = {}, children: Children = ['']) {
+  createHTML(tree: Tree) {
+    const { tag, attrs, children } = this.intercept(tree);
+
     // 节点片段
     if (isFragment(tag)) {
       const props = objectAssign(attrs, { children });
@@ -39,15 +49,14 @@ export class Static {
 
     // 组件
     if (isComponent(tag)) {
-      tag = tag as BaseComponent;
       if (isClassComponent(tag)) {
         // @ts-ignore
         const t = new tag({ ...attrs, children });
         return this.createHTML(t.render.bind(t));
       }
       const props = objectAssign(attrs, { children });
-      const h = (tag as Function)(props);
-      return this.createHTML(h.tag, h.attrs, h.children);
+      const newTree = (tag as Function)(props);
+      return this.createHTML(newTree);
     } 
 
     // 属性
@@ -59,7 +68,7 @@ export class Static {
       let value = isFunction(attrs[attr]) && isReactiveChangeAttr(attr) ? attrs[attr]() : attrs[attr];
 
       if (isString(tag) && ['innerHTML', 'innerText'].includes(attr)) {
-        children = [value];
+        tree.children = [value];
         continue;
       }
 
@@ -117,7 +126,7 @@ export class Static {
 
       // 节点 || 组件 || 虚拟节点
       if (isObject(val)) {
-        text += this.createHTML(val.tag, val.attrs, val.children);
+        text += this.createHTML(val as Tree);
         return;
       }
 
