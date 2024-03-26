@@ -4,6 +4,7 @@ import { resolve } from 'path';
 export default defineConfig({
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    'process.env.version': JSON.stringify(process.env.npm_package_version),
   },
   resolve: {
     alias: {

@@ -1,7 +1,7 @@
 import { reactive, ref, toRaw, watch } from "../reactivity";
 import { createId, customForEach, deepClone, isBrowser, isFunction, isString } from "../utils";
-import { Component, PropsType, h, Fragment, renderToString, BaseComponent } from "../vdom";
-import { beforeEach, config, currentRoute, setCurrentRoute, variable } from "./create-router";
+import { Component, PropsType, h, Fragment, BaseComponent } from "../vdom";
+import { beforeEach, config, currentApp, currentRoute, setCurrentRoute, variable } from "./create-router";
 import { queryRoute } from "./route";
 import { BeforeEnter, PagePropsType } from "./type";
 import { replace } from "./use-router";
@@ -240,7 +240,7 @@ export function Router(props: BrowserRouterProps & StaticRouterProps) {
  * @param attrs 
  */
 function resultReplace(replaceStr: string, Comp: BaseComponent, attrs: PagePropsType) {
-  const string = renderToString(<Comp {...attrs} />);
+  const string = currentApp.renderToString(<Comp {...attrs} />);
   deleteStackItem(replaceStr);
   const newTemplate = variable.currentTemplate.replace(replaceStr, string);
   variable.currentTemplate = newTemplate;

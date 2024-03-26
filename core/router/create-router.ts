@@ -3,6 +3,7 @@ import { isBrowser } from "../utils";
 import { BeforeEnter, RouteOption } from "./type";
 import { useRouter } from "./use-router";
 import { analyzeRoute } from "./utils";
+import { App } from "../vdom";
 
 type Config = {
   base?:       string
@@ -16,6 +17,7 @@ export const config: Config = {
   ssrDataKey: 'g_initialProps',
 }
 
+export let currentApp: App = null;
 export let currentRoute: RouteOption = null;
 export function setCurrentRoute(route: RouteOption) {
   currentRoute = route;
@@ -40,7 +42,7 @@ export let beforeEach: BeforeEnter = null;
  * @param option 
  * @returns 
  */
-export function initRouter(option: Config = {}) {
+export function createRouter(option: Config = {}) {
   Object.assign(config, option);
   if (isBrowser()) {
     const route = analyzeRoute(getBrowserUrl());
@@ -54,6 +56,9 @@ export function initRouter(option: Config = {}) {
   }
 
   return {
+    install(app: App) {
+      currentApp = app;
+    },
     ...useRouter(),
     beforeEach(func: BeforeEnter) {
       beforeEach = func;

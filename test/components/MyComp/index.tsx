@@ -9,7 +9,7 @@ export default function(props: MyCompProps) {
   })
   return <div>
     <h1>{props.title}</h1>
-    <button onclick={() => console.log(111111)}>click</button>
-    <slot></slot>
+    <button onclick={() => console.log(111)}>click</button>
+    {props.children}
   </div>
 }

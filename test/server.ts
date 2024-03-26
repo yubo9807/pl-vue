@@ -5,6 +5,7 @@ import { ssrOutlet } from "~/core/router";
 import App from "./app";
 import { getMimeType, getStaticFileExts } from "./utils/string";
 import env from "~/config/env";
+import app from './basic';
 
 // html 模版
 const html = readFileSync(resolve(__dirname, 'index.html'), 'utf-8');
@@ -31,7 +32,8 @@ const server = createServer(async (req, res) => {
     });
   } else {
     // 服务端渲染
-    const content = await ssrOutlet(App, url, html);
+    const appTostring = app.renderToString(App())
+    const content = await ssrOutlet(appTostring, url, html);
     res.write(content);
     res.end();
   }

@@ -1,227 +1,342 @@
 import { binding } from "../reactivity";
-import { objectAssign, AnyObj, printWarn, isArray, isEquals, isFunction, isObject, isString, len, customForEach } from '../utils';
-import { isAssignmentValueToNode, isReactiveChangeAttr, isComponent, noRenderValue, createTextNode, appendChild, joinClass, isClassComponent, isDomRealObject } from "./utils"
+import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals } from '../utils';
+import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isDomRealObject, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
-import { Tag, Attrs, Children, Tree, Component, BaseComponent } from "./type";
+import { Tag, Attrs, Children, Tree, Component, BaseComponent, IntailOption } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
+import { collectExportsData, recordCurrentComp } from "./instance";
+import { triggerBeforeMount } from "./hooks/before-mount";
+import { triggerMounted } from "./hooks/mounted";
 import { triggerBeforeUnmount } from "./hooks/before-unmount";
 import { triggerUnmounted } from "./hooks/unmounted";
-import { collectExportsData, recordCurrentComp } from "./instance";
-import { getGlobalComponent } from "./component-global";
+import { Static } from "./create-html";
 
+export class Element extends Static {
 
+  intercept(tree: Tree) {}
 
-/**
- * 创建元素
- * @param tag 
- * @param attrs 
- * @param children 
- * @returns 
- */
-export function createElement(tag: Tag, attrs: Attrs, children: Children) {
-  // 节点
-  if (isString(tag)) {
-    return createElementReal(tag, attrs, children);
+  /**
+   * 创建组件虚拟 DOM 树的函数
+   * @param param0 
+   * @returns 
+   */
+  render = ({ tag, attrs, children }): HTMLElement => {
+    const dom = this.createElement(tag, attrs, children);
+
+    // 执行钩子函数
+    triggerBeforeMount();
+    nextTick(triggerMounted);
+
+    return dom;
   }
 
-  // 节点片段
-  if (isFragment(tag)) {
-    return createElementFragment(children);
-  }
-
-  // 组件
-  if (isComponent(tag)) {  
-    return createComponent(tag, attrs, children);
-  }
-}
-
-/**
- * 组件生成节点
- * @param tag 
- * @param attrs 
- * @param children 
- * @returns 
- */
-function createComponent(tag: Component, attrs: Attrs, children: Children) {
-  recordCurrentComp(tag);
-
-  // 类组件
-  if (isClassComponent(tag)) {
-    // @ts-ignore
-    const t = new tag({ ...attrs, children });
-    tag = t.render.bind(t);
-  }
-
-  // 组件
-  const props = objectAssign(attrs, { children });
-  const tree = (tag as BaseComponent)(props);
-  collectExportsData(tag, attrs);
-  if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
-    return createTextNode(tree);
-  }
-  compTreeMap.set(tag, filterElement([tree, ...tree.children]));  // 收集组件
-  return createElement(tree.tag, tree.attrs, tree.children);
-}
-
-
-
-/**
- * 创建真实节点
- * @param tag 
- * @param attrs 
- * @param children 
- * @returns 
- */
-function createElementReal(tag: string, attrs: AnyObj = {}, children: Children = ['']) {
-  const el = document.createElement(tag as string);
-
-  customForEach(children, val => {
-    if (isFunction(val)) {
-      const fragment = createElementFragment([val]);
-      appendChild(el, fragment);  // 响应式数据交给节点片段去处理
-    } else {
-      nodeMount(el, val);
+  /**
+   * 创建元素
+   * @param tag 
+   * @param attrs 
+   * @param children 
+   * @returns 
+   */
+  createElement(tag: Tag, attrs: Attrs, children: Children) {
+    this.intercept({ tag, attrs, children });
+    // 节点
+    if (isString(tag)) {
+      return this.createElementReal(tag, attrs, children);
     }
-  })
 
-  // attrs 赋值
-  for (const attr in attrs) {
-    attrAssign(el, attr, attrs[attr]);
+    // 节点片段
+    if (isFragment(tag)) {
+      return this.createElementFragment(children);
+    }
+
+    // 组件
+    if (isComponent(tag)) {  
+      return this.createComponent(tag, attrs, children);
+    }
   }
 
-  // 对样式单独处理
-  if (attrs.style && isObject(attrs.style)) {
-    for (const prop in attrs.style) {
-      const value = attrs.style[prop];
-      if (isFunction(value)) {
-        binding(() => el.style[prop] = value());
+  /**
+   * 组件生成节点
+   * @param tag 
+   * @param attrs 
+   * @param children 
+   * @returns 
+   */
+  createComponent(tag: Component, attrs: Attrs, children: Children) {
+    recordCurrentComp(tag);
+
+    // 类组件
+    if (isClassComponent(tag)) {
+      // @ts-ignore
+      const t = new tag({ ...attrs, children });
+      tag = t.render.bind(t);
+    }
+
+    // 组件
+    const props = objectAssign(attrs, { children });
+    const tree = (tag as BaseComponent)(props);
+    collectExportsData(tag, attrs);
+    if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
+      return createTextNode(tree);
+    }
+    compTreeMap.set(tag, filterElement([tree, ...tree.children]));  // 收集组件
+    return this.createElement(tree.tag, tree.attrs, tree.children);
+  }
+
+
+
+  /**
+   * 创建真实节点
+   * @param tag 
+   * @param attrs 
+   * @param children 
+   * @returns 
+   */
+  createElementReal(tag: string, attrs: AnyObj = {}, children: Children = ['']) {
+    const el = document.createElement(tag as string);
+
+    customForEach(children, val => {
+      this.intercept(val);
+      if (isFunction(val)) {
+        const fragment = this.createElementFragment([val]);
+        appendChild(el, fragment);  // 响应式数据交给节点片段去处理
       } else {
-        el.style[prop] = value;
+        this.#nodeMount(el, val);
+      }
+    })
+
+    // attrs 赋值
+    for (const attr in attrs) {
+      this.#attrAssign(el, attr, attrs[attr]);
+    }
+
+    // 对样式单独处理
+    if (attrs.style && isObject(attrs.style)) {
+      for (const prop in attrs.style) {
+        const value = attrs.style[prop];
+        if (isFunction(value)) {
+          binding(() => el.style[prop] = value());
+        } else {
+          el.style[prop] = value;
+        }
       }
     }
+
+    return el;
   }
 
-  return el;
-}
+  /**
+   * 创建节点片段
+   * @param children 
+   * @returns 
+   */
+  createElementFragment(children: Children) {
+    const fragment = document.createDocumentFragment();
 
-/**
- * 属性赋值
- * @param el 
- * @param attr 
- * @param value 
- */
-function attrAssign(el: HTMLElement, attr: string, value: any) {
-  // 自定义属性
-  if (attr === 'ref' && isObject(value)) {
-    value.value = el;
-    return;
-  }
-  if (attr === 'created' && isFunction(value)) {
-    value(el);
-    return;
-  }
+    customForEach(children, val => {
+      this.intercept(val);
+      if (isFunction(val)) {
+        this.#reactivityNode(fragment, val);  // 响应式数据挂载
+      } else {
+        this.#nodeMount(fragment, val);
+      }
+    })
 
-  // 一般属性赋值
-  let assgin = (val: string) => el[attr] = val;
-
-  // 特殊属性处理
-  if (attr === 'className') {
-    assgin = (val: string) => el[attr] = joinClass(...[val].flat());
-  } else if (attr.startsWith('data-')) {
-    assgin = (val: string) => el.dataset[attr.slice(5)] = val;
+    return fragment;
   }
 
-  // 响应式数据
-  if (isReactiveChangeAttr(attr) && isFunction(value)) {
-    binding(() => assgin(value()));
-  } else {
-    assgin(value);
-  }
-}
+  /**
+   * 节点挂载
+   * @param el 
+   * @param val 
+   */
+  #nodeMount(el: HTMLElement | DocumentFragment, val: any) {
+    if (noRenderValue(val)) return;
 
-
-
-/**
- * 创建节点片段
- * @param children 
- * @returns 
- */
-export function createElementFragment(children: Children) {
-  const fragment = document.createDocumentFragment();
-
-  customForEach(children, val => {
-    if (isFunction(val)) {
-      reactivityNode(fragment, val);  // 响应式数据挂载
-    } else {
-      nodeMount(fragment, val);
+    // 节点片段
+    if (isArray(val)) {
+      const fragment = this.createElementFragment(val);
+      appendChild(el, fragment);
+      return;
     }
-  })
 
-  return fragment;
+    if (isAssignmentValueToNode(val) || isObject(val)) {
+      const node = this.createNode(val as Tree);
+      appendChild(el, node);
+      return;
+    }
+
+    printWarn(`render: 不支持 ${val} 值渲染`);
+  }
+
+
+
+  /**
+   * 创建一个节点
+   * @param value 
+   * @returns 
+   */
+  createNode(value: Tree | string) {
+    // 文本节点
+    if (isAssignmentValueToNode(value)) {
+      return createTextNode(value);
+    }
+
+    // 节点
+    if (isDomRealObject(value)) {
+      return this.createElementReal(value.tag as string, value.attrs, value.children);
+    }
+
+    // 节点片段
+    if (isFragment(value.tag)) {
+      return this.createElementFragment(value.children);
+    }
+
+    // 组件
+    if (isComponent(value.tag)) {
+      return this.createComponent(value.tag, value.attrs, value.children);
+    }
+  }
+
+  /**
+   * 属性赋值
+   * @param el 
+   * @param attr 
+   * @param value 
+   */
+  #attrAssign(el: HTMLElement, attr: string, value: any) {
+    // 自定义属性
+    if (attr === 'ref' && isObject(value)) {
+      value.value = el;
+      return;
+    }
+    if (attr === 'created' && isFunction(value)) {
+      value(el);
+      return;
+    }
+
+    // 一般属性赋值
+    let assgin = (val: string) => el[attr] = val;
+
+    // 特殊属性处理
+    if (attr === 'className') {
+      assgin = (val: string) => el[attr] = joinClass(...[val].flat());
+    } else if (attr.startsWith('data-')) {
+      assgin = (val: string) => el.dataset[attr.slice(5)] = val;
+    }
+
+    // 响应式数据
+    if (isReactiveChangeAttr(attr) && isFunction(value)) {
+      binding(() => assgin(value()));
+    } else {
+      assgin(value);
+    }
+  }
+
+  /**
+   * 响应式节点变化
+   * @param fragment 
+   * @param func 
+   */
+  #reactivityNode(fragment: DocumentFragment, func: () => any) {
+    let backupNodes: BackupNode[] = [];
+    let lockFirstRun = true;  // 锁：第一次运行
+    let parent = null;
+
+    const textNode = createTextNode('');  // 用于记录添加位置
+    appendChild(fragment, textNode);
+
+    binding(() => {
+      let value = func();
+      if (value && isObject(value) && isFragment(value.tag)) {
+        printWarn('不支持响应式节点片段渲染');
+        return;
+      }
+
+      if (!isArray(value)) value = [value];
+      value = value.filter(val => !noRenderValue(val));
+
+      let i = 0;
+      while (i < len(value)) {
+        let val = value[i];
+
+        const index = lookupBackupNodes(backupNodes, i);
+        if (index >= 0) {  // 节点已经存在
+          if (isEquals(val, backupNodes[index].tree)) {  // 任何数据都没有变化
+            i++;
+            continue;
+          }
+
+          // 节点替换，重新备份
+          const node = this.createNode(val);
+          if (!node) {  // 创建节点失败，有可能原节点被删除
+            value.splice(index, 1);
+            i++;
+            continue;
+          }
+          const originTree = backupNodes[index].tree;
+
+          isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag as Component);  // 组件卸载之前
+          backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
+          if (isComponent(originTree.tag)) {                                                 // 组件卸载之后
+            const comp = originTree.tag as Component;
+            triggerUnmounted(comp);
+            compTreeMap.delete(comp);
+          }
+
+          backupNodes[index].tree = val;
+          backupNodes[index].node = node;
+        } else {  // 节点不存在，追加节点
+          const node = this.createNode(val);
+          if (!node) {  // 创建节点失败，有可能原节点被删除
+            i++;
+            continue;
+          }
+
+          if (lockFirstRun) {
+            appendChild(fragment, node);
+          } else if (len(backupNodes) === 0) {
+            parent ??= textNode.parentElement;
+            parent.insertBefore(node, textNode.nextSibling);
+          } else {
+            const prevNode = backupNodes[len(backupNodes) - 1].node;
+            const lastNode = prevNode.nextSibling;
+            prevNode.parentElement.insertBefore(node, lastNode);
+          }
+          backupNodes.push({ key: i, tree: val, node });
+        }
+
+        i++;
+      }
+
+      // 检查有没有要删除的节点
+      if (len(backupNodes) > len(value)) {
+        for (let i = len(value); i < len(backupNodes); i ++) {
+          const originTree = backupNodes[i].tree;
+
+          isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag as Component);  // 组件卸载之前
+          // @ts-ignore 节点片段无法删除
+          backupNodes[i].node.remove();
+          if (isComponent(originTree.tag)) {                                                 // 组件卸载之后
+            const comp = originTree.tag as Component;
+            triggerUnmounted(comp);
+            compTreeMap.delete(comp);
+          }
+
+        }
+        backupNodes.splice(len(value), len(backupNodes) - len(value));
+      }
+
+      lockFirstRun = false;
+    })
+  }
+
 }
-
-/**
- * 节点挂载
- * @param el 
- * @param val 
- */
-function nodeMount(el: HTMLElement | DocumentFragment, val: any) {
-  if (noRenderValue(val)) return;
-
-  // 节点片段
-  if (isArray(val)) {
-    const fragment = createElementFragment(val);
-    appendChild(el, fragment);
-    return;
-  }
-
-  if (isAssignmentValueToNode(val) || isObject(val)) {
-    const node = createNode(val as Tree);
-    appendChild(el, node);
-    return;
-  }
-
-  printWarn(`render: 不支持 ${val} 值渲染`);
-}
-
-
-
-/**
- * 创建一个节点
- * @param value 
- * @returns 
- */
-function createNode(value: Tree | string) {
-  // 文本节点
-  if (isAssignmentValueToNode(value)) {
-    return createTextNode(value);
-  }
-
-  // 全局组件，改写节点树
-  const globalComp = getGlobalComponent(value.tag as string);
-  if (globalComp) value.tag = globalComp;
-
-  // 节点
-  if (isDomRealObject(value)) {
-    return createElementReal(value.tag as string, value.attrs, value.children);
-  }
-
-  // 节点片段
-  if (isFragment(value.tag)) {
-    return createElementFragment(value.children);
-  }
-
-  // 组件
-  if (isComponent(value.tag)) {
-    return createComponent(value.tag, value.attrs, value.children);
-  }
-}
-
 
 type BackupNode = {
-  key: number
+  key:  number
   tree: Tree
-  node: ReturnType<typeof createNode>
+  node: HTMLElement | DocumentFragment | Text
 }
 
 /**
@@ -245,102 +360,4 @@ function lookupBackupNodes(arr: BackupNode[], value: number) {
     }
   }
   return -1;
-}
-
-/**
- * 响应式节点变化
- * @param fragment 
- * @param func 
- */
-function reactivityNode(fragment: DocumentFragment, func: () => any) {
-  let backupNodes: BackupNode[] = [];
-  let lockFirstRun = true;  // 锁：第一次运行
-  let parent = null;
-
-  const textNode = createTextNode('');  // 用于记录添加位置
-  appendChild(fragment, textNode);
-
-  binding(() => {
-    let value = func();
-    if (value && isObject(value) && isFragment(value.tag)) {
-      printWarn('不支持响应式节点片段渲染');
-      return;
-    }
-
-    if (!isArray(value)) value = [value];
-    value = value.filter(val => !noRenderValue(val));
-
-    let i = 0;
-    while (i < len(value)) {
-      let val = value[i];
-
-      const index = lookupBackupNodes(backupNodes, i);
-      if (index >= 0) {  // 节点已经存在
-        if (isEquals(val, backupNodes[index].tree)) {  // 任何数据都没有变化
-          i++;
-          continue;
-        }
-
-        // 节点替换，重新备份
-        const node = createNode(val);
-        if (!node) {  // 创建节点失败，有可能原节点被删除
-          value.splice(index, 1);
-          i++;
-          continue;
-        }
-        const originTree = backupNodes[index].tree;
-
-        isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag as Component);  // 组件卸载之前
-        backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
-        if (isComponent(originTree.tag)) {                                                 // 组件卸载之后
-          const comp = originTree.tag as Component;
-          triggerUnmounted(comp);
-          compTreeMap.delete(comp);
-        }
-
-        backupNodes[index].tree = val;
-        backupNodes[index].node = node;
-      } else {  // 节点不存在，追加节点
-        const node = createNode(val);
-        if (!node) {  // 创建节点失败，有可能原节点被删除
-          i++;
-          continue;
-        }
-
-        if (lockFirstRun) {
-          appendChild(fragment, node);
-        } else if (len(backupNodes) === 0) {
-          parent ??= textNode.parentElement;
-          parent.insertBefore(node, textNode.nextSibling);
-        } else {
-          const prevNode = backupNodes[len(backupNodes) - 1].node;
-          const lastNode = prevNode.nextSibling;
-          prevNode.parentElement.insertBefore(node, lastNode);
-        }
-        backupNodes.push({ key: i, tree: val, node });
-      }
-
-      i++;
-    }
-
-    // 检查有没有要删除的节点
-    if (len(backupNodes) > len(value)) {
-      for (let i = len(value); i < len(backupNodes); i ++) {
-        const originTree = backupNodes[i].tree;
-
-        isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag as Component);  // 组件卸载之前
-        // @ts-ignore 节点片段无法删除
-        backupNodes[i].node.remove();
-        if (isComponent(originTree.tag)) {                                                 // 组件卸载之后
-          const comp = originTree.tag as Component;
-          triggerUnmounted(comp);
-          compTreeMap.delete(comp);
-        }
-
-      }
-      backupNodes.splice(len(value), len(backupNodes) - len(value));
-    }
-
-    lockFirstRun = false;
-  })
 }

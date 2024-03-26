@@ -1,6 +1,8 @@
-import { h, render } from "~/core";
-import App from "./app";
+import { h } from '~/core';
+import app from './basic'
+import App from './app';
 
-const root = document.getElementById('root')
+const node = app.render(<App />);
+const root = document.getElementById('root');
 root.innerHTML = '';
-root.appendChild(render(<App />));
+root.appendChild(node);

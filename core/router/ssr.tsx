@@ -1,7 +1,7 @@
 import { watch } from '../reactivity';
 import { customForEach, len } from '../utils';
-import { createElementFragment, createHTML, h, Fragment, renderToString, Component, onMounted, onUnmounted } from '../vdom';
-import { config, setCurrentRoute, variable } from './create-router';
+import { Fragment, onMounted, onUnmounted } from '../vdom';
+import { config, currentApp, setCurrentRoute, variable } from './create-router';
 import { stack } from './router';
 import { analyzeRoute } from './utils';
 
@@ -30,7 +30,7 @@ export function Helmet(props) {
       }
     }
     customForEach(props.children, val => {
-      const html = createHTML(val.tag, val.attrs, val.children);
+      const html = currentApp.createHTML(val.tag, val.attrs, val.children);
       nodes.push(html);
     })
     const newHeadInnerHTML = nodes.filter(val => val).join('\n');
@@ -60,7 +60,7 @@ export function Helmet(props) {
     })
 
     count = len(props.children);
-    const node = createElementFragment(props.children);
+    const node = currentApp.createElementFragment(props.children);
     head.insertBefore(node, head.children[0]);
   })
 
@@ -86,7 +86,7 @@ export function Helmet(props) {
  * @param template html 模版
  * @returns 
  */
-export async function ssrOutlet(App: Component, url: string, template: string) {
+export async function ssrOutlet(content: string, url: string, template: string) {
   return new Promise((resolve) => {
     url = url.replace(config.base, '');
     if (config.mode === 'hash') {
@@ -96,7 +96,6 @@ export async function ssrOutlet(App: Component, url: string, template: string) {
     setCurrentRoute(analyzeRoute(url));
     variable.ssrData = {};
 
-    const content = renderToString(<App />);
     variable.currentTemplate = template.replace('<!--ssr-outlet-->', content);
 
     const unWatch = watch(() => len(stack), value => {
