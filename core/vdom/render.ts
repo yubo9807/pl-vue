@@ -1,6 +1,27 @@
-import { BaseComponent, ClassComponent, Component, GetClassCompPropsType, GetCompPropsType } from "./type";
+import { BaseComponent, ClassComponent, Component, GetClassCompPropsType, GetCompPropsType, Tree } from "./type";
 import { h } from "./h";
 import { Element } from "./create-element";
+import { Static } from "./create-html";
+
+/**
+ * 渲染为 DOM 节点
+ * @param tree 
+ * @returns 
+ */
+export function render(tree: Tree) {
+  const app = new Element();
+  return app.render(tree);
+}
+
+/**
+ * 渲染成字符串
+ * @param tree 
+ * @returns 
+ */
+export function renderToString(tree: Tree) {
+  const app = new Static();
+  return app.renderToString(tree);
+}
 
 /**
  * 使用组件
@@ -16,6 +37,5 @@ export function useComponent<C extends Component>(
     ? GetCompPropsType<typeof Comp>
     : never
 ) {
-  const app = new Element();
-  return app.render(h(Comp, props));
+  return render(h(Comp, props));
 }
