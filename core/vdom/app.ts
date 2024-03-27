@@ -7,6 +7,8 @@ type Plugin = {
 }
 export class App extends Element {
 
+  [k: string]: any
+
   constructor(config: IntailOption) {
     super(config);
     this.config = config;
@@ -24,7 +26,7 @@ export class App extends Element {
    */
   intercept(tree: Tree) {
     if (isString(tree.tag)) {
-      const globalComp = this.getComponent(tree.tag);
+      const globalComp = this.#compMap.get(tree.tag);
       if (globalComp) {
         tree.tag = globalComp;
       }
@@ -34,15 +36,6 @@ export class App extends Element {
 
   // #region 全局组件
   #compMap = new Map<string, Component>();
-
-  /**
-   * 获取全局组件
-   * @param name 
-   * @returns 
-   */
-  getComponent(name: string) {
-    return this.#compMap.get(name);
-  }
 
   /**
    * 注册全局组件

@@ -1,7 +1,7 @@
 import { reactive } from "../reactivity";
 import { isBrowser } from "../utils";
 import { BeforeEnter, RouteOption } from "./type";
-import { useRouter } from "./use-router";
+import { useRoute, useRouter } from "./use-router";
 import { analyzeRoute } from "./utils";
 import { App } from "../vdom";
 
@@ -55,11 +55,15 @@ export function createRouter(option: Config = {}) {
     })
   }
 
+  const router = useRouter();
+
   return {
     install(app: App) {
       currentApp = app;
+      app.$router = router;
+      app.$route = useRoute();
     },
-    ...useRouter(),
+    ...router,
     beforeEach(func: BeforeEnter) {
       beforeEach = func;
     },

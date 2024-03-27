@@ -14,6 +14,7 @@ const config = defineConfig({
   preview: { proxy },
   base: env.BASE_URL || '/',
   build: {
+    // minify: false,
     rollupOptions: {
       output: {
         manualChunks(url) {

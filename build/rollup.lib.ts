@@ -22,7 +22,7 @@ const builds = [
   },
   {
     file: 'store/index',
-    external: ['../utils', '../reactivity'],
+    external: ['../utils', '../reactivity', '../vdom'],
   },
   {
     file: 'router/index',
