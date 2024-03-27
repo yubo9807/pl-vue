@@ -1,6 +1,6 @@
 import { BaseComponent, ClassComponent, Component, GetClassCompPropsType, GetCompPropsType } from "./type";
 import { h } from "./h";
-import { createApp } from "./app";
+import { Element } from "./create-element";
 
 /**
  * 使用组件
@@ -16,6 +16,6 @@ export function useComponent<C extends Component>(
     ? GetCompPropsType<typeof Comp>
     : never
 ) {
-  const app = createApp();
+  const app = new Element();
   return app.render(h(Comp, props));
 }

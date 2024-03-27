@@ -7,7 +7,7 @@ import { setLock } from "./hooks/utils";
 export class Static {
 
   config: IntailOption
-  constructor(config: IntailOption) {
+  constructor(config?: IntailOption) {
     this.config = config;
   }
 

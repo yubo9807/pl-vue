@@ -13,7 +13,7 @@ import { Static } from "./create-html";
 
 export class Element extends Static {
 
-  constructor(option: IntailOption) {
+  constructor(option?: IntailOption) {
     super(option);
   }
 
