@@ -53,6 +53,9 @@ export function createRouter(option: Config = {}) {
         currentRoute[key] = route[key];
       }
     })
+  } else {
+    // 随便给个路径，防止报错。真正的路径在 ssrOutlet 赋值
+    currentRoute = analyzeRoute('');
   }
 
   const router = useRouter();
