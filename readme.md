@@ -11,7 +11,7 @@
 ## Use
 
 ```tsx
-import { h, ref, render } from 'pl-vue';
+import { h, ref, createApp } from 'pl-vue';
 
 function App() {
   const count = ref(0);
@@ -23,8 +23,9 @@ function App() {
   </div>
 }
 
+const app = createApp();
 const root = document.getElementById('root');
-root.appendChild(render(<App />));
+root.appendChild(app.render(<App />));
 ```
 
 ## Template
