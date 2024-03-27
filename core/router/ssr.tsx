@@ -1,6 +1,6 @@
 import { watch } from '../reactivity';
 import { customForEach, len } from '../utils';
-import { Fragment, onMounted, onUnmounted } from '../vdom';
+import { Fragment, h, onMounted, onUnmounted } from '../vdom';
 import { config, currentApp, setCurrentRoute, variable } from './create-router';
 import { stack } from './router';
 import { analyzeRoute } from './utils';
@@ -76,7 +76,7 @@ export function Helmet(props) {
   })
   // #endregion
 
-  return <></>
+  return h(Fragment, null);
 }
 
 /**
