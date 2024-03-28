@@ -24,7 +24,7 @@ export class App extends Element {
   /**
    * 数据拦截
    */
-  intercept(tree: Tree) {
+  intercept(tree: any) {
     if (tree && isString(tree.tag)) {
       const globalComp = this.#compMap.get(tree.tag);
       if (globalComp) {

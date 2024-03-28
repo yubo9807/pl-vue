@@ -15,7 +15,7 @@ export class Static {
    * 树形结构拦截
    * @param tree 
    */
-  intercept(tree: Tree): Tree {
+  intercept<T>(tree: T) {
     return tree;
   }
 
