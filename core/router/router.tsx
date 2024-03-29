@@ -17,7 +17,7 @@ type BrowserRouterProps = PropsType<{
 }>
 function BrowserRouter(props: BrowserRouterProps) {
 
-  const Comp = ref<BaseComponent>();
+  const Comp = ref<BaseComponent>(props.loading);
   let attrs: PagePropsType = {};
 
   function routeChange(path: string) {
