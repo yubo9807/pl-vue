@@ -61,12 +61,12 @@ export class Static {
     let attrStr = '';
 
     for (const attr in attrs) {
-      if (attr.startsWith('on') || attr === 'ref') continue;
+      if (attr.startsWith('on') || ['ref', 'created'].includes(attr)) continue;
 
       let value = isFunction(attrs[attr]) && isReactiveChangeAttr(attr) ? attrs[attr]() : attrs[attr];
 
-      if (isString(tag) && ['innerHTML', 'innerText'].includes(attr)) {
-        tree.children = [value];
+      if (isString(tag) && ['innerHTML', 'innerText', 'textContent'].includes(attr)) {
+        children[0] = value;
         continue;
       }
 
