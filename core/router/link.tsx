@@ -9,10 +9,12 @@ type LinkProps = PropsType<{
   to:          SkipOption
   className?:  string
   type?:       'push' | 'replace'
-  [k: string]: any
-}>
+  onClick?:    (to: string, next: (to?: SkipOption) => void) => void
+}> & {
+  [K in keyof HTMLAnchorElement]?: any
+}
 export function Link(props: LinkProps) {
-  const { to, type, className, children, ...args } = props;
+  const { to, type, className, children, onClick, ...args } = props;
 
   const route = useRoute();
 
@@ -24,10 +26,15 @@ export function Link(props: LinkProps) {
 
   function jump(e: Event) {
     e.preventDefault();
-    if (type === 'replace') {
-      replace(props.to);
+
+    function next(to = props.to) {
+      type === 'replace' ? replace(to) : push(to);
+    }
+
+    if (onClick) {
+      onClick(props.to as string, next);
     } else {
-      push(props.to);
+      next();
     }
   }
 
