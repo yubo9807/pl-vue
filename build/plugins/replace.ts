@@ -1,5 +1,15 @@
 
-export default function() {
+export function replaceVersion() {
+  return {
+    name: 'replace-version',
+
+    transform(code, id) {
+      return code.replace('process.env.version', `'${process.env.npm_package_version}'`);
+    },
+  }
+}
+
+export function replaceModuleName() {
   return {
     name: 'replace-module-name',
 
@@ -13,6 +23,5 @@ export default function() {
       }
       return code;
     }
-
   }
 }

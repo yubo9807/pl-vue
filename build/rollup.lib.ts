@@ -1,6 +1,6 @@
 import { rollup } from 'rollup';
 import typescript2 from 'rollup-plugin-typescript2';
-import replaceModuleName from './plugins/replace-module-name';
+import { replaceVersion, replaceModuleName } from './plugins/replace';
 import removeFunc from './plugins/remove-func';
 
 const builds = [
@@ -41,6 +41,7 @@ async function esmBuild(file, external) {
         tsconfig: 'tsconfig.json',
       }),
       removeFunc(...esmFuncs),
+      replaceVersion(),
     ],
   })
   await bundle.write({
@@ -67,6 +68,7 @@ async function cjsBuild(file, external) {
         tsconfig: 'tsconfig.json',
       }),
       removeFunc(...cjsFuncs),
+      replaceVersion(),
       replaceModuleName(),
     ],
   })
