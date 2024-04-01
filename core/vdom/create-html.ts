@@ -1,5 +1,5 @@
 import { customForEach, isArray, isFunction, isObject, isString, objectAssign, printWarn } from "../utils";
-import { isAssignmentValueToNode, isClassComponent, isComponent, isReactiveChangeAttr, joinClass } from "./utils";
+import { isAssignmentValueToNode, isClassComponent, isComponent, isReactiveChangeAttr, joinClass, noRenderValue } from "./utils";
 import { isFragment } from "./h";
 import { Children, IntailOption, Tree } from "./type";
 import { setLock } from "./hooks/utils";
@@ -102,6 +102,7 @@ export class Static {
   createHTMLFragment(children: Children) {
     let text = '';
     customForEach(children, val => {
+      if (noRenderValue(val)) return;
 
       // 原始值
       if (isAssignmentValueToNode(val)) {

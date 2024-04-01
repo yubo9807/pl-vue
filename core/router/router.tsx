@@ -98,7 +98,7 @@ function BrowserRouter(props: BrowserRouterProps) {
   }, { immediate: true })
   props.prefix && unwatchs.push(unwatch);
 
-  return <>{() => <Comp.value {...attrs} />}</>;
+  return <>{() => Comp.value && <Comp.value {...attrs} />}</>;
 }
 
 
@@ -118,6 +118,7 @@ function StaticRouter(props: StaticRouterProps) {
 
   function routerChange(path: string) {
     let query = queryRoute(props.children, path);
+    if (!query) return;
 
     // 重定向
     if (query.redirect && query.redirect !== currentRoute.fullPath) {
