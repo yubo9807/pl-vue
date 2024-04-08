@@ -2,7 +2,7 @@ import { toRaw } from "../reactivity";
 import { isBrowser, isString } from "../utils"
 import { config, currentRoute } from "./create-router"
 import { BaseOption, SkipOption } from "./type";
-import { analyzeRoute } from "./utils"
+import { analyzeRoute, splicingUrl } from "./utils"
 
 /**
  * 切换路由
@@ -19,7 +19,8 @@ function toggle(option: SkipOption, type: 'push' | 'replace') {
   for (const key in option as BaseOption) {
     currentRoute[key] = option[key];
   }
-  const { fullPath } = currentRoute;
+  const fullPath = splicingUrl(currentRoute);
+  currentRoute.fullPath = fullPath;
 
   if (!isBrowser()) return;
   if (config.mode === 'history') {

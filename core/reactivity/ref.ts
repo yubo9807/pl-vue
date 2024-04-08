@@ -7,10 +7,10 @@ export class RefImpl<T> {
 
   [ISREF] = true;
 
-  _rawValue: { value: T }
-  _value:    T
-  getSignal: () => T
-  setSignal: (newValue: T) => void
+  _rawValue?: { value: T }
+  _value?:    T
+  getSignal?: () => T
+  setSignal?: (newValue: T) => void
 
   constructor(value: T) {
     const [ getSignal, setSignal, raw ] = createSignal(value);
@@ -44,7 +44,7 @@ export function ref<T>(value: T = void 0) {
  * @note vue 实现这个函数有点low，随便定义一个对象就可以判断
  * @param ref
  */
-export function isRef(ref: unknown) {
+export function isRef(ref: unknown): ref is RefImpl<unknown> {
   return ref && !!ref[ISREF];
 }
 
