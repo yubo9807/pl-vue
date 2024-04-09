@@ -97,6 +97,13 @@ export class Element extends Static {
   createRealNode(tag: string, attrs: AnyObj = {}, children: Children = ['']) {
     const el = document.createElement(tag as string);
 
+    // created 和 children 中同时具备相同的值，删掉 children 中的值
+    const created = attrs.created;
+    if (isFunction(created)) {
+      const index = children.findIndex(val => val === created);
+      index >= 0 && children.splice(index, 1);
+    }
+
     customForEach(children, val => {
       this.intercept(val);
       if (isFunction(val)) {
