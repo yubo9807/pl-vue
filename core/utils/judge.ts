@@ -83,7 +83,7 @@ export function isBrowser() {
  * @returns 
  */
 export function isObject(obj: AnyObj): obj is AnyObj {
-  return isType(obj) === 'object';
+  return typeof obj === 'object' && obj !== null;
 }
 
 /**

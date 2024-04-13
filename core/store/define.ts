@@ -1,27 +1,27 @@
 import { reactive } from "../reactivity";
-import { AnyObj, deepClone, isFunction, isMemoryObject, CustomWeakMap } from "../utils";
+import { AnyObj, deepClone, isFunction, CustomWeakMap, isType } from "../utils";
 
 const actionFlag = Symbol('action');
 function isAction(func: Function) {
   return isFunction(func) && func.prototype[actionFlag] === actionFlag;
 }
 
-type Obj = Record<string, any>
+type State = Record<string, any>
+type Actions = Record<string, Function>
 
-class Stroe<S extends Obj, A extends Obj> {
+class Stroe<S extends State, A extends Actions> {
   state:   S
-  actions: A
+  actions: Actions = {}
   constructor(state: S, actions: A) {
     this.state = reactive(deepClone(state));
 
     // 包装每个 actions
-    (this.actions as AnyObj) = {};
     for (const key in actions) {
       const self = this;
       function func(...args: unknown[]) {
         const result = actions[key].bind(state)(...args);
-        if (isMemoryObject(result) && result[Symbol.toStringTag] === 'Promise') {
-          result.then(res => {
+        if (isType(result) === 'promise') {
+          return result.then(res => {
             self._merge(state);
             return res;
           })
@@ -66,9 +66,9 @@ class Stroe<S extends Obj, A extends Obj> {
 }
 
 
-export const states = {};
+export const states: AnyObj = {};
 
-const collectMap: WeakMap<Obj, Obj> = new CustomWeakMap();
+const collectMap: WeakMap<State, State & Actions> = new CustomWeakMap();
 
 /**
  * 定义 Store
@@ -76,7 +76,7 @@ const collectMap: WeakMap<Obj, Obj> = new CustomWeakMap();
  * @param actions 
  * @returns 
  */
-export function defineStore<S extends Obj, A extends Obj>(option: { id?: string, state: S, actions: A }): () => S & A {
+export function defineStore<S extends State, A extends Actions>(option: { id?: string, state: S, actions: A }): () => S & A {
   const { id, state, actions } = option;
   return () => {
     if (!collectMap.has(state)) {
