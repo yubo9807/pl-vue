@@ -1,11 +1,10 @@
 import { reactive, ref, toRaw, watch } from "../reactivity";
 import { createId, customForEach, deepClone, isBrowser, isFunction, isString } from "../utils";
 import { Component, PropsType, h, Fragment, BaseComponent } from "../vdom";
-import { beforeEach, config, currentApp, currentRoute, setCurrentRoute, variable } from "./create-router";
+import { beforeEach, config, currentApp, currentRoute, variable } from "./create-router";
 import { queryRoute } from "./route";
 import { BeforeEnter, PagePropsType } from "./type";
-import { replace } from "./use-router";
-import { analyzeRoute, formatUrl } from "./utils";
+import { formatUrl } from "./utils";
 
 let backupRoute = void 0;  // 旧的 route 信息
 const unwatchs  = [];      // 收集子路由的取消监听事件
@@ -54,13 +53,6 @@ function BrowserRouter(props: BrowserRouterProps) {
       Comp.value = query.component;
       attrs.meta = query.meta;
       currentRoute.meta = query.meta;
-    }
-
-    // 重定向
-    if (query.redirect && query.redirect !== currentRoute.fullPath) {
-      replace(query.redirect);
-      routeChange(currentRoute.path);
-      return;
     }
 
     function protect(func: BeforeEnter) {
@@ -116,15 +108,10 @@ type StaticRouterProps = PropsType<{
 }>
 function StaticRouter(props: StaticRouterProps) {
 
-  function routerChange(path: string) {
+  function routeChange(path: string) {
     let query = queryRoute(props.children, path);
     if (!query) return;
-
-    // 重定向
-    if (query.redirect && query.redirect !== currentRoute.fullPath) {
-      setCurrentRoute(analyzeRoute(query.redirect));
-      return routerChange(currentRoute.path);
-    }
+    currentRoute.path = query.path;
 
     function protect(func: BeforeEnter) {
       repalceComp = `b_${createId()}`;
@@ -132,15 +119,11 @@ function StaticRouter(props: StaticRouterProps) {
 
       func(toRaw(currentRoute), backupRoute, () => {
         backupRoute = deepClone(currentRoute);
-        if (query.path !== currentRoute.path) {
-          StaticRouter(props);
-        } else {
-          resultReplace(repalceComp, query.component, {
-            path: query.path,
-            meta: query.meta,
-          });
-          deleteStackItem(repalceComp);
-        }
+        resultReplace(repalceComp, query.component, {
+          path: query.path,
+          meta: query.meta,
+        });
+        deleteStackItem(repalceComp);
       })
       return repalceComp;
     }
@@ -154,7 +137,7 @@ function StaticRouter(props: StaticRouterProps) {
     return query;
   }
 
-  let query = routerChange(currentRoute.path);
+  let query = routeChange(currentRoute.path);
 
   if (isString(query)) {
     return <>{query}</>
@@ -167,6 +150,7 @@ function StaticRouter(props: StaticRouterProps) {
 
   query = query as ReturnType<typeof queryRoute>;
   let Comp = query.component;
+  currentRoute.path = query.path;
   currentRoute.meta = query.meta;
   const attrs: PagePropsType = {
     path: query.path,

@@ -39,11 +39,14 @@ export function queryRoute(routes: RouteItem[], pathname: string) {
   });
   if (!query) return;
   const { path, component, beforeEnter, meta, redirect } = query.attrs;
+
+  // 重定向
+  if (redirect) return queryRoute(routes, redirect);
+
   return {
     path: formatUrl(path),
     component,
     meta,
     beforeEnter,
-    redirect,
   };
 }
