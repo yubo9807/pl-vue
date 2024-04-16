@@ -1,6 +1,6 @@
 import { reactive, ref, toRaw, watch } from "../reactivity";
 import { createId, customForEach, deepClone, isBrowser, isFunction, isString } from "../utils";
-import { Component, PropsType, h, Fragment, BaseComponent } from "../vdom";
+import { Component, PropsType, h, Fragment, BaseComponent, Children } from "../vdom";
 import { beforeEach, config, currentApp, currentRoute, variable } from "./create-router";
 import { queryRoute } from "./route";
 import { BeforeEnter, PagePropsType } from "./type";
@@ -13,6 +13,7 @@ type BrowserRouterProps = PropsType<{
   loading?:  BaseComponent
   notFound?: BaseComponent
   prefix?:   string
+  children:  Children
 }>
 function BrowserRouter(props: BrowserRouterProps) {
 
@@ -105,6 +106,7 @@ let repalceComp: string = null;
 
 type StaticRouterProps = PropsType<{
   notFound?: Component
+  children:  Children
 }>
 function StaticRouter(props: StaticRouterProps) {
 
