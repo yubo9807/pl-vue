@@ -1,4 +1,4 @@
-import { isClass, isFunction, isObject, isString } from "../utils";
+import { customForEach, isClass, isFunction, isObject, isString } from "../utils";
 import { isFragment } from "./h";
 import { Component } from "./type";
 
@@ -60,9 +60,15 @@ export function noRenderValue(value: any) {
  * @param args 剩余参数，类名
  * @returns 
  */
-export function joinClass(...args: string[]) {
-  const arr = args.filter(val => isAssignmentValueToNode(val))
-  return arr.join(' ').trim().replace(/\s+/, ' ');
+export function joinClass(...args: (string | (() => string))[]) {
+  const results = [];
+  customForEach(args, val => {
+    if (isFunction(val)) val = val();
+    if (isAssignmentValueToNode(val)) {
+      results.push(val);
+    }
+  })
+  return results.join(' ').trim().replace(/\s+/, ' ');
 }
 
 

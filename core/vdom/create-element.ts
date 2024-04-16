@@ -223,13 +223,19 @@ export class Element extends Static {
       value(el);
       return;
     }
+    if (attr === 'className' && isArray(value)) {
+      binding(() => {
+        el[attr] = joinClass(...value);
+      })
+      return;
+    }
 
     // 一般属性赋值
     let assgin = (val: string) => el[attr] = val;
 
     // 特殊属性处理
     if (attr === 'className') {
-      assgin = (val: string) => el[attr] = joinClass(...[val].flat());
+      assgin = (val: string) => el[attr] = joinClass(val);
     } else if (attr.startsWith('data-')) {
       assgin = (val: string) => el.dataset[attr.slice(5)] = val;
     }
