@@ -1,5 +1,5 @@
 npm run build:lib &&
-npm run build:online &&
+# npm run build:online &&
 
 npm config set registry https://registry.npmjs.org/ &&
 npm publish &&
