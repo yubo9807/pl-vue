@@ -13,7 +13,7 @@ type BrowserRouterProps = PropsType<{
   loading?:  BaseComponent
   notFound?: BaseComponent
   prefix?:   string
-  children:  Children
+  children?: Children
 }>
 function BrowserRouter(props: BrowserRouterProps) {
 
@@ -106,7 +106,7 @@ let repalceComp: string = null;
 
 type StaticRouterProps = PropsType<{
   notFound?: Component
-  children:  Children
+  children?: Children
 }>
 function StaticRouter(props: StaticRouterProps) {
 

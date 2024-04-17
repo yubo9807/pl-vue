@@ -27,3 +27,11 @@ export type GetClassCompPropsType<ClassComp extends ClassComponent> = Constructo
 export type IntailOption = {
   intercept?: (tree: Tree) => void
 }
+
+type AssignType = string | (() => string)
+
+export type ClassNameType = AssignType | AssignType[]
+
+export type StyleType = AssignType | {
+  [I in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[I] | (() => CSSStyleDeclaration[I])
+}

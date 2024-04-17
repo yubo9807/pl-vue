@@ -1,13 +1,13 @@
-import { AnyObj } from "./utils"
-import { PropsType } from "./vdom"
+import { AnyObj, ExcludeKey } from "./utils"
+import { ClassNameType, PropsType, StyleType } from "./vdom"
 
-type OptionalDeep<T extends Record<string | symbol, any>> = {
-  [K in keyof T]?: any
+type HTMLAttributes<T extends AnyObj> = PropsType<{
+  [K in keyof ExcludeKey<T, 'className' | 'style'>]?: T[K] | (() => T[K])
 } & {
-  created?: (el: T) => void
-}
-
-type HTMLAttributes<T extends AnyObj> = PropsType<OptionalDeep<T>>
+  className?: ClassNameType
+  style?:     StyleType
+  created?:   (el: T) => void
+}>
 
 export interface IntrinsicElements {
   a: HTMLAttributes<HTMLAnchorElement>
