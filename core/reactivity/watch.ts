@@ -50,11 +50,17 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
 
   return () => {
     cleanup = true;
+
+    // 释放内存
+    backup = null;
+    source = null;
+    cb     = null;
+    option = null;
   }
 }
 
 type OnCleanup = (cleanupFn: () => void) => void
-type Callback = (onCleanup: OnCleanup) => void
+type Callback  = (onCleanup: OnCleanup)  => void
 
 /**
  * 立即运行一个函数，同时响应式地追踪其依赖，并在依赖更改时重新执行
@@ -75,5 +81,8 @@ export function watchEffect(cb: Callback) {
 
   return () => {
     cleanup = true;
+
+    // 释放内存
+    cb = null;
   }
 }
