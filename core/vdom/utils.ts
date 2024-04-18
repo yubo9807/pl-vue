@@ -1,4 +1,4 @@
-import { customForEach, isClass, isFunction, isObject, isString } from "../utils";
+import { customForEach, isClass, isFunction, isObject, isStrictObject, isString } from "../utils";
 import { isFragment } from "./h";
 import { Component } from "./type";
 
@@ -25,7 +25,7 @@ export function isReactiveChangeAttr(attr: string) {
  * @returns 
  */
 export function isRealNode(o) {
-  return isObject(o) && isString(o.tag);
+  return isStrictObject(o) && isString(o.tag);
 }
 
 /**

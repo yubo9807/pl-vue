@@ -1,21 +1,21 @@
 import { len } from "./string";
 import { AnyObj, Key, WideClass } from "./type";
 
-export type Type = 'string'    | 'number'  | 'boolean' |
-                   'symbol'    | 'bigint'  |
-                   'undefined' | 'null'    |
-                   'regexp'    | 'date'    |
-                   'array'     | 'object'  |
-                   'function'  | 'promise' |
-                   'set'       | 'map'     |
-                   'weakset'   | 'weakmap' | 'weakref'
+export type Type = 'String'    | 'Number'  | 'Boolean' |
+                   'Symbol'    | 'Bigint'  |
+                   'Undefined' | 'Null'    |
+                   'regexp'    | 'Date'    |
+                   'Array'     | 'Object'  |
+                   'Function'  | 'Promise' |
+                   'Set'       | 'Map'     |
+                   'WeakSet'   | 'WeakMap' | 'WeakRef'
 
 /**
  * 属于什么类型
  * @param o
  */
 export function isType(o: any): Type {
-  return Object.prototype.toString.call(o).slice(8, -1).toLowerCase();
+  return Object.prototype.toString.call(o).slice(8, -1);
 }
 
 /**
@@ -25,14 +25,6 @@ export function isType(o: any): Type {
  */
 export function isClass(func: Function): func is WideClass {
   return func.toString().slice(0, 5) === 'class';
-}
-
-/**
- * 从内存上看是否是一个对象
- * @param o
- */
-export function isMemoryObject(o: any): o is AnyObj {
-  return ['object', 'array'].includes(isType(o));
 }
 
 /**
@@ -52,7 +44,7 @@ export function hasOwn(target: object | any[], key: Key) {
  * @returns 
  */
 export function isEquals(val1: any, val2: any) {
-  if (isMemoryObject(val1) && isMemoryObject(val2)) {
+  if (isObject(val1) && isObject(val2)) {
     const keys1 = Object.keys(val1), keys2 = Object.keys(val2);
     if (len(keys1) !== len(keys2)) return false;
     for (const key of keys1) {
@@ -74,16 +66,31 @@ export function isBrowser() {
   return typeof window === 'object';
 }
 
-
-
-// #region 减少打包代码体积
 /**
- * 是 object 类型
+ * 是否为 object 类型，包含 class
  * @param obj 
  * @returns 
  */
 export function isObject(obj: AnyObj): obj is AnyObj {
   return typeof obj === 'object' && obj !== null;
+}
+
+/**
+ * 是否为一个普通的对象
+ * @param obj 
+ * @returns 
+ */
+export function isNormalObject(obj: AnyObj): obj is AnyObj {
+  return isStrictObject(obj) || isType(obj) === 'Array';
+}
+
+/**
+ * 是否为一个严格的对象
+ * @param obj 
+ * @returns 
+ */
+export function isStrictObject(obj: AnyObj): obj is AnyObj {
+  return isType(obj) === 'Object';
 }
 
 /**
@@ -107,4 +114,3 @@ export function isString(text: any): text is string {
 export function isFunction(value: any): value is Function {
   return typeof value === 'function';
 }
-// #region

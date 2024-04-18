@@ -1,5 +1,5 @@
 import { binding } from "./depend";
-import { isEquals, isMemoryObject, deepClone } from "../utils";
+import { isEquals, deepClone, isNormalObject } from "../utils";
 
 type Option = {
   immediate?: boolean
@@ -28,7 +28,7 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
     const value = source();
 
     // 是一个对象
-    if (isMemoryObject(value)) {
+    if (isNormalObject(value)) {
       if (option.deep && !isEquals(value, backup)) {
         cb(value, backup);
         backup = deepClone(value);

@@ -1,4 +1,4 @@
-import { customForEach, isArray, isFunction, isObject, isString, objectAssign, printWarn } from "../utils";
+import { customForEach, isArray, isFunction, isStrictObject, isString, objectAssign, printWarn } from "../utils";
 import { isAssignmentValueToNode, isClassComponent, isComponent, isReactiveChangeAttr, joinClass, noRenderValue } from "./utils";
 import { isFragment } from "./h";
 import { Children, IntailOption, Tree } from "./type";
@@ -76,7 +76,7 @@ export class Static {
       }
 
       // 对样式单独做下处理
-      if (attr === 'style' && isObject(value)) {
+      if (attr === 'style' && isStrictObject(value)) {
         for (const key in value) {
           if (isFunction(value[key])) {  // 响应式数据
             value[key] = value[key]();
@@ -124,7 +124,7 @@ export class Static {
       }
 
       // 节点 || 组件 || 虚拟节点
-      if (isObject(val)) {
+      if (isStrictObject(val)) {
         text += this.createHTML(val as Tree);
         return;
       }

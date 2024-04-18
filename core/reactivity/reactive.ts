@@ -1,4 +1,4 @@
-import { nextTick, printWarn, AnyObj, hasOwn, isMemoryObject, isObject, CustomWeakMap } from "../utils";
+import { nextTick, printWarn, AnyObj, hasOwn, isObject, CustomWeakMap, isNormalObject } from "../utils";
 import { dependencyCollection, distributeUpdates } from "./depend";
 import { isReadonly } from "./readonly";
 
@@ -18,7 +18,7 @@ export const ReactiveFlags = {
 */
 export function reactive<T extends AnyObj>(target: T): T {
 
-  if (!isMemoryObject(target) || Object.isFrozen(target)) {
+  if (!isNormalObject(target) || Object.isFrozen(target)) {
     printWarn(`lue cannot be made reactive: ${target}`);
     return target;
   }
@@ -34,7 +34,7 @@ export function reactive<T extends AnyObj>(target: T): T {
 
       const result = Reflect.get(target, key, receiver);
       dependencyCollection(target);
-      return isMemoryObject(result) ? reactive(result) : result;
+      return isNormalObject(result) ? reactive(result) : result;
     },
 
 
@@ -123,6 +123,6 @@ export function isProxy<T extends AnyObj>(proxy: T): boolean {
  * @returns 
  */
 export function markRaw<T extends AnyObj>(obj: T): T {
-  if (isMemoryObject(obj)) rawMap.set(obj, true);
+  if (isObject(obj)) rawMap.set(obj, true);
   return obj;
 }

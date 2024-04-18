@@ -1,4 +1,4 @@
-import { customForEach, isMemoryObject, CustomWeakMap } from "../utils";
+import { customForEach, CustomWeakMap, isObject } from "../utils";
 import { toRaw } from "./reactive";
 
 let func = null;
@@ -34,7 +34,9 @@ export function dependencyCollection(key: object) {
  */
 export function distributeUpdates(key: object) {
   const funcs = funcsMap.get(key);
-  funcs && customForEach(funcs, (fn, index) => {
+  if (!funcs) return;
+
+  customForEach(funcs, (fn, index) => {
     const isRemove = fn();
     // 清理下内存，将不用的函数删除
     isRemove === true && delete funcs[index];
@@ -51,7 +53,7 @@ export function recycleDepend(...keys: object[]) {
     const obj = toRaw(key);
     for (const prop in obj) {
       const val = obj[prop];
-      isMemoryObject(val) && _recycleDepend(val as object);
+      isObject(val) && _recycleDepend(val as object);
     }
     funcsMap.delete(obj);
   }

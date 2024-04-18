@@ -9,24 +9,24 @@ import { AnyObj } from "./type";
  */
 export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {}) {
 	const cache: any = new CustomWeakMap();
-	const noCloneTypes = ['null', 'regexp', 'date', 'weakset', 'weakmap'];
+	const noCloneTypes = ['Null', 'Regexp', 'Date', 'WeakSet', 'WeakMap'];
 	
 	const specialClone = Object.assign({
-		function(func: Function) {
+		Function(func: Function) {
 			const newFunc = function(...args) {
 				return func.apply(this, args);
 			}
 			newFunc.prototype = _deepClone(func.prototype);
 			return newFunc;
 		},
-		set(set: Set<any>) {
+		Set(set: Set<any>) {
 			const collect = new Set();
 			for (const value of set) {
 				collect.add(_deepClone(value));
 			}
 			return collect;
 		},
-		map(map: Map<any, any>) {
+		Map(map: Map<any, any>) {
 			const collect = new Map();
 			for (const [ key, val ] of map.entries()) {
 				collect.set(key, _deepClone(val));

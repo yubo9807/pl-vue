@@ -20,7 +20,7 @@ class Stroe<S extends State, A extends Actions> {
       const self = this;
       function func(...args: unknown[]) {
         const result = actions[key].bind(state)(...args);
-        if (isType(result) === 'promise') {
+        if (isType(result) === 'Promise') {
           return result.then(res => {
             self._merge(state);
             return res;

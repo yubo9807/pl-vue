@@ -1,5 +1,5 @@
 import { binding } from "../reactivity";
-import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals } from '../utils';
+import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals, isStrictObject } from '../utils';
 import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
 import { Attrs, Children, Tree, Component, BaseComponent, IntailOption } from "./type";
@@ -120,7 +120,7 @@ export class Element extends Static {
     }
 
     // 对样式单独处理
-    if (attrs.style && isObject(attrs.style)) {
+    if (attrs.style && isStrictObject(attrs.style)) {
       for (const prop in attrs.style) {
         const value = attrs.style[prop];
         if (isFunction(value)) {
@@ -170,7 +170,7 @@ export class Element extends Static {
       return;
     }
 
-    if (isAssignmentValueToNode(val) || isObject(val)) {
+    if (isAssignmentValueToNode(val) || isStrictObject(val)) {
       const node = this.createNode(val as Tree);
       appendChild(el, node);
       return;
@@ -215,7 +215,7 @@ export class Element extends Static {
    */
   #attrAssign(el: HTMLElement, attr: string, value: any) {
     // 自定义属性
-    if (attr === 'ref' && isObject(value)) {
+    if (attr === 'ref' && isStrictObject(value)) {
       value.value = el;
       return;
     }
