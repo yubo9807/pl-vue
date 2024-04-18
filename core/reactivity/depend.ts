@@ -35,13 +35,11 @@ export function dependencyCollection(key: object) {
 export function distributeUpdates(key: object) {
   const funcs = funcsMap.get(key);
   funcs && customForEach(funcs, (fn, index) => {
-    const del = fn();
+    const isRemove = fn();
     // 清理下内存，将不用的函数删除
-    if (del === true) {
-      funcs.splice(index, 1);
-      funcsMap.set(key, funcs);
-    }
+    isRemove === true && delete funcs[index];
   });
+  funcsMap.set(key, funcs.filter(fn => fn));
 }
 
 /**
