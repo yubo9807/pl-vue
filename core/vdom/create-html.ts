@@ -1,21 +1,22 @@
 import { customForEach, isArray, isFunction, isStrictObject, isString, objectAssign, printWarn } from "../utils";
 import { isAssignmentValueToNode, isClassComponent, isComponent, isReactiveChangeAttr, joinClass, noRenderValue } from "./utils";
 import { isFragment } from "./h";
-import { Children, IntailOption, Tree } from "./type";
+import { Children, Tree } from "./type";
 import { setLock } from "./hooks/utils";
+
+export type StaticOption = {
+}
 
 export class Static {
 
-  config: IntailOption
-  constructor(config?: IntailOption) {
-    this.config = config;
-  }
+  constructor() {}
 
   /**
    * 树形结构拦截
    * @param tree 
    */
   intercept<T>(tree: T) {
+    console.log(tree)
     return tree;
   }
 

@@ -1,20 +1,26 @@
-import { binding } from "../reactivity";
 import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals, isStrictObject } from '../utils';
 import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
-import { Attrs, Children, Tree, Component, BaseComponent, IntailOption } from "./type";
 import { compTreeMap, filterElement } from './component-tree';
 import { collectExportsData, recordCurrentComp } from "./instance";
 import { triggerBeforeMount } from "./hooks/before-mount";
 import { triggerMounted } from "./hooks/mounted";
 import { triggerBeforeUnmount } from "./hooks/before-unmount";
 import { triggerUnmounted } from "./hooks/unmounted";
-import { Static } from "./create-html";
+import { Static, StaticOption } from "./create-html";
+import type { Attrs, Children, Tree, Component, BaseComponent } from "./type";
 
-export class Element extends Static {
+export interface StructureOption extends StaticOption {
+  binding: Function
+}
 
-  constructor(option?: IntailOption) {
-    super(option);
+export class Structure extends Static {
+
+  #binding: Function  // 响应式函数
+
+  constructor(option: StructureOption) {
+    super();
+    this.#binding = option.binding
   }
 
   /**
@@ -124,7 +130,7 @@ export class Element extends Static {
       for (const prop in attrs.style) {
         const value = attrs.style[prop];
         if (isFunction(value)) {
-          binding(() => el.style[prop] = value());
+          this.#binding(() => el.style[prop] = value());
         } else {
           el.style[prop] = value;
         }
@@ -171,7 +177,7 @@ export class Element extends Static {
     }
 
     if (isAssignmentValueToNode(val) || isStrictObject(val)) {
-      const node = this.createNode(val as Tree);
+      const node = this.#createNode(val as Tree);
       appendChild(el, node);
       return;
     }
@@ -185,7 +191,7 @@ export class Element extends Static {
    * @param value 
    * @returns 
    */
-  createNode(value: Tree | string) {
+  #createNode(value: Tree | string) {
     // 文本节点
     if (isAssignmentValueToNode(value)) {
       return createTextNode(value);
@@ -224,7 +230,7 @@ export class Element extends Static {
       return;
     }
     if (attr === 'className' && isArray(value)) {
-      binding(() => {
+      this.#binding(() => {
         el[attr] = joinClass(...value);
       })
       return;
@@ -242,7 +248,7 @@ export class Element extends Static {
 
     // 响应式数据
     if (isReactiveChangeAttr(attr) && isFunction(value)) {
-      binding(() => assgin(value()));
+      this.#binding(() => assgin(value()));
     } else {
       assgin(value);
     }
@@ -261,7 +267,7 @@ export class Element extends Static {
     const textNode = createTextNode('');  // 用于记录添加位置
     appendChild(fragment, textNode);
 
-    binding(() => {
+    this.#binding(() => {
       let value = func();
       if (value && isObject(value) && isFragment(value.tag)) {
         printWarn('不支持响应式节点片段渲染');
@@ -283,7 +289,7 @@ export class Element extends Static {
           }
 
           // 节点替换，重新备份
-          const node = this.createNode(val);
+          const node = this.#createNode(val);
           if (!node) {  // 创建节点失败，有可能原节点被删除
             value.splice(index, 1);
             i++;
@@ -302,7 +308,7 @@ export class Element extends Static {
           backupNodes[index].tree = val;
           backupNodes[index].node = node;
         } else {  // 节点不存在，追加节点
-          const node = this.createNode(val);
+          const node = this.#createNode(val);
           if (!node) {  // 创建节点失败，有可能原节点被删除
             i++;
             continue;

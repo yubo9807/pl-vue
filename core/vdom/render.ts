@@ -1,7 +1,8 @@
 import { BaseComponent, ClassComponent, Component, GetClassCompPropsType, GetCompPropsType, Tree } from "./type";
 import { h } from "./h";
-import { Element } from "./create-element";
+import { Structure } from "./create-element";
 import { Static } from "./create-html";
+import { binding } from '../reactivity';
 
 /**
  * 渲染为 DOM 节点
@@ -9,7 +10,7 @@ import { Static } from "./create-html";
  * @returns 
  */
 export function render(tree: Tree) {
-  const app = new Element();
+  const app = new Structure({ binding });
   return app.render(tree);
 }
 

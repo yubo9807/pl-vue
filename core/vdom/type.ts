@@ -24,10 +24,6 @@ export type Component = BaseComponent | ClassComponent
 export type GetCompPropsType<Comp extends BaseComponent> = Parameters<Comp>[0]
 export type GetClassCompPropsType<ClassComp extends ClassComponent> = ConstructorParameters<ClassComp>[0]
 
-export type IntailOption = {
-  intercept?: (tree: Tree) => void
-}
-
 type AssignType = string | (() => string)
 
 export type ClassNameType = AssignType | AssignType[]

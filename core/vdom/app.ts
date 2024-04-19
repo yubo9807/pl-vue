@@ -1,17 +1,18 @@
-import { Component, IntailOption, Tree } from "./type";
-import { Element } from "./create-element"; 
+import { Component } from "./type";
+import { Structure, StructureOption } from "./create-element"; 
 import { isString } from "../utils";
+import { binding } from "../reactivity";
 
 type Plugin = {
   install: (app: App) => void;
 }
-export class App extends Element {
+export class App extends Structure {
 
   [k: string]: any
 
-  constructor(config: IntailOption) {
-    super(config);
-    this.config = config;
+  constructor(option: StructureOption) {
+    super(option);
+    this.option = option;
   }
 
   use(plugin: Plugin) {
@@ -54,6 +55,6 @@ export class App extends Element {
  * @param option 
  * @returns 
  */
-export function createApp(option: IntailOption = {}) {
-  return new App(option);
+export function createApp() {
+  return new App({ binding });
 }
