@@ -52,10 +52,7 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
     cleanup = true;
 
     // 释放内存
-    backup = null;
-    source = null;
-    cb     = null;
-    option = null;
+    backup = source = cb = option = null;
   }
 }
 
@@ -69,13 +66,12 @@ type Callback  = (onCleanup: OnCleanup)  => void
  */
 export function watchEffect(cb: Callback) {
   let cleanup = false;
-  let lock = false;
 
   binding(() => {
     if (cleanup) return true;
+
     cb((cleanupFn) => {
-      lock && cleanupFn();  // 第一次不执行
-      lock = true;
+      cleanupFn();
     });
   })
 
