@@ -1,18 +1,29 @@
-import { Fragment, h, ref } from "~/core";
-import useStore from './store/test';
+import { Fragment, binding, h, onMounted, reactive, ref, watch, watchEffect } from "~/core";
+import { isStrictObject, isType } from "~/core/utils";
 
 function App() {
-  const count = ref(0);
-  const s = useStore()
+  const count = reactive({
+    value: 0,
+    o: {
+      a: 1
+    }
+  });
+
 
   return <div>
     {/* 响应式数据一律以函数形式返回 */}
-    <h1>{() => s.count}</h1>
-    <button onclick={s.add}>click</button>
-    <my-comp title="hello">
-      <p>hhhhhhhh</p>
-    </my-comp>
+    <h1>{() => count.value}</h1>
+    <button onclick={() => count.value ++}>click</button>
   </div>
+}
+
+function delay(ms = 2000) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(1);
+      console.log(111111)
+    }, ms)
+  });
 }
 
 export default App;

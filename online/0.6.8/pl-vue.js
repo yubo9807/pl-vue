@@ -21,7 +21,7 @@ function len(o) {
  * @param o
  */
 function isType(o) {
-    return Object.prototype.toString.call(o).slice(8, -1).toLowerCase();
+    return Object.prototype.toString.call(o).slice(8, -1);
 }
 /**
  * 函数是否是为类声明
@@ -30,13 +30,6 @@ function isType(o) {
  */
 function isClass(func) {
     return func.toString().slice(0, 5) === 'class';
-}
-/**
- * 从内存上看是否是一个对象
- * @param o
- */
-function isMemoryObject(o) {
-    return ['object', 'array'].includes(isType(o));
 }
 /**
  * 是否属于自己的属性
@@ -54,7 +47,7 @@ function hasOwn(target, key) {
  * @returns
  */
 function isEquals(val1, val2) {
-    if (isMemoryObject(val1) && isMemoryObject(val2)) {
+    if (isObject(val1) && isObject(val2)) {
         const keys1 = Object.keys(val1), keys2 = Object.keys(val2);
         if (len(keys1) !== len(keys2))
             return false;
@@ -78,14 +71,29 @@ function isEquals(val1, val2) {
 function isBrowser() {
     return typeof window === 'object';
 }
-// #region 减少打包代码体积
 /**
- * 是 object 类型
+ * 是否为 object 类型，包含 class
  * @param obj
  * @returns
  */
 function isObject(obj) {
     return typeof obj === 'object' && obj !== null;
+}
+/**
+ * 是否为一个普通的对象
+ * @param obj
+ * @returns
+ */
+function isNormalObject(obj) {
+    return isStrictObject(obj) || isType(obj) === 'Array';
+}
+/**
+ * 是否为一个严格的对象
+ * @param obj
+ * @returns
+ */
+function isStrictObject(obj) {
+    return isType(obj) === 'Object';
 }
 /**
  * 是 array 类型
@@ -106,7 +114,6 @@ function isString(text) {
 function isFunction(value) {
     return typeof value === 'function';
 }
-// #region
 
 /**
  * 异步执行一个函数
@@ -141,23 +148,23 @@ class CustomWeakMap extends WeakMap {
  */
 function deepClone(origin, extend = {}) {
     const cache = new CustomWeakMap();
-    const noCloneTypes = ['null', 'regexp', 'date', 'weakset', 'weakmap'];
+    const noCloneTypes = ['Null', 'Regexp', 'Date', 'WeakSet', 'WeakMap'];
     const specialClone = Object.assign({
-        function(func) {
+        Function(func) {
             const newFunc = function (...args) {
                 return func.apply(this, args);
             };
             newFunc.prototype = _deepClone(func.prototype);
             return newFunc;
         },
-        set(set) {
+        Set(set) {
             const collect = new Set();
             for (const value of set) {
                 collect.add(_deepClone(value));
             }
             return collect;
         },
-        map(map) {
+        Map(map) {
             const collect = new Map();
             for (const [key, val] of map.entries()) {
                 collect.set(key, _deepClone(val));
@@ -253,14 +260,14 @@ function dependencyCollection(key) {
  */
 function distributeUpdates(key) {
     const funcs = funcsMap.get(key);
-    funcs && customForEach(funcs, (fn, index) => {
-        const del = fn();
+    if (!funcs)
+        return;
+    customForEach(funcs, (fn, index) => {
+        const isRemove = fn();
         // 清理下内存，将不用的函数删除
-        if (del === true) {
-            funcs.splice(index, 1);
-            funcsMap.set(key, funcs);
-        }
+        isRemove === true && delete funcs[index];
     });
+    funcsMap.set(key, funcs.filter(fn => fn));
 }
 /**
  * 回收依赖，清空当前已收集的依赖
@@ -271,7 +278,7 @@ function recycleDepend(...keys) {
         const obj = toRaw(key);
         for (const prop in obj) {
             const val = obj[prop];
-            isMemoryObject(val) && _recycleDepend(val);
+            isObject(val) && _recycleDepend(val);
         }
         funcsMap.delete(obj);
     }
@@ -326,7 +333,7 @@ const ReactiveFlags = {
  * @returns
 */
 function reactive(target) {
-    if (!isMemoryObject(target) || Object.isFrozen(target)) {
+    if (!isNormalObject(target) || Object.isFrozen(target)) {
         printWarn(`lue cannot be made reactive: ${target}`);
         return target;
     }
@@ -340,7 +347,7 @@ function reactive(target) {
                 return target; // 返回原始值
             const result = Reflect.get(target, key, receiver);
             dependencyCollection(target);
-            return isMemoryObject(result) ? reactive(result) : result;
+            return isNormalObject(result) ? reactive(result) : result;
         },
         // 赋值/修改
         set(target, key, value, receiver) {
@@ -410,7 +417,7 @@ function isProxy(proxy) {
  * @returns
  */
 function markRaw(obj) {
-    if (isMemoryObject(obj))
+    if (isObject(obj))
         rawMap.set(obj, true);
     return obj;
 }
@@ -610,7 +617,7 @@ function watch(source, cb, option = {}) {
             return true;
         const value = source();
         // 是一个对象
-        if (isMemoryObject(value)) {
+        if (isNormalObject(value)) {
             if (option.deep && !isEquals(value, backup)) {
                 cb(value, backup);
                 backup = deepClone(value);
@@ -629,6 +636,8 @@ function watch(source, cb, option = {}) {
     });
     return () => {
         cleanup = true;
+        // 释放内存
+        backup = source = cb = option = null;
     };
 }
 /**
@@ -638,17 +647,17 @@ function watch(source, cb, option = {}) {
  */
 function watchEffect(cb) {
     let cleanup = false;
-    let lock = false;
     binding(() => {
         if (cleanup)
             return true;
         cb((cleanupFn) => {
-            lock && cleanupFn(); // 第一次不执行
-            lock = true;
+            cleanupFn();
         });
     });
     return () => {
         cleanup = true;
+        // 释放内存
+        cb = null;
     };
 }
 
@@ -673,7 +682,7 @@ function isReactiveChangeAttr(attr) {
  * @returns
  */
 function isRealNode(o) {
-    return isObject(o) && isString(o.tag);
+    return isStrictObject(o) && isString(o.tag);
 }
 /**
  * 是否为一个组件
@@ -959,15 +968,13 @@ function triggerUnmounted(comp) {
 }
 
 class Static {
-    config;
-    constructor(config) {
-        this.config = config;
-    }
+    constructor() { }
     /**
      * 树形结构拦截
      * @param tree
      */
     intercept(tree) {
+        console.log(tree);
         return tree;
     }
     /**
@@ -1019,7 +1026,7 @@ class Static {
                 continue;
             }
             // 对样式单独做下处理
-            if (attr === 'style' && isObject(value)) {
+            if (attr === 'style' && isStrictObject(value)) {
                 for (const key in value) {
                     if (isFunction(value[key])) { // 响应式数据
                         value[key] = value[key]();
@@ -1060,7 +1067,7 @@ class Static {
                 return;
             }
             // 节点 || 组件 || 虚拟节点
-            if (isObject(val)) {
+            if (isStrictObject(val)) {
                 text += this.createHTML(val);
                 return;
             }
@@ -1070,9 +1077,11 @@ class Static {
     }
 }
 
-class Element extends Static {
+class Structure extends Static {
+    #binding; // 响应式函数
     constructor(option) {
-        super(option);
+        super();
+        this.#binding = option.binding;
     }
     /**
      * 创建组件虚拟 DOM 树的函数
@@ -1162,11 +1171,11 @@ class Element extends Static {
             this.#attrAssign(el, attr, attrs[attr]);
         }
         // 对样式单独处理
-        if (attrs.style && isObject(attrs.style)) {
+        if (attrs.style && isStrictObject(attrs.style)) {
             for (const prop in attrs.style) {
                 const value = attrs.style[prop];
                 if (isFunction(value)) {
-                    binding(() => el.style[prop] = value());
+                    this.#binding(() => el.style[prop] = value());
                 }
                 else {
                     el.style[prop] = value;
@@ -1207,8 +1216,8 @@ class Element extends Static {
             appendChild(el, fragment);
             return;
         }
-        if (isAssignmentValueToNode(val) || isObject(val)) {
-            const node = this.createNode(val);
+        if (isAssignmentValueToNode(val) || isStrictObject(val)) {
+            const node = this.#createNode(val);
             appendChild(el, node);
             return;
         }
@@ -1219,7 +1228,7 @@ class Element extends Static {
      * @param value
      * @returns
      */
-    createNode(value) {
+    #createNode(value) {
         // 文本节点
         if (isAssignmentValueToNode(value)) {
             return createTextNode(value);
@@ -1245,7 +1254,7 @@ class Element extends Static {
      */
     #attrAssign(el, attr, value) {
         // 自定义属性
-        if (attr === 'ref' && isObject(value)) {
+        if (attr === 'ref' && isStrictObject(value)) {
             value.value = el;
             return;
         }
@@ -1254,7 +1263,7 @@ class Element extends Static {
             return;
         }
         if (attr === 'className' && isArray(value)) {
-            binding(() => {
+            this.#binding(() => {
                 el[attr] = joinClass(...value);
             });
             return;
@@ -1270,7 +1279,7 @@ class Element extends Static {
         }
         // 响应式数据
         if (isReactiveChangeAttr(attr) && isFunction(value)) {
-            binding(() => assgin(value()));
+            this.#binding(() => assgin(value()));
         }
         else {
             assgin(value);
@@ -1287,7 +1296,7 @@ class Element extends Static {
         let parent = null;
         const textNode = createTextNode(''); // 用于记录添加位置
         appendChild(fragment, textNode);
-        binding(() => {
+        this.#binding(() => {
             let value = func();
             if (value && isObject(value) && isFragment(value.tag)) {
                 printWarn('不支持响应式节点片段渲染');
@@ -1306,7 +1315,7 @@ class Element extends Static {
                         continue;
                     }
                     // 节点替换，重新备份
-                    const node = this.createNode(val);
+                    const node = this.#createNode(val);
                     if (!node) { // 创建节点失败，有可能原节点被删除
                         value.splice(index, 1);
                         i++;
@@ -1324,7 +1333,7 @@ class Element extends Static {
                     backupNodes[index].node = node;
                 }
                 else { // 节点不存在，追加节点
-                    const node = this.createNode(val);
+                    const node = this.#createNode(val);
                     if (!node) { // 创建节点失败，有可能原节点被删除
                         i++;
                         continue;
@@ -1389,16 +1398,16 @@ function lookupBackupNodes(arr, value) {
     return -1;
 }
 
-class App extends Element {
-    constructor(config) {
-        super(config);
-        this.config = config;
+class App extends Structure {
+    constructor(option) {
+        super(option);
+        this.option = option;
     }
     use(plugin) {
         plugin.install(this);
         return this;
     }
-    version = '0.6.7';
+    version = '0.6.8';
     /**
      * 数据拦截
      */
@@ -1428,8 +1437,8 @@ class App extends Element {
  * @param option
  * @returns
  */
-function createApp(option = {}) {
-    return new App(option);
+function createApp() {
+    return new App({ binding });
 }
 
 /**
@@ -1438,7 +1447,7 @@ function createApp(option = {}) {
  * @returns
  */
 function render(tree) {
-    const app = new Element();
+    const app = new Structure({ binding });
     return app.render(tree);
 }
 /**
@@ -1460,4 +1469,4 @@ function useComponent(Comp, props) {
     return render(h(Comp, props));
 }
 
-export { Fragment, RefImpl, binding, computed, createApp, createSignal, customRef, defineExpose, h, isProxy, isReactive, isRef, joinClass, markRaw, nextTick, onBeforeMount, onBeforeUnmount, onMounted, onUnmounted, reactive, readonly, recycleDepend, ref, render, renderToString, toRaw, toRef, toRefs, unref, useComponent, watch, watchEffect };
+export { Fragment, RefImpl, Static, Structure, binding, computed, createApp, createSignal, customRef, defineExpose, h, isProxy, isReactive, isRef, markRaw, nextTick, onBeforeMount, onBeforeUnmount, onMounted, onUnmounted, reactive, readonly, recycleDepend, ref, render, renderToString, toRaw, toRef, toRefs, unref, useComponent, watch, watchEffect };
