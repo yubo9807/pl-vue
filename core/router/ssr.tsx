@@ -1,11 +1,14 @@
 import { watch } from '../reactivity';
 import { customForEach, len } from '../utils';
-import { Fragment, h, onMounted, onUnmounted } from '../vdom';
+import { Children, Fragment, PropsType, h, onMounted, onUnmounted } from '../vdom';
 import { config, currentApp, setCurrentRoute, variable } from './create-router';
 import { stack } from './router';
 import { analyzeRoute } from './utils';
 
-export function Helmet(props) {
+type Props = PropsType<{
+  children: Children
+}>
+export function Helmet(props: Props) {
 
   const regs: RegExp[] = [];
   customForEach(props.children, tree => {

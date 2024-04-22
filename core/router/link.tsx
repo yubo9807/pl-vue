@@ -1,5 +1,5 @@
 import { isString } from "../utils"
-import { PropsType, h } from "../vdom"
+import { ClassNameType, PropsType, h } from "../vdom"
 import { config } from "./create-router"
 import { SkipOption } from "./type"
 import { push, replace, useRoute } from "./use-router"
@@ -7,7 +7,7 @@ import { splicingUrl } from "./utils"
 
 type LinkProps = PropsType<{
   to:          SkipOption
-  className?:  string
+  className?:  ClassNameType
   type?:       'push' | 'replace'
   onClick?:    (to: string, next: (to?: SkipOption) => void) => void
 }> & {
@@ -38,16 +38,13 @@ export function Link(props: LinkProps) {
     }
   }
 
+  const currentPath = props.to + '/';
   return <a
-    className={() => {
-      const currentPath = props.to + '/';
-      const routePath = route.path + '/';
-      return [
-        routePath.startsWith(currentPath) && 'active',
-        routePath === currentPath && 'exact-active',
-        className,
-      ]
-    }}
+    className={[
+      () => (route.path + '/').startsWith(currentPath) && 'active',
+      () => route.path + '/' === currentPath && 'exact-active',
+      ...[className].flat(),
+    ]}
     href={href}
     onclick={jump}
     {...args}
