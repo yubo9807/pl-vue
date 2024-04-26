@@ -1,4 +1,4 @@
-import { nextTick, printWarn, AnyObj, hasOwn, isObject, CustomWeakMap, isNormalObject } from "../utils";
+import { nextTick, printWarn, AnyObj, hasOwn, isObject, CustomWeakMap, isNormalObject, isEquals } from "../utils";
 import { dependencyCollection, distributeUpdates } from "./depend";
 import { isReadonly } from "./readonly";
 
@@ -44,16 +44,16 @@ export function reactive<T extends AnyObj>(target: T): T {
       if (target[ReactiveFlags.IS_READONLY]) return true;
 
       const oldValue = Reflect.get(target, key, receiver);
-      if (oldValue === value) return true;
+      if (isEquals(oldValue, value)) return true;
       const result = Reflect.set(target, key, value, receiver);
 
       // 记录要更新的 key
-      const updateKeys = updateKeysMap.get(target) || new Set()
+      const updateKeys = updateKeysMap.get(target) || new Set();
       updateKeys.add(key);
       const size = updateKeys.size;
       updateKeysMap.set(target, updateKeys);
 
-      nextTick(() => {  // 利用时间循环机制，防止同一时刻多次将数据更新
+      nextTick(() => {  // 利用事件循环机制，防止同一时刻多次将数据更新
         if (result && size === 1) {
           // console.log(`%c update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`, 'color: orange');
           distributeUpdates(target);  // 在同一时刻多次改变数据，只更新一次即可

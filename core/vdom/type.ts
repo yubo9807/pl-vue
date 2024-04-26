@@ -24,12 +24,14 @@ export type Component = BaseComponent | ClassComponent
 export type GetCompPropsType<Comp extends BaseComponent> = Parameters<Comp>[0]
 export type GetClassCompPropsType<ClassComp extends ClassComponent> = ConstructorParameters<ClassComp>[0]
 
-type AssignType = string | (() => string)
+type AssignType = string | number | (() => string | number)
 
 export type ClassNameType = AssignType | AssignType[]
 
-export type StyleType = AssignType | ({
+export type StyleObject = {
   [I in keyof CSSStyleDeclaration]?: CSSStyleDeclaration[I] | (() => CSSStyleDeclaration[I])
 } & {
-  [k: `--${string}`]: string
-})
+  [k: `--${string}`]: AssignType
+}
+
+export type StyleType = AssignType | StyleObject

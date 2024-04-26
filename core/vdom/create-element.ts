@@ -130,7 +130,7 @@ export class Structure extends Static {
       for (const prop in attrs.style) {
         const value = attrs.style[prop];
         if (isFunction(value)) {
-          this.#binding(() => el.style[prop] = value());
+          this.#binding(() => el.style.setProperty(prop, value()));
         } else {
           el.style[prop] = value;
         }

@@ -16,7 +16,6 @@ export class Static {
    * @param tree 
    */
   intercept<T>(tree: T) {
-    console.log(tree)
     return tree;
   }
 
