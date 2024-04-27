@@ -1,5 +1,5 @@
 import { nextTick, hasOwn, isNormalObject, isEquals, printWarn } from "../utils";
-import { dependencyCollection, distributeUpdates } from "./depend";
+import { deepExecute, dependencyCollection, distributeUpdates } from "./depend";
 
 export const IS_RAW      = Symbol('__v_raw');
 export const IS_REF      = Symbol('__v_isRef');
@@ -37,11 +37,17 @@ export function proxy<T extends Object>(target: T, option: Option = {}) {
       if (key === IS_RAW) return target;  // 返回原始值
 
       const result = Reflect.get(target, key);
-      if (isReadonly) return result;  // readonly
 
-      dependencyCollection(target);   // 收集依赖
+      // readonly
+      if (isReadonly) return result;
 
-      if (isShallow) return result;   // 浅响应式
+      // 浅响应式
+      if (isShallow) {
+        deepExecute(target, dependencyCollection);
+        return result;
+      }
+
+      dependencyCollection(target);  // 收集依赖
       return isNormalObject(result) ? proxy(result, option) : result;
     },
 

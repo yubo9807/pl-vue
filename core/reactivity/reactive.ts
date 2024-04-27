@@ -57,3 +57,12 @@ export function markRaw<T extends AnyObj>(obj: T): T {
   if (isObject(obj)) rawMap.set(obj, true);
   return obj;
 }
+
+/**
+ * reactive 的浅层作用形式
+ * @param obj 
+ * @returns 
+ */
+export function shallowReactive<T extends AnyObj>(obj: T) {
+  return proxy(obj, { shallow: true });
+}

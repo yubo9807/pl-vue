@@ -1,4 +1,4 @@
-import { customForEach, CustomWeakMap, isObject } from "../utils";
+import { AnyObj, customForEach, CustomWeakMap, isNormalObject, isObject } from "../utils";
 import { toRaw } from "./reactive";
 
 let func = null;
@@ -58,4 +58,19 @@ export function recycleDepend(...keys: object[]) {
     funcsMap.delete(obj);
   }
   customForEach(keys, _recycleDepend);
+}
+
+/**
+ * 深度执行 收集依赖或派发更新
+ * @param target 
+ * @param func 
+ */
+export function deepExecute(target: object, func: typeof dependencyCollection | typeof distributeUpdates) {
+  func(target);
+  for (const key in target) {
+    const value = target[key];
+    if (isNormalObject(value)) {
+      deepExecute(value, func);
+    }
+  }
 }

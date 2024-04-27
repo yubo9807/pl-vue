@@ -18,3 +18,15 @@ export function readonly(target: AnyObj) {
 export function isReadonly(proxy: AnyObj) {
   return proxy && readonly(proxy)[IS_READONLY];
 }
+
+/**
+ * readonly 的浅层作用形式
+ * @param target 
+ * @returns 
+ */
+export function shallowReadonly(target: any[]) {
+  return proxy(target, {
+    shallow:  true,
+    readonly: true,
+  });
+}

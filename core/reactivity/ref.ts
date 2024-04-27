@@ -1,5 +1,7 @@
 import { AnyObj } from "../utils";
+import { deepExecute, distributeUpdates } from "./depend";
 import { IS_REF, IS_SHALLOW, proxy } from "./proxy";
+import { toRaw } from "./reactive";
 
 export class RefImpl<T> {
 
@@ -41,6 +43,14 @@ export function ref<T>(value: T = void 0) {
  */
 export function shallowRef<T>(value: T = void 0) {
   return new RefImpl(value, true);
+}
+
+/**
+ * 强制触发 shallowRef
+ * @param ref 
+ */
+export function triggerRef(ref: RefImpl<object>) {
+  deepExecute(toRaw(ref.value), distributeUpdates);
 }
 
 /**
