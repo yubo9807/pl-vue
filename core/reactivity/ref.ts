@@ -1,31 +1,26 @@
 import { AnyObj } from "../utils";
-import { createSignal } from "./signal";
-
-export const ISREF = Symbol('__v_isRef');
+import { IS_REF, IS_SHALLOW, proxy } from "./proxy";
 
 export class RefImpl<T> {
 
-  [ISREF] = true;
+  [IS_REF]     = true;
+  [IS_SHALLOW] = false;
 
   _rawValue?: { value: T }
   _value?:    T
-  getSignal?: () => T
-  setSignal?: (newValue: T) => void
 
-  constructor(value: T) {
-    const [ getSignal, setSignal, raw ] = createSignal(value);
-    this._rawValue = raw;
-    this.getSignal = getSignal;
-    this.setSignal = setSignal;
-    this._value = getSignal();
+  constructor(value: T, shallow = false) {
+    this[IS_SHALLOW] = shallow;
+    this._rawValue = proxy({ value }, { shallow });
+    this._value = this._rawValue.value;
   }
 
   get value() {
-    return this.getSignal();
+    return this._rawValue.value;
   }
 
   set value(newValue) {
-    this.setSignal(newValue);
+    this._rawValue.value = newValue;
   }
 
 }
@@ -40,12 +35,21 @@ export function ref<T>(value: T = void 0) {
 }
 
 /**
+ * ref 的浅层代理
+ * @param value 
+ * @returns 
+ */
+export function shallowRef<T>(value: T = void 0) {
+  return new RefImpl(value, true);
+}
+
+/**
  * 判断对象是否为 ref
  * @note vue 实现这个函数有点low，随便定义一个对象就可以判断
  * @param ref
  */
 export function isRef(ref: unknown): ref is RefImpl<unknown> {
-  return ref && !!ref[ISREF];
+  return ref && !!ref[IS_REF];
 }
 
 /**
@@ -59,7 +63,7 @@ export function unref<T>(ref: RefImpl<T>) {
 
 class ObjectRefImpl<T extends object> {
 
-  [ISREF]       = true
+  [IS_REF] = true
 
   _defaultValue: any
   _key:    keyof T
@@ -117,13 +121,13 @@ class CustomRefImpl<T> extends RefImpl<T> {
     );
 
     super(get());
-    this[ISREF] = isRef;
+    this[IS_REF] = isRef;
     this._get = get;
     this._set = set;
   }
 
   get value(): T {
-    return this[ISREF] ? super.value : this._get();
+    return this[IS_REF] ? super.value : this._get();
   }
 
   // 方法重写，阻断，将 val 指给 set 函数

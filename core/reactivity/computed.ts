@@ -1,6 +1,6 @@
-import { ISREF } from "./ref";
 import { ReactiveEffect } from './effect'
 import { printWarn, isFunction } from "../utils";
+import { IS_REF } from './proxy';
 
 type Getter<T> = () => T
 type Setter<T> = (val: T) => void
@@ -12,7 +12,7 @@ type ComputedOption<T> = Getter<T> | {
 class ComputedRefImpl<T> {
 
   __v_isReadonly = true;
-  [ISREF]        = true;
+  [IS_REF]       = true;
   _cacheable     = true;
   _dirty         = true;
 
