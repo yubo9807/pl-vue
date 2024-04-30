@@ -1,5 +1,5 @@
-import { nextTick, hasOwn, isNormalObject, isEquals, printWarn } from "../utils";
-import { deepExecute, dependencyCollection, distributeUpdates } from "./depend";
+import { nextTick, hasOwn, isNormalObject, isEquals, printWarn, Key } from "../utils";
+import { deepDependencyCollection, dependencyCollection, distributeUpdates } from "./depend";
 
 export const IS_RAW      = Symbol('__v_raw');
 export const IS_REF      = Symbol('__v_isRef');
@@ -28,7 +28,7 @@ export function proxy<T extends Object>(target: T, option: Option = {}) {
   }
 
 
-  const updateKeySet = new Set();  // 记录要更新的 key
+  const updateKeySet: Set<Key> = new Set();  // 记录要更新的 key
 
   return new Proxy(target, {
 
@@ -43,11 +43,11 @@ export function proxy<T extends Object>(target: T, option: Option = {}) {
 
       // 浅响应式
       if (isShallow) {
-        deepExecute(target, dependencyCollection);
+        deepDependencyCollection(target);
         return result;
       }
 
-      dependencyCollection(target);  // 收集依赖
+      dependencyCollection(target, key);  // 收集依赖
       return isNormalObject(result) ? proxy(result, option) : result;
     },
 
@@ -76,7 +76,7 @@ export function proxy<T extends Object>(target: T, option: Option = {}) {
         const newValue = Reflect.get(target, key);
         if (result && !isEquals(oldValue, newValue)) {
           // console.log(`%c update ${isType(target)}[${key.toString()}]: ${oldValue} --> ${value}`, 'color: orange');
-          distributeUpdates(target);
+          distributeUpdates(target, updateKeySet);
         }
         updateKeySet.clear();  // 更新完成后清除记录
       })
@@ -109,7 +109,7 @@ export function proxy<T extends Object>(target: T, option: Option = {}) {
         const newValue = Reflect.get(target, key);  // 数据被删，可能又被赋值为原先的值
         if (result && !hasKey && !isEquals(oldValue, newValue)) {
           // console.log(`%c delete ${isType(target)}[${key.toString()}]`, 'color: red');
-          distributeUpdates(target);
+          distributeUpdates(target, updateKeySet);
         }
         updateKeySet.clear();
       })

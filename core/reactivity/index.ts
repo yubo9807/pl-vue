@@ -4,4 +4,4 @@ export { createSignal } from './signal';
 export { readonly, shallowReadonly } from "./readonly";
 export { computed } from "./computed";
 export { watch, watchEffect } from "./watch";
-export { binding, recycleDepend } from './depend';
+export { binding, recycleDepend, triggerObject, deepTriggerObject } from './depend';

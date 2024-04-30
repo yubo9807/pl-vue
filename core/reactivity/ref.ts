@@ -1,5 +1,5 @@
 import { AnyObj } from "../utils";
-import { deepExecute, distributeUpdates } from "./depend";
+import { deepTriggerObject } from "./depend";
 import { IS_REF, IS_SHALLOW, proxy } from "./proxy";
 
 export class RefImpl<T> {
@@ -49,7 +49,7 @@ export function shallowRef<T>(value: T = void 0) {
  * @param ref 
  */
 export function triggerRef(ref: RefImpl<object>) {
-  deepExecute(ref.value, distributeUpdates);
+  deepTriggerObject(unref(ref));
 }
 
 /**
