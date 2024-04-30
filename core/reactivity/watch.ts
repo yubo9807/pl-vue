@@ -1,5 +1,5 @@
 import { binding } from "./depend";
-import { isEquals, deepClone, isNormalObject } from "../utils";
+import { isEquals, deepClone, isNormalObject, nextTick } from "../utils";
 
 type Option = {
   immediate?: boolean
@@ -67,8 +67,13 @@ type Callback  = (onCleanup: OnCleanup)  => void
 export function watchEffect(cb: Callback) {
   let cleanup = false;
 
+  let count = 0;  // 回调中可能监听着来自不同的对象，会导致回调函数多次运行
   binding(() => {
     if (cleanup) return true;
+
+    if (count > 0) return;  // 保证该函数在同一时刻只会触发一次
+    count++;
+    nextTick(() => count = 0);  // 在微队列中重置计数
 
     cb((cleanupFn) => {
       cleanupFn();
@@ -79,6 +84,6 @@ export function watchEffect(cb: Callback) {
     cleanup = true;
 
     // 释放内存
-    cb = null;
+    count = cb = null;
   }
 }
