@@ -1,31 +1,29 @@
 import { ReactiveEffect } from './effect'
 import { printWarn, isFunction } from "../utils";
-import { IS_REF } from './proxy';
+import { IS_READONLY, IS_REF } from './proxy';
 
 type Getter<T> = () => T
 type Setter<T> = (val: T) => void
-type ComputedOption<T> = Getter<T> | {
-  get: Getter<T>
-  set: Setter<T>
-}
 
-class ComputedRefImpl<T> {
+export class ComputedRefImpl<T> {
 
-  __v_isReadonly = true;
-  [IS_REF]       = true;
-  _cacheable     = true;
-  _dirty         = true;
+  [IS_READONLY] = true;
+  [IS_REF]      = true;
+  _cacheable    = true;
+  
+  effect:  ReactiveEffect<T>
+  _setter: Setter<T>
+  _value:  T
+  _dirty:  boolean
 
-  computed: ReactiveEffect
-  _setter:  Function
-
-  constructor(getter: Getter<T>, setter?: Setter<T>) {
-    this.computed = new ReactiveEffect(getter);
-    this._setter  = setter;
+  constructor(getter: Getter<T>, setter?: Setter<T>, dirty = false) {
+    this.effect  = new ReactiveEffect(getter);
+    this._setter = setter;
+    this._dirty  = dirty;
   }
 
   get value(): T {
-    return this.computed.fn();
+    return this._dirty ? this.effect.computed.value : this.effect.fn();
   }
 
   set value(val: T) {
@@ -39,6 +37,11 @@ class ComputedRefImpl<T> {
 }
 
 
+type ComputedOption<T> = Getter<T> | {
+  get: Getter<T>
+  set: Setter<T>
+}
+
 /**
  * 计算属性
  * @param option 
@@ -46,9 +49,9 @@ class ComputedRefImpl<T> {
  */
 export function computed<T>(option: ComputedOption<T>): ComputedRefImpl<T> {
   if (isFunction(option)) {
-    return new ComputedRefImpl(option as Getter<T>);
+    return new ComputedRefImpl(option as Getter<T>, null, true);
   }
 
   // @ts-ignore
-  return new ComputedRefImpl(option.get, option.set);
+  return new ComputedRefImpl(option.get, option.set, true);
 }
