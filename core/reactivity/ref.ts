@@ -1,18 +1,21 @@
 import { AnyObj } from "../utils";
 import { deepTriggerObject } from "./depend";
-import { IS_REF, IS_SHALLOW, proxy } from "./proxy";
+import { IS_REF, IS_SHALLOW, IS_SHALLOW_BEST, proxy } from "./proxy";
 
 export class RefImpl<T> {
 
-  [IS_REF]     = true;
-  [IS_SHALLOW] = false;
+  [IS_REF]          = true;
+  [IS_SHALLOW]      = false;
+  [IS_SHALLOW_BEST] = false;
 
   _rawValue?: { value: T }
   _value?:    T
 
-  constructor(value: T, shallow = false) {
+  constructor(value: T, type: 0 | 1 | 2 = 0) {
+    const shallow     = type === 1;
+    const shallowBest = type === 2;
     this[IS_SHALLOW] = shallow;
-    this._rawValue = proxy({ value }, { shallow });
+    this._rawValue = proxy({ value }, { shallow, shallowBest });
     this._value = this._rawValue.value;
   }
 
@@ -36,12 +39,22 @@ export function ref<T>(value: T = void 0) {
 }
 
 /**
+ * 性能最好的浅响应式对象（不会深度遍历收集依赖，也就无法强制更新）
+ * 只能通过重新覆盖整个对象来触发更新
+ * @param value 
+ * @returns 
+ */
+export function shallowBestRef<T>(value: T = void 0) {
+  return new RefImpl(value, 2);
+}
+
+/**
  * ref 的浅层代理
  * @param value 
  * @returns 
  */
 export function shallowRef<T>(value: T = void 0) {
-  return new RefImpl(value, true);
+  return new RefImpl(value, 1);
 }
 
 /**
