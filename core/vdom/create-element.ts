@@ -1,4 +1,4 @@
-import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals, isStrictObject } from '../utils';
+import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals, isStrictObject, binarySearch, customFindIndex } from '../utils';
 import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
 import { compTreeMap, filterElement } from './component-tree';
@@ -106,7 +106,7 @@ export class Structure extends Static {
     // created 和 children 中同时具备相同的值，删掉 children 中的值
     const created = attrs.created;
     if (isFunction(created)) {
-      const index = children.findIndex(val => val === created);
+      const index = customFindIndex(children, val => val === created);
       index >= 0 && children.splice(index, 1);
     }
 
@@ -260,6 +260,11 @@ export class Structure extends Static {
    * @param func 
    */
   #reactivityNode(fragment: DocumentFragment, func: () => any) {
+    type BackupNode = {
+      key:  number
+      tree: Tree
+      node: HTMLElement | DocumentFragment | Text
+    }
     let backupNodes: BackupNode[] = [];
     let lockFirstRun = true;  // 锁：第一次运行
     let parent = null;
@@ -281,7 +286,7 @@ export class Structure extends Static {
       while (i < len(value)) {
         let val = value[i];
 
-        const index = lookupBackupNodes(backupNodes, i);
+        const index = binarySearch(backupNodes, i, v => v.key);
         if (index >= 0) {  // 节点已经存在
           if (isEquals(val, backupNodes[index].tree)) {  // 任何数据都没有变化
             i++;
@@ -352,33 +357,4 @@ export class Structure extends Static {
     })
   }
 
-}
-
-type BackupNode = {
-  key:  number
-  tree: Tree
-  node: HTMLElement | DocumentFragment | Text
-}
-
-/**
- * 查询备份数据中是否存在（二分）
- * @param arr 
- * @param value 
- * @returns 
- */
-function lookupBackupNodes(arr: BackupNode[], value: number) {
-  let start = 0;
-  let end = len(arr) - 1;
-  while (start <= end) {
-    const midden = Math.ceil((start + end) / 2);
-    const val = arr[midden];
-    if(value === val.key) {
-      return midden;
-    } else if (value < val.key) {  // 在左边
-      end = midden - 1;
-    } else if (value > val.key) {  // 在右边
-      start = midden + 1;
-    }
-  }
-  return -1;
 }

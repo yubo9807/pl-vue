@@ -1,4 +1,4 @@
-import { AnyObj } from "../utils"
+import { AnyObj, customFind } from "../utils"
 import { BaseComponent, PropsType, Tree } from "../vdom"
 import { config } from "./create-router"
 import { BeforeEnter } from "./type"
@@ -29,7 +29,7 @@ export type RouteItem = Tree & {
  */
 export function queryRoute(routes: RouteItem[], pathname: string) {
   pathname = pathname.replace(config.base, '');
-  const query = routes.find(val => {
+  const query = customFind(routes, val => {
     const { path, exact } = val.attrs;
 
     if (exact === false) {

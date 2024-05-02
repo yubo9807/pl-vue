@@ -1,4 +1,4 @@
-import { customForEach, CustomWeakMap, isNormalObject, isObject, Key } from "../utils";
+import { customFind, customForEach, CustomWeakMap, isNormalObject, isObject, Key } from "../utils";
 import { toRaw } from "./reactive";
 
 let func = null;
@@ -23,7 +23,7 @@ export function binding(fn: Function) {
 export function dependencyCollection(source: object, key: Key) {
   if (!func) return;
   const funcs = funcsMap.get(source) || [];
-  const query = funcs.find(item => func === item.fn);  // 是否有重复存在的函数
+  const query = customFind(funcs, item => func === item.fn);  // 是否有重复存在的函数
   if (query) {
     query.s.add(key);
   } else {
