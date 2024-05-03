@@ -1,19 +1,23 @@
-import { customFind, customForEach, CustomWeakMap, isNormalObject, isObject, Key } from "../utils";
+import { customFind, customForEach, CustomWeakMap, isNormalObject, isObject, Key, nextTick } from "../utils";
 import { toRaw } from "./reactive";
 
+type BindingCallBack = (keys?: Set<Key>) => void | true;
+
 let func = null;
-const funcsMap: WeakMap<object, { s: Set<Key>, fn: Function }[]> = new CustomWeakMap();  // 收集依赖的 map 集合
+const funcsMap: WeakMap<object, { s: Set<Key>, fn: BindingCallBack }[]> = new CustomWeakMap();  // 收集依赖的 map 集合
 
 /**
  * 绑定响应式对象
  * @param fn 将响应式对象写在 fn 内，该对象重新赋值时会自行触发 fn()
  * 当返回 true 时，该函数将在依赖收集中删除，避免占用过多的内存
  */
-export function binding(fn: Function) {
+export function binding(fn: BindingCallBack) {
   func = fn;
   fn();  // 自执行触发 get 方法，方法被保存
   func = null;
 }
+
+export let currentKeys: Set<Key> = null;
 
 /**
  * 依赖收集
@@ -26,10 +30,14 @@ export function dependencyCollection(source: object, key: Key) {
   const query = customFind(funcs, item => func === item.fn);  // 是否有重复存在的函数
   if (query) {
     query.s.add(key);
+    currentKeys = query.s;
   } else {
-    funcs.push({ s: new Set([key]), fn: func });
+    const s = new Set([key]);
+    funcs.push({ s, fn: func });
     funcsMap.set(source, funcs);
+    currentKeys = s;
   }
+  nextTick(() => currentKeys = null);  // 回收内存
 }
 
 /**
@@ -42,17 +50,11 @@ export function distributeUpdates(source: object, keys: Set<Key>) {
   if (!funcs) return;
 
   customForEach(funcs, (item, index) => {
-    let bool = false;
-    for (const key of keys) {
-      bool = item.s.has(key);
-      if (bool) break;
-    }
-    if (!bool) return;
-    const isRemove = item.fn();
+    const isRemove = item.fn(keys);
     // 清理下内存，将不用的函数删除
     isRemove === true && delete funcs[index];
   });
-  funcsMap.set(source, funcs.filter(fn => fn));
+  funcsMap.set(source, funcs.filter(item => item));
 }
 
 /**

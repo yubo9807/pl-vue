@@ -1,7 +1,7 @@
 import { Component } from "./type";
 import { Structure, StructureOption } from "./create-element"; 
 import { isString } from "../utils";
-import { watchEffect } from "../reactivity";
+import { binding } from "../reactivity";
 
 type Plugin = {
   install: (app: App) => void;
@@ -56,5 +56,5 @@ export class App extends Structure {
  * @returns 
  */
 export function createApp() {
-  return new App({ binding: watchEffect });
+  return new App({ binding });
 }

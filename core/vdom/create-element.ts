@@ -110,8 +110,8 @@ export class Structure extends Static {
       index >= 0 && children.splice(index, 1);
     }
 
-    customForEach(children, val => {
-      this.intercept(val);
+    customForEach(children, tree => {
+      const val = this.intercept(tree);
       if (isFunction(val)) {
         const fragment = this.createNodeFragment([val]);
         appendChild(el, fragment);  // 响应式数据交给节点片段去处理
@@ -149,8 +149,8 @@ export class Structure extends Static {
   createNodeFragment(children: Children) {
     const fragment = document.createDocumentFragment();
 
-    customForEach(children, val => {
-      this.intercept(val);
+    customForEach(children, tree => {
+      const val = this.intercept(tree);
       if (isFunction(val)) {
         this.#reactivityNode(fragment, val);  // 响应式数据挂载
       } else {

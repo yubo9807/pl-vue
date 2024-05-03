@@ -8,23 +8,25 @@ export class RefImpl<T> {
   [IS_SHALLOW]      = false;
   [IS_SHALLOW_BEST] = false;
 
-  _rawValue?: { value: T }
-  _value?:    T
+  _rawValue?: T
+  _value?:    { value: T }
 
   constructor(value: T, type: 0 | 1 | 2 = 0) {
-    const shallow     = type === 1;
-    const shallowBest = type === 2;
-    this[IS_SHALLOW] = shallow;
-    this._rawValue = proxy({ value }, { shallow, shallowBest });
-    this._value = this._rawValue.value;
+    const shallow         = type === 1;
+    const shallowBest     = type === 2;
+    this[IS_SHALLOW]      = shallow;
+    this[IS_SHALLOW_BEST] = shallowBest;
+    this._rawValue        = value;
+    this._value           = proxy({ value }, { shallow, shallowBest });
   }
 
   get value() {
-    return this._rawValue.value;
+    return this._value.value;
   }
 
   set value(newValue) {
-    this._rawValue.value = newValue;
+    this._rawValue    = newValue;
+    this._value.value = newValue;
   }
 
 }

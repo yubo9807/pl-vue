@@ -6,7 +6,7 @@ import { stack } from './router';
 import { analyzeRoute } from './utils';
 
 type Props = PropsType<{
-  children: Children
+  children?: Children
 }>
 export function Helmet(props: Props) {
 

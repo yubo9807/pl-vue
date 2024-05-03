@@ -2,7 +2,7 @@ import { BaseComponent, ClassComponent, Component, GetClassCompPropsType, GetCom
 import { h } from "./h";
 import { Structure } from "./create-element";
 import { Static } from "./create-html";
-import { watchEffect } from '../reactivity';
+import { binding } from '../reactivity';
 
 /**
  * 渲染为 DOM 节点
@@ -10,7 +10,7 @@ import { watchEffect } from '../reactivity';
  * @returns 
  */
 export function render(tree: Tree) {
-  const app = new Structure({ binding: watchEffect });
+  const app = new Structure({ binding });
   return app.render(tree);
 }
 

@@ -1,5 +1,5 @@
-import { binding } from "./depend";
-import { isEquals, deepClone, isNormalObject, nextTick } from "../utils";
+import { binding, currentKeys } from "./depend";
+import { isEquals, deepClone, isNormalObject, nextTick, Key } from "../utils";
 
 type Option = {
   immediate?: boolean
@@ -66,24 +66,35 @@ type Callback  = (onCleanup: OnCleanup)  => void
  */
 export function watchEffect(cb: Callback) {
   let cleanup = false;
+  let isFirst = true;
+  let monitorKeys: typeof currentKeys = null;  // 监听的 key
 
-  let count = 0;  // 回调中可能监听着来自不同的对象，会导致回调函数多次运行
-  binding(() => {
+  binding((updateKeys) => {
     if (cleanup) return true;
 
-    if (count > 0) return;  // 保证该函数在同一时刻只会触发一次
-    count++;
-    nextTick(() => count = 0);  // 在微队列中重置计数
+    if (!isFirst) {
+      // 如果更新的 key 中找不到监听的 key，不执行回调
+      for (const key of updateKeys) {
+        if (!monitorKeys.has(key)) return;
+      }
+    };
 
     cb((cleanupFn) => {
       cleanupFn();
     });
+
+    if (isFirst) {
+      // 第一次执行后，知道了需要监听的 key
+      monitorKeys = currentKeys;
+      console.log(monitorKeys)
+      isFirst     = false;
+    }
   })
 
   return () => {
     cleanup = true;
 
     // 释放内存
-    count = cb = null;
+    cb = monitorKeys = null;
   }
 }
