@@ -5,7 +5,7 @@ import { terser } from 'rollup-plugin-terser';
 
 async function build(minifay: boolean) {
   const bundle = await rollup({
-    input: `online/index.ts`,
+    input: `core/reactivity/index.ts`,
     plugins: [
       typescript2({
         tsconfig: 'tsconfig.json',
@@ -16,7 +16,7 @@ async function build(minifay: boolean) {
   })
   await bundle.write({
     format: 'es',
-    file: `online/${process.env.npm_package_version}/pl-vue${minifay ? '.min' : ''}.js`,
+    file: `dist/reactivity${minifay ? '.min' : ''}.js`,
   });
   bundle.close();
 }

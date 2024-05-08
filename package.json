@@ -40,7 +40,7 @@
     "start": "node dist/server.js",
     "tsc:lib": "tsc --project build/tsconfig.lib.json --declaration --emitDeclarationOnly",
     "build:lib": "rm -rf lib && ts-node --project build/tsconfig.lib.json build/rollup.lib.ts && npm run tsc:lib",
-    "build:online": "ts-node --project build/tsconfig.lib.json build/rollup.online.ts"
+    "build:online": "rm -rf dist && ts-node --project build/tsconfig.lib.json build/rollup.online.ts"
   },
   "keywords": [
     "plvue",
