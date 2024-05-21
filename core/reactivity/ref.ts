@@ -1,23 +1,23 @@
 import { AnyObj } from "../utils";
 import { deepTriggerObject } from "./depend";
-import { IS_REF, IS_SHALLOW, IS_SHALLOW_BEST, proxy } from "./proxy";
+import { IS_REF, IS_SHALLOW, IS_BEST, proxy } from "./proxy";
 
 export class RefImpl<T> {
 
-  [IS_REF]          = true;
-  [IS_SHALLOW]      = false;
-  [IS_SHALLOW_BEST] = false;
+  [IS_REF]     = true;
+  [IS_SHALLOW] = false;
+  [IS_BEST]    = false;
 
   _rawValue?: T
   _value?:    { value: T }
 
   constructor(value: T, type: 0 | 1 | 2 = 0) {
-    const shallow         = type === 1;
-    const shallowBest     = type === 2;
-    this[IS_SHALLOW]      = shallow;
-    this[IS_SHALLOW_BEST] = shallowBest;
-    this._rawValue        = value;
-    this._value           = proxy({ value }, { shallow, shallowBest });
+    const shallow    = type === 1;
+    const best       = type === 2;
+    this[IS_SHALLOW] = shallow;
+    this[IS_BEST]    = best;
+    this._rawValue   = value;
+    this._value      = proxy({ value }, { shallow, best });
   }
 
   get value() {
@@ -46,7 +46,7 @@ export function ref<T>(value: T = void 0) {
  * @param value 
  * @returns 
  */
-export function shallowBestRef<T>(value: T = void 0) {
+export function bestRef<T>(value: T = void 0) {
   return new RefImpl(value, 2);
 }
 
@@ -77,7 +77,25 @@ export function isRef(ref: unknown): ref is RefImpl<unknown> {
 }
 
 /**
- * 返回 ref 内部值
+ * 判断是否为 shallowRef
+ * @param ref 
+ * @returns 
+ */
+export function isShallowRef(ref: unknown): ref is RefImpl<unknown> {
+  return ref && !!ref[IS_SHALLOW];
+}
+
+/**
+ * 判断是否为 bestRef
+ * @param ref 
+ * @returns 
+ */
+export function isBestRef(ref: unknown): ref is RefImpl<unknown> {
+  return ref && !!ref[IS_BEST];
+}
+
+/**
+ * 返回 ref | shallowRef | bestRef 内部值
  * @param ref 
  * @returns 
  */

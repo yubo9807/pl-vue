@@ -1,16 +1,16 @@
 import { nextTick, hasOwn, isNormalObject, isEquals, printWarn, Key } from "../utils";
 import { deepDependencyCollection, dependencyCollection, distributeUpdates } from "./depend";
 
-export const IS_RAW          = Symbol('__v_raw');
-export const IS_REF          = Symbol('__v_isRef');
-export const IS_SHALLOW      = Symbol('__v_isShallow');
-export const IS_SHALLOW_BEST = Symbol('__v_isShallowBest');
-export const IS_READONLY     = Symbol('__v_isReadonly');
+export const IS_RAW      = Symbol('__v_raw');
+export const IS_REF      = Symbol('__v_isRef');
+export const IS_SHALLOW  = Symbol('__v_isShallow');
+export const IS_BEST     = Symbol('__v_isBest');
+export const IS_READONLY = Symbol('__v_isReadonly');
 
 type Option = {
-  readonly?:    boolean  // 只读对象
-  shallow?:     boolean  // 浅响应式对象
-  shallowBest?: boolean  // 不会深度遍历收集依赖的浅响应式对象
+  readonly?: boolean  // 只读对象
+  shallow?:  boolean  // 浅响应式对象
+  best?:     boolean  // 不会深度遍历收集依赖的浅响应式对象
 }
 /**
  * 创建一个代理对象
@@ -19,9 +19,9 @@ type Option = {
  */
 export function proxy<T extends Object>(target: T, option: Option = {}) {
 
-  const isReadonly    = option.readonly;
-  const isShallowBest = option.shallowBest;
-  const isShallow     = option.shallow;
+  const isReadonly = option.readonly;
+  const isBest     = option.best;
+  const isShallow  = option.shallow;
 
   // readonly
   if (isReadonly) {
@@ -52,7 +52,7 @@ export function proxy<T extends Object>(target: T, option: Option = {}) {
 
       dependencyCollection(target, key);  // 收集依赖
 
-      if (isShallowBest) return result;
+      if (isBest) return result;
       return isNormalObject(result) ? proxy(result, option) : result;
     },
 
