@@ -86,7 +86,6 @@ export function watchEffect(cb: Callback) {
     if (isFirst) {
       // 第一次执行后，知道了需要监听的 key
       monitorKeys = currentKeys;
-      console.log(monitorKeys)
       isFirst     = false;
     }
   })

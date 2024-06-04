@@ -1,15 +1,25 @@
 import { binding } from "./depend";
-import { RefImpl, ref } from "./ref";
+import { CustomRefImpl } from "./ref";
 
 export class ReactiveEffect<T> {
 
   fn:       () => T
-  computed: RefImpl<T>
+  computed: CustomRefImpl<T>
   active    = true;
 
   constructor(fn: () => T) {
-    this.fn       = fn;
-    this.computed = ref(fn());
+    this.fn   = fn;
+    let value = fn();
+    this.computed = new CustomRefImpl((track, trigger) => ({
+      get() {
+        track();
+        return value;
+      },
+      set: (val) => {
+        value = val;
+        trigger();
+      }
+    }));
     this.scheduler();
   }
 

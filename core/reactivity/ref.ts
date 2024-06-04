@@ -152,7 +152,7 @@ export function toRefs<T extends object>(target: T) {
 
 type CustomRefCallback<T> = (track: Function, trigger: Function) => ({ get: () => T, set: (val: T) => void })
 
-class CustomRefImpl<T> extends RefImpl<T> {
+export class CustomRefImpl<T> extends RefImpl<T> {
   _get: Function
   _set: Function
   constructor(callback: CustomRefCallback<T>) {
