@@ -67,10 +67,15 @@ type Callback  = (onCleanup: OnCleanup)  => void
 export function watchEffect(cb: Callback) {
   let cleanup = false;
   let isFirst = true;
+  let count = 0;
   let monitorKeys: typeof currentKeys = null;  // 监听的 key
 
   binding((updateKeys) => {
     if (cleanup) return true;
+
+    if (count > 0) return;  // 保证该函数在同一时刻只会触发一次
+    count++;
+    nextTick(() => count = 0);
 
     if (!isFirst) {
       // 如果更新的 key 中找不到监听的 key，不执行回调
