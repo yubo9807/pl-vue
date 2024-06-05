@@ -336,7 +336,7 @@ function deepTriggerObject(target) {
 const IS_RAW = Symbol('__v_raw');
 const IS_REF = Symbol('__v_isRef');
 const IS_SHALLOW = Symbol('__v_isShallow');
-const IS_SHALLOW_BEST = Symbol('__v_isShallowBest');
+const IS_BEST = Symbol('__v_isBest');
 const IS_READONLY = Symbol('__v_isReadonly');
 /**
  * 创建一个代理对象
@@ -345,7 +345,7 @@ const IS_READONLY = Symbol('__v_isReadonly');
  */
 function proxy(target, option = {}) {
     const isReadonly = option.readonly;
-    const isShallowBest = option.shallowBest;
+    const isBest = option.best;
     const isShallow = option.shallow;
     // readonly
     if (isReadonly) {
@@ -369,7 +369,7 @@ function proxy(target, option = {}) {
                 return result;
             }
             dependencyCollection(target, key); // 收集依赖
-            if (isShallowBest)
+            if (isBest)
                 return result;
             return isNormalObject(result) ? proxy(result, option) : result;
         },
@@ -519,16 +519,16 @@ function shallowReactive(obj) {
 class RefImpl {
     [IS_REF] = true;
     [IS_SHALLOW] = false;
-    [IS_SHALLOW_BEST] = false;
+    [IS_BEST] = false;
     _rawValue;
     _value;
     constructor(value, type = 0) {
         const shallow = type === 1;
-        const shallowBest = type === 2;
+        const best = type === 2;
         this[IS_SHALLOW] = shallow;
-        this[IS_SHALLOW_BEST] = shallowBest;
+        this[IS_BEST] = best;
         this._rawValue = value;
-        this._value = proxy({ value }, { shallow, shallowBest });
+        this._value = proxy({ value }, { shallow, best });
     }
     get value() {
         return this._value.value;
@@ -552,7 +552,7 @@ function ref(value = void 0) {
  * @param value
  * @returns
  */
-function shallowBestRef(value = void 0) {
+function bestRef(value = void 0) {
     return new RefImpl(value, 2);
 }
 /**
@@ -579,7 +579,7 @@ function isRef(ref) {
     return ref && !!ref[IS_REF];
 }
 /**
- * 返回 ref 内部值
+ * 返回 ref | shallowRef | bestRef 内部值
  * @param ref
  * @returns
  */
@@ -679,7 +679,17 @@ class ReactiveEffect {
     active = true;
     constructor(fn) {
         this.fn = fn;
-        this.computed = ref(fn());
+        let value = fn();
+        this.computed = new CustomRefImpl((track, trigger) => ({
+            get() {
+                track();
+                return value;
+            },
+            set: (val) => {
+                value = val;
+                trigger();
+            }
+        }));
         this.scheduler();
     }
     /**
@@ -796,10 +806,15 @@ function watch(source, cb, option = {}) {
 function watchEffect(cb) {
     let cleanup = false;
     let isFirst = true;
+    let count = 0;
     let monitorKeys = null; // 监听的 key
     binding((updateKeys) => {
         if (cleanup)
             return true;
+        if (count > 0)
+            return; // 保证该函数在同一时刻只会触发一次
+        count++;
+        nextTick(() => count = 0);
         if (!isFirst) {
             // 如果更新的 key 中找不到监听的 key，不执行回调
             for (const key of updateKeys) {
@@ -813,7 +828,6 @@ function watchEffect(cb) {
         if (isFirst) {
             // 第一次执行后，知道了需要监听的 key
             monitorKeys = currentKeys;
-            console.log(monitorKeys);
             isFirst = false;
         }
     });
@@ -824,4 +838,4 @@ function watchEffect(cb) {
     };
 }
 
-export { RefImpl, binding, computed, createSignal, customRef, deepTriggerObject, isProxy, isReactive, isRef, markRaw, reactive, readonly, recycleDepend, ref, shallowBestRef, shallowReactive, shallowReadonly, shallowRef, toRaw, toRef, toRefs, triggerObject, triggerRef, unref, watch, watchEffect };
+export { RefImpl, bestRef, binding, computed, createSignal, customRef, deepTriggerObject, isProxy, isReactive, isRef, markRaw, reactive, readonly, recycleDepend, ref, shallowReactive, shallowReadonly, shallowRef, toRaw, toRef, toRefs, triggerObject, triggerRef, unref, watch, watchEffect };
