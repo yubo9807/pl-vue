@@ -1,5 +1,6 @@
 import { binding, currentKeys } from "./depend";
 import { isEquals, deepClone, isNormalObject, nextTick, Key } from "../utils";
+import { collectMonitor } from "./scope";
 
 type Option = {
   immediate?: boolean
@@ -48,12 +49,15 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
     }
   })
 
-  return () => {
+  const result = () => {
     cleanup = true;
 
     // 释放内存
     backup = source = cb = option = null;
   }
+
+  collectMonitor(result);
+  return result;
 }
 
 type OnCleanup = (cleanupFn: () => void) => void
@@ -95,10 +99,13 @@ export function watchEffect(cb: Callback) {
     }
   })
 
-  return () => {
+  const result = () => {
     cleanup = true;
 
     // 释放内存
     cb = monitorKeys = null;
   }
+
+  collectMonitor(result);
+  return result;
 }

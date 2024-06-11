@@ -1,6 +1,7 @@
 import { ReactiveEffect } from './effect'
 import { printWarn, isFunction } from "../utils";
 import { IS_READONLY, IS_REF } from './proxy';
+import { collectMonitor } from './scope';
 
 type Getter<T> = () => T
 type Setter<T> = (val: T) => void
@@ -47,11 +48,13 @@ type ComputedOption<T> = Getter<T> | {
  * @param option 
  * @returns 
  */
-export function computed<T>(option: ComputedOption<T>): ComputedRefImpl<T> {
+export function computed<T>(option: ComputedOption<T>) {
+  let result: ComputedRefImpl<T>;
   if (isFunction(option)) {
-    return new ComputedRefImpl(option as Getter<T>, null, true);
+    result = new ComputedRefImpl(option as Getter<T>, null, true);
+  } else {
+    result = new ComputedRefImpl(option.get, option.set, true);
   }
-
-  // @ts-ignore
-  return new ComputedRefImpl(option.get, option.set, true);
+  collectMonitor(result);
+  return result;
 }

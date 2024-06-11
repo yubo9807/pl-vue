@@ -5,3 +5,4 @@ export { readonly, shallowReadonly } from "./readonly";
 export { computed } from "./computed";
 export { watch, watchEffect } from "./watch";
 export { binding, recycleDepend, triggerObject, deepTriggerObject } from './depend';
+export { effectScope } from './scope';
