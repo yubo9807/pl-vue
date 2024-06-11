@@ -717,6 +717,59 @@ class ReactiveEffect {
     }
 }
 
+let scopeId;
+const monitorMap = new Map();
+/**
+ * 记录当前侦听器
+ * @param monitor
+ */
+function collectMonitor(monitor) {
+    if (!scopeId)
+        return;
+    const monitorList = monitorMap.get(scopeId) || [];
+    monitorList.push(monitor);
+    monitorMap.set(scopeId, monitorList);
+}
+class EffectScope {
+    #id = Symbol();
+    /**
+     * 捕获其中所创建的响应式副作用(计算属性和侦听器)
+     * @param fn
+     * @returns
+     */
+    run(fn) {
+        scopeId = this.#id;
+        const result = fn();
+        scopeId = null;
+        return result;
+    }
+    /**
+     * 处理掉当前作用域内的所有 effect
+     * @returns
+     */
+    stop() {
+        const monitorList = monitorMap.get(this.#id);
+        if (!monitorList)
+            return;
+        customForEach(monitorList, val => {
+            if (val instanceof ComputedRefImpl) {
+                val.effect.stop();
+            }
+            else {
+                val();
+            }
+        });
+        monitorMap.delete(this.#id);
+    }
+}
+/**
+ * 创建一个 effect 作用域
+ * @returns
+ */
+function effectScope() {
+    return new EffectScope();
+}
+
 class ComputedRefImpl {
     [IS_READONLY] = true;
     [IS_REF] = true;
@@ -748,11 +801,15 @@ class ComputedRefImpl {
  * @returns
  */
 function computed(option) {
+    let result;
     if (isFunction(option)) {
-        return new ComputedRefImpl(option, null, true);
+        result = new ComputedRefImpl(option, null, true);
     }
-    // @ts-ignore
-    return new ComputedRefImpl(option.get, option.set, true);
+    else {
+        result = new ComputedRefImpl(option.get, option.set, true);
+    }
+    collectMonitor(result);
+    return result;
 }
 
 /**
@@ -792,11 +849,13 @@ function watch(source, cb, option = {}) {
             backup = value;
         }
     });
-    return () => {
+    const result = () => {
         cleanup = true;
         // 释放内存
         backup = source = cb = option = null;
     };
+    collectMonitor(result);
+    return result;
 }
 /**
  * 立即运行一个函数，同时响应式地追踪其依赖，并在依赖更改时重新执行
@@ -831,11 +890,13 @@ function watchEffect(cb) {
             isFirst = false;
         }
     });
-    return () => {
+    const result = () => {
         cleanup = true;
         // 释放内存
         cb = monitorKeys = null;
     };
+    collectMonitor(result);
+    return result;
 }
 
-export { RefImpl, bestRef, binding, computed, createSignal, customRef, deepTriggerObject, isProxy, isReactive, isRef, markRaw, reactive, readonly, recycleDepend, ref, shallowReactive, shallowReadonly, shallowRef, toRaw, toRef, toRefs, triggerObject, triggerRef, unref, watch, watchEffect };
+export { RefImpl, bestRef, binding, computed, createSignal, customRef, deepTriggerObject, effectScope, isProxy, isReactive, isRef, markRaw, reactive, readonly, recycleDepend, ref, shallowReactive, shallowReadonly, shallowRef, toRaw, toRef, toRefs, triggerObject, triggerRef, unref, watch, watchEffect };
