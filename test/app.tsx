@@ -1,29 +1,49 @@
-import { Fragment, binding, h, onMounted, reactive, ref, watch, watchEffect } from "~/core";
-import { isStrictObject, isType } from "~/core/utils";
+import { RefImpl, h, ref, createContext, onUnmounted } from "~/core";
+
+const context = createContext<{
+  a:      number
+  b?:     number
+  count?: RefImpl<number>,
+  add?:   Function
+}>({ a: 123 });
 
 function App() {
-  const count = reactive({
-    value: 0,
-    o: {
-      a: 1
-    }
-  });
+  
 
-
+  const isPage = ref(true);
   return <div>
-    {/* 响应式数据一律以函数形式返回 */}
-    <h1>{() => count.value}</h1>
-    <button onclick={() => count.value ++}>click</button>
+    {() => isPage.value && <Page />}
+    <button onclick={() => isPage.value = !isPage.value}>{() => isPage.value ? '卸载Page' : '加载Page'}</button>
   </div>
 }
 
-function delay(ms = 2000) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(1);
-      console.log(111111)
-    }, ms)
-  });
+function Page() {
+  const count = ref(0);
+  function add() {
+    count.value++;
+  }
+  context.provide({ add })
+
+  return <div>
+    <h2>{() => count.value}</h2>
+    <button onclick={add}>add</button>
+    <Comp />
+  </div>
+}
+
+
+function Comp() {
+  const contextData = context.inject();
+  console.log(contextData);
+
+  onUnmounted(() => {
+    const contextData = context.inject();
+    console.log(contextData)
+  })
+
+  return <div>comp
+    <button onclick={() => contextData.add()}>++</button>
+  </div>
 }
 
 export default App;

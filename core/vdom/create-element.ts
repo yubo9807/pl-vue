@@ -9,6 +9,7 @@ import { triggerBeforeUnmount } from "./hooks/before-unmount";
 import { triggerUnmounted } from "./hooks/unmounted";
 import { Static, StaticOption } from "./create-html";
 import type { Attrs, Children, Tree, Component, BaseComponent } from "./type";
+import { contextMap } from './context';
 
 export interface StructureOption extends StaticOption {
   binding: Function
@@ -302,13 +303,9 @@ export class Structure extends Static {
           }
           const originTree = backupNodes[index].tree;
 
-          isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag as Component);  // 组件卸载之前
+          this.#beforeUnload(originTree.tag as Component);  // 组件卸载之前
           backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
-          if (isComponent(originTree.tag)) {                                                 // 组件卸载之后
-            const comp = originTree.tag as Component;
-            triggerUnmounted(comp);
-            compTreeMap.delete(comp);
-          }
+          this.#afterUnload(originTree.tag as Component);   // 组件卸载之后
 
           backupNodes[index].tree = val;
           backupNodes[index].node = node;
@@ -340,21 +337,36 @@ export class Structure extends Static {
         for (let i = len(value); i < len(backupNodes); i ++) {
           const originTree = backupNodes[i].tree;
 
-          isComponent(originTree.tag) && triggerBeforeUnmount(originTree.tag as Component);  // 组件卸载之前
+          this.#beforeUnload(originTree.tag as Component);  // 组件卸载之前
           // @ts-ignore 节点片段无法删除
           backupNodes[i].node.remove();
-          if (isComponent(originTree.tag)) {                                                 // 组件卸载之后
-            const comp = originTree.tag as Component;
-            triggerUnmounted(comp);
-            compTreeMap.delete(comp);
-          }
-
+          this.#afterUnload(originTree.tag as Component);   // 组件卸载之后
         }
         backupNodes.splice(len(value), len(backupNodes) - len(value));
       }
 
       lockFirstRun = false;
     })
+  }
+
+  /**
+   * 卸载之前
+   */
+  #beforeUnload(comp: Component) {
+    if (!isComponent(comp)) return;
+    triggerBeforeUnmount(comp);
+  }
+
+  /**
+   * 卸载之后
+   * @param comp 
+   * @returns 
+   */
+  #afterUnload(comp: Component) {
+    if (!isComponent(comp)) return;
+    contextMap.delete(comp);
+    triggerUnmounted(comp);
+    compTreeMap.delete(comp);
   }
 
 }

@@ -3,6 +3,7 @@ export { Structure } from './create-element';
 export { Static } from './create-html';
 export { createApp } from './app';
 export { defineExpose } from './instance';
+export { createContext } from './context';
 export { onBeforeMount } from './hooks/before-mount';
 export { onMounted } from './hooks/mounted';
 export { onBeforeUnmount } from './hooks/before-unmount';
