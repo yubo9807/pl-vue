@@ -33,11 +33,12 @@ function Page() {
 
 
 function Comp() {
+  context.provide({ b: 990 });
   const contextData = context.inject();
   console.log(contextData);
 
+
   onUnmounted(() => {
-    const contextData = context.inject();
     console.log(contextData)
   })
 

@@ -1,3 +1,4 @@
+import { nextTick } from "../utils";
 import { Attrs, Component } from "./type";
 
 
@@ -10,6 +11,17 @@ export let currentComp: Component = null;
  */
 export function recordCurrentComp(comp: Component) {
   currentComp = comp;
+  nextTick(() => {
+    currentComp = null;
+  })
+}
+
+/**
+ * 获取当前组件
+ * @returns 
+ */
+export function getCurrentComp() {
+  return currentComp;
 }
 
 
