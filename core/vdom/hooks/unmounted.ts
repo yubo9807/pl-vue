@@ -31,6 +31,9 @@ export function triggerUnmounted(comp: Component) {
   keys.unshift(comp);
   const funcs = [];
   customForEach(keys, key => {
+    if (key.prototype) {
+      key.prototype.$effect?.stop();
+    }
     const arr = map.get(key) || [];
     funcs.push(...arr);
     map.delete(key);

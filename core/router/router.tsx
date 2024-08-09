@@ -79,17 +79,20 @@ function BrowserRouter(props: BrowserRouterProps) {
     next();
   }
 
-  const unwatch = watch(() => currentRoute.path, value => {
-    // 父级组件卸载的时候，需要把嵌套路由的监听器全部取消掉（这里存在性能问题）
-    if (backupRoute) {
-      const arr1 = backupRoute.path.split('/'), arr2 = value.split('/');
-      if (arr1[1] !== arr2[1]) {
-        customForEach(unwatchs, unwatch => unwatch());
-      }
-    }
+  // const unwatch = watch(() => currentRoute.path, value => {
+  //   // 父级组件卸载的时候，需要把嵌套路由的监听器全部取消掉（这里存在性能问题）
+  //   if (backupRoute) {
+  //     const arr1 = backupRoute.path.split('/'), arr2 = value.split('/');
+  //     if (arr1[1] !== arr2[1]) {
+  //       customForEach(unwatchs, unwatch => unwatch());
+  //     }
+  //   }
+  //   routeChange(value);
+  // }, { immediate: true })
+  // props.prefix && unwatchs.push(unwatch);
+  watch(() => currentRoute.path, value => {
     routeChange(value);
   }, { immediate: true })
-  props.prefix && unwatchs.push(unwatch);
 
   return <>{() => Comp.value && <Comp.value {...attrs} />}</>;
 }

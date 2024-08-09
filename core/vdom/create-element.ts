@@ -10,6 +10,7 @@ import { triggerUnmounted } from "./hooks/unmounted";
 import { Static, StaticOption } from "./create-html";
 import type { Attrs, Children, Tree, Component, BaseComponent } from "./type";
 import { contextMap } from './context';
+import { effectScope } from '../reactivity';
 
 export interface StructureOption extends StaticOption {
   binding: Function
@@ -84,7 +85,12 @@ export class Structure extends Static {
 
     // 组件
     const props = objectAssign(attrs, { children });
-    const tree = (tag as BaseComponent)(props);
+    // const tree = (tag as BaseComponent)(props);
+    const effect = effectScope();
+    const tree = effect.run(() => (tag as BaseComponent)(props));
+    if (tag.prototype) {
+      tag.prototype.$effect = effect;
+    }
     collectExportsData(tag, attrs);
     if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
       return createTextNode(tree);

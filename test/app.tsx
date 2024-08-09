@@ -1,49 +1,56 @@
-import { RefImpl, h, ref, createContext, onUnmounted } from "~/core";
-
-const context = createContext<{
-  a:      number
-  b?:     number
-  count?: RefImpl<number>,
-  add?:   Function
-}>({ a: 123 });
+import { h, onUnmounted } from "~/core";
+import { Route, Router, Link } from "~/core/router";
 
 function App() {
-  
-
-  const isPage = ref(true);
   return <div>
-    {() => isPage.value && <Page />}
-    <button onclick={() => isPage.value = !isPage.value}>{() => isPage.value ? '卸载Page' : '加载Page'}</button>
+    <nav>
+      <Link to='/'>home</Link>
+      <Link to='/about'>about</Link>
+    </nav>
+    <Router>
+      <Route path="/" component={Home} />
+      <Route path="/about" component={About} exact={false} />
+    </Router>
   </div>
 }
 
-function Page() {
-  const count = ref(0);
-  function add() {
-    count.value++;
-  }
-  context.provide({ add })
-
+function Home() {
   return <div>
-    <h2>{() => count.value}</h2>
-    <button onclick={add}>add</button>
-    <Comp />
+    home
   </div>
 }
-
-
-function Comp() {
-  context.provide({ b: 990 });
-  const contextData = context.inject();
-  console.log(contextData);
-
-
+function About() {
+  console.log('about')
   onUnmounted(() => {
-    console.log(contextData)
+    console.log('about unmount')
   })
+  return <div>
+    about
+    <nav>
+      <Link to='/about/aaa'>aaa</Link>
+      <Link to='/about/aab'>aab</Link>
+      <Link to='/about/bbb'>bbb</Link>
+    </nav>
+    <Router prefix="/about">
+      <Route path="/aaa" component={Aaa} />
+      <Route path="/aab" component={Aaa} />
+      <Route path="/bbb" component={Bbb} />
+    </Router>
+  </div>
+}
 
-  return <div>comp
-    <button onclick={() => contextData.add()}>++</button>
+function Aaa() {
+  console.log('aaa')
+  onUnmounted(() => {
+    console.log('aaa unmount')
+  })
+  return <div>
+    aaa
+  </div>
+}
+function Bbb() {
+  return <div>
+    bbb
   </div>
 }
 
