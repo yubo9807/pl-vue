@@ -1,4 +1,4 @@
-import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals, isStrictObject, binarySearch, customFindIndex } from '../utils';
+import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals, isStrictObject, binarySearch, customFindIndex, CustomWeakMap } from '../utils';
 import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
 import { compTreeMap, filterElement } from './component-tree';
@@ -295,7 +295,8 @@ export class Structure extends Static {
 
         const index = binarySearch(backupNodes, i, v => v.key);
         if (index >= 0) {  // 节点已经存在
-          if (isEquals(val, backupNodes[index].tree)) {  // 任何数据都没有变化
+          const backup = backupNodes[index];
+          if (isEquals(val, backup.tree)) {  // 任何数据都没有变化
             i++;
             continue;
           }
@@ -307,14 +308,14 @@ export class Structure extends Static {
             i++;
             continue;
           }
-          const originTree = backupNodes[index].tree;
 
-          this.#beforeUnload(originTree.tag as Component);  // 组件卸载之前
-          backupNodes[index].node.parentElement.replaceChild(node, backupNodes[index].node);
-          this.#afterUnload(originTree.tag as Component);   // 组件卸载之后
+          const backupTree = backup.tree, backupNode = backup.node;
+          this.#beforeUnload(backupTree.tag as Component);  // 组件卸载之前
+          backupNode.parentElement.replaceChild(node, backupNode);
+          this.#afterUnload(backupTree.tag as Component);   // 组件卸载之后
 
-          backupNodes[index].tree = val;
-          backupNodes[index].node = node;
+          backup.tree = val;
+          backup.node = node;
         } else {  // 节点不存在，追加节点
           const node = this.#createNode(val);
           if (!node) {  // 创建节点失败，有可能原节点被删除
@@ -341,12 +342,13 @@ export class Structure extends Static {
       // 检查有没有要删除的节点
       if (len(backupNodes) > len(value)) {
         for (let i = len(value); i < len(backupNodes); i ++) {
-          const originTree = backupNodes[i].tree;
+          const backup = backupNodes[i];
+          const backupTree = backup.tree;
 
-          this.#beforeUnload(originTree.tag as Component);  // 组件卸载之前
+          this.#beforeUnload(backupTree.tag as Component);  // 组件卸载之前
           // @ts-ignore 节点片段无法删除
-          backupNodes[i].node.remove();
-          this.#afterUnload(originTree.tag as Component);   // 组件卸载之后
+          backup.node.remove();
+          this.#afterUnload(backupTree.tag as Component);   // 组件卸载之后
         }
         backupNodes.splice(len(value), len(backupNodes) - len(value));
       }
