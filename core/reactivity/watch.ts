@@ -1,20 +1,22 @@
 import { binding, currentKeys } from "./depend";
-import { isEquals, deepClone, isNormalObject, nextTick, Key } from "../utils";
+import { isEquals, deepClone, isNormalObject, nextTick, isFunction } from "../utils";
 import { collectMonitor } from "./scope";
+import { isRef, RefImpl } from "./ref";
 
-type Option = {
+type WatchOption = {
   immediate?: boolean
   deep?:      boolean
 }
-
+type WatchCallback<T> = (newValue: T, oldValue: T) => void
+type WatchReturn = () => void
 /**
- * 侦听器
+ * 侦听器实现
  * @param source  响应式数据
  * @param cb      回调函数
  * @param option  配置参数
  * @returns unwatch() 取消监听
  */
-export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void, option: Option = {}): Function {
+function watchBasic<T>(source: () => T, cb: WatchCallback<T>, option: WatchOption = {}): WatchReturn {
   let cleanup = false;
   if (cleanup) return;
 
@@ -60,15 +62,34 @@ export function watch<T>(source: () => T, cb: (newValue: T, oldValue: T) => void
   return result;
 }
 
+export function watch<T>(source: () => T, cb: WatchCallback<T>, option: WatchOption): WatchReturn
+export function watch<T>(source: RefImpl<T>, cb: WatchCallback<T>, option: WatchOption): WatchReturn
+export function watch<T extends object>(source: T, cb: WatchCallback<T>, option: WatchOption): WatchReturn
+/**
+ * 侦听器
+ * @param source  响应式数据
+ * @param cb      回调函数
+ * @param option  配置参数
+ * @returns unwatch() 取消监听
+ */
+export function watch<T>(source, cb: WatchCallback<T>, option: WatchOption): WatchReturn {
+  const newSource = isFunction(source) ? source
+    : isRef(source) ? () => source.value
+    : () => source;
+  return watchBasic(newSource, cb, option);
+}
+
+
+
 type OnCleanup = (cleanupFn: () => void) => void
-type Callback  = (onCleanup: OnCleanup)  => void
+type WatchEffectCallback  = (onCleanup: OnCleanup)  => void
 
 /**
  * 立即运行一个函数，同时响应式地追踪其依赖，并在依赖更改时重新执行
  * @param cb 
  * @returns stop() 取消监听
  */
-export function watchEffect(cb: Callback) {
+export function watchEffect(cb: WatchEffectCallback) {
   let cleanup = false;
   let isFirst = true;
   let count = 0;
