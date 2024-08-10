@@ -2,6 +2,7 @@ import { CustomWeakMap, customForEach } from "../../utils";
 import { getSubComponent } from "../../vdom/component-tree";
 import { currentComp } from "../../vdom/instance";
 import { Component } from "../../vdom/type";
+import { keepAliveMap } from "../keep-alive";
 import { hookLock } from "./utils";
 
 const map = new CustomWeakMap();
@@ -31,6 +32,7 @@ export function triggerUnmounted(comp: Component) {
   keys.unshift(comp);
   const funcs = [];
   customForEach(keys, key => {
+    keepAliveMap.delete(key);
     if (key.prototype) {
       key.prototype.$effect?.stop();
     }

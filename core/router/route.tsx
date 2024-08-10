@@ -10,6 +10,7 @@ type RouteProps = PropsType<{
   beforeEnter?: BeforeEnter
   meta?:        AnyObj
   redirect?:    string
+  keepAlive?:   boolean
 } & {
   component: BaseComponent | (() => Promise<BaseComponent>)
 } | {

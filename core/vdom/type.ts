@@ -12,8 +12,9 @@ export type Tree = {
 }
 
 export type PropsType<T extends AnyObj> = T & {
-  ref?:      RefImpl<unknown>
-  children?: T['children'] | Children
+  ref?:       RefImpl<unknown>
+  children?:  T['children'] | Children
+  keepAlive?: boolean
 }
 
 export type BaseComponent = (props?: PropsType<{ [k: string]: any }>) => any

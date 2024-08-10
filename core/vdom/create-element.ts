@@ -11,6 +11,7 @@ import { Static, StaticOption } from "./create-html";
 import type { Attrs, Children, Tree, Component, BaseComponent } from "./type";
 import { contextMap } from './context';
 import { effectScope } from '../reactivity';
+import { keepAliveMap } from './keep-alive';
 
 export interface StructureOption extends StaticOption {
   binding: Function
@@ -65,7 +66,6 @@ export class Structure extends Static {
     }
   }
 
-
   /**
    * 组件生成节点
    * @param tag 
@@ -74,6 +74,12 @@ export class Structure extends Static {
    * @returns 
    */
   createComponent(tag: Component, attrs: Attrs, children: Children) {
+    if (attrs.keepAlive) {
+      if (keepAliveMap.has(tag)) return keepAliveMap.get(tag);
+    } else {
+      keepAliveMap.delete(tag);
+    }
+
     recordCurrentComp(tag);
 
     // 类组件
@@ -96,7 +102,9 @@ export class Structure extends Static {
       return createTextNode(tree);
     }
     compTreeMap.set(tag, filterElement([tree, ...tree.children]));  // 收集组件
-    return this.createElement(tree);
+    const node = this.createElement(tree);
+    keepAliveMap.set(tag, node as HTMLElement);
+    return node;
   }
 
 
@@ -191,7 +199,6 @@ export class Structure extends Static {
 
     printWarn(`render: 不支持 ${val} 值渲染`);
   }
-
 
   /**
    * 创建一个节点
@@ -310,9 +317,21 @@ export class Structure extends Static {
           }
 
           const backupTree = backup.tree, backupNode = backup.node;
-          this.#beforeUnload(backupTree.tag as Component);  // 组件卸载之前
-          backupNode.parentElement.replaceChild(node, backupNode);
-          this.#afterUnload(backupTree.tag as Component);   // 组件卸载之后
+          const backupComp = backupTree.tag as Component;
+
+          const replaceNode = () => backupNode.parentElement.replaceChild(node, backupNode);
+
+          if (isComponent(backupComp)) {
+            if (backupTree.attrs.keepAlive) {
+              replaceNode();
+            } else {
+              this.#beforeUnload(backupComp);  // 组件卸载之前
+              replaceNode();
+              this.#afterUnload(backupComp);   // 组件卸载之后
+            }
+          } else {
+            replaceNode();
+          }
 
           backup.tree = val;
           backup.node = node;
@@ -344,11 +363,20 @@ export class Structure extends Static {
         for (let i = len(value); i < len(backupNodes); i ++) {
           const backup = backupNodes[i];
           const backupTree = backup.tree;
+          const backupComp = backupTree.tag as Component;
 
-          this.#beforeUnload(backupTree.tag as Component);  // 组件卸载之前
-          // @ts-ignore 节点片段无法删除
-          backup.node.remove();
-          this.#afterUnload(backupTree.tag as Component);   // 组件卸载之后
+          const nodeRemove = () => (backup.node as HTMLElement).remove();
+          if (isComponent(backupComp)) {
+            if (backupTree.attrs.keepAlive) {
+              nodeRemove();
+            } else {
+              this.#beforeUnload(backupComp);  // 组件卸载之前
+              nodeRemove();
+              this.#afterUnload(backupComp);   // 组件卸载之后
+            }
+          } else {
+            nodeRemove();
+          }
         }
         backupNodes.splice(len(value), len(backupNodes) - len(value));
       }
@@ -361,7 +389,6 @@ export class Structure extends Static {
    * 卸载之前
    */
   #beforeUnload(comp: Component) {
-    if (!isComponent(comp)) return;
     triggerBeforeUnmount(comp);
   }
 
@@ -371,7 +398,6 @@ export class Structure extends Static {
    * @returns 
    */
   #afterUnload(comp: Component) {
-    if (!isComponent(comp)) return;
     contextMap.delete(comp);
     triggerUnmounted(comp);
     compTreeMap.delete(comp);
