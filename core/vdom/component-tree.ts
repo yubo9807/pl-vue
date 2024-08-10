@@ -1,4 +1,4 @@
-import { deepClone, objectAssign, isObject, customForEach, CustomWeakMap } from '../utils';
+import { deepClone, objectAssign, isObject, customForEach, CustomWeakMap, isEquals } from '../utils';
 import { Attrs, Children, Component } from './type';
 import { isAssignmentValueToNode, isComponent } from './utils';
 
@@ -40,10 +40,15 @@ export function filterElement(children: Children, collect: CompTree[] = []) {
  */
 export function getSubComponent(comp: Component, collect: CompTree[] = []) {
   const arr = compTreeMap.get(comp) || [];
-  collect.push(...arr);
+  function append(tree: CompTree) {
+    const some = collect.some(val => isEquals(val, tree));
+    if (some) return;
+    collect.push(tree);
+  }
+  customForEach(arr, append);
   customForEach(arr, val => {
     const arr = getSubComponent(val.comp);
-    collect.push(...arr);
+    customForEach(arr, append);
   })
   return collect;
 }
