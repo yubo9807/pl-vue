@@ -1,4 +1,5 @@
-import { deepClone, objectAssign, isObject, customForEach, CustomWeakMap, isEquals } from '../utils';
+import { deepClone, objectAssign, isObject, customForEach, CustomWeakMap, isEquals, isFunction } from '../utils';
+import { currentComp } from './instance';
 import { Attrs, Children, Component } from './type';
 import { isAssignmentValueToNode, isComponent } from './utils';
 
@@ -7,7 +8,8 @@ type CompTree = {
   props:     Attrs
   children?: Children
 }
-export const compTreeMap: WeakMap<Component, CompTree[]> = new CustomWeakMap();
+const compTreeMap: WeakMap<Component, CompTree[]> = new CustomWeakMap();
+const runFuncMap: WeakMap<Function, Component> = new CustomWeakMap();
 
 /**
  * 过滤掉元素，对组件进行收集
@@ -15,8 +17,12 @@ export const compTreeMap: WeakMap<Component, CompTree[]> = new CustomWeakMap();
  * @param collect  递归参数，无需传递
  * @returns 
  */
-export function filterElement(children: Children, collect: CompTree[] = []) {
+function filterElement(children: Children, collect: CompTree[] = []) {
   customForEach(children, tree => {
+    if (isFunction(tree)) {
+      runFuncMap.set(tree, currentComp);
+      return;
+    }
     if (!isObject(tree)) return;
     if (isComponent(tree.tag)) {
       collect.push({ comp: tree.tag, props: objectAssign(tree.attrs, { children }) });
@@ -51,6 +57,42 @@ export function getSubComponent(comp: Component, collect: CompTree[] = []) {
     customForEach(arr, append);
   })
   return collect;
+}
+
+/**
+ * 收集组件数数据
+ * @param comp 
+ * @param tree 
+ * @returns 
+ */
+export function collectComponentTree(comp: Component, tree: CompTree) {
+  if (!isObject(tree)) return;
+  compTreeMap.set(comp, filterElement(tree.children));
+}
+
+/**
+ * 追加组件数据
+ * @param func 响应式函数，未立即渲染的
+ * @param children 
+ */
+export function appendComponentTree(func: Function, children: Children) {
+  const comp = runFuncMap.get(func);
+  if (!comp) return;
+  const collect = getSubComponent(comp);
+  collect.push(...filterElement(children));
+  compTreeMap.set(comp, collect);
+}
+
+/**
+ * 清除组件树数据
+ * @param comp 
+ */
+export function removeComponentTree(comp: Component) {
+  const arr = compTreeMap.get(comp) || [];
+  customForEach(arr, val => {
+    compTreeMap.delete(val.comp);
+  })
+  compTreeMap.delete(comp);
 }
 
 /**

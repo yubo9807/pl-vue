@@ -1,7 +1,7 @@
 import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals, isStrictObject, binarySearch, customFindIndex, CustomWeakMap } from '../utils';
 import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
-import { compTreeMap, filterElement } from './component-tree';
+import { appendComponentTree, collectComponentTree, removeComponentTree } from './component-tree';
 import { collectExportsData, recordCurrentComp } from "./instance";
 import { triggerBeforeMount } from "./hooks/before-mount";
 import { triggerMounted } from "./hooks/mounted";
@@ -101,7 +101,7 @@ export class Structure extends Static {
     if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
       return createTextNode(tree);
     }
-    compTreeMap.set(tag, filterElement([tree, ...tree.children]));  // 收集组件
+    collectComponentTree(tag, tree);  // 收集组件
     const node = this.createElement(tree);
     keepAliveMap.set(tag, node as HTMLElement);
     return node;
@@ -295,6 +295,7 @@ export class Structure extends Static {
 
       if (!isArray(value)) value = [value];
       value = value.filter(val => !noRenderValue(val));
+      appendComponentTree(func, value);
 
       let i = 0;
       while (i < len(value)) {
@@ -400,7 +401,7 @@ export class Structure extends Static {
   #afterUnload(comp: Component) {
     contextMap.delete(comp);
     triggerUnmounted(comp);
-    compTreeMap.delete(comp);
+    removeComponentTree(comp);
   }
 
 }
