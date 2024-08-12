@@ -813,13 +813,13 @@ function computed(option) {
 }
 
 /**
- * 侦听器
+ * 侦听器实现
  * @param source  响应式数据
  * @param cb      回调函数
  * @param option  配置参数
  * @returns unwatch() 取消监听
  */
-function watch(source, cb, option = {}) {
+function watchBasic(source, cb, option = {}) {
     let cleanup = false;
     if (cleanup)
         return;
@@ -856,6 +856,19 @@ function watch(source, cb, option = {}) {
     };
     collectMonitor(result);
     return result;
+}
+/**
+ * 侦听器
+ * @param source  响应式数据
+ * @param cb      回调函数
+ * @param option  配置参数
+ * @returns unwatch() 取消监听
+ */
+function watch(source, cb, option) {
+    const newSource = isFunction(source) ? source
+        : isRef(source) ? () => source.value
+            : () => source;
+    return watchBasic(newSource, cb, option);
 }
 /**
  * 立即运行一个函数，同时响应式地追踪其依赖，并在依赖更改时重新执行
