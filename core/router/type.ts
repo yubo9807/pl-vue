@@ -1,4 +1,5 @@
 import { AnyObj } from "../utils"
+import { KeepAliveValue } from "../vdom"
 
 export type BaseOption = {
   path?:  string
@@ -16,8 +17,9 @@ export type RouteOption = {
 }
 
 export type GetInitialPropsOption = {
-  path?: string
-  meta?: AnyObj
+  path?:      string
+  meta?:      AnyObj
+  keepAlive?: KeepAliveValue
 }
 
 export interface PagePropsType extends GetInitialPropsOption {

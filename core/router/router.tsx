@@ -53,6 +53,7 @@ function BrowserRouter(props: BrowserRouterProps) {
       }
       Comp.value = query.component;
       attrs.meta = query.meta;
+      attrs.keepAlive = query.keepAlive;
       currentRoute.meta = query.meta;
     }
 
@@ -160,6 +161,7 @@ function StaticRouter(props: StaticRouterProps) {
   const attrs: PagePropsType = {
     path: query.path,
     meta: query.meta,
+    keepAlive: query.keepAlive,
   };
 
   if (repalceComp) {

@@ -39,7 +39,7 @@ export function queryRoute(routes: RouteItem[], pathname: string) {
     return formatUrl(path) === pathname;
   });
   if (!query) return;
-  const { path, component, beforeEnter, meta, redirect } = query.attrs;
+  const { path, component, beforeEnter, meta, redirect, keepAlive } = query.attrs;
 
   // 重定向
   if (redirect) return queryRoute(routes, redirect);
@@ -49,5 +49,6 @@ export function queryRoute(routes: RouteItem[], pathname: string) {
     component,
     meta,
     beforeEnter,
+    keepAlive,
   };
 }
