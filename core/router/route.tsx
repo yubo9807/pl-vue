@@ -1,5 +1,5 @@
 import { AnyObj, customFind } from "../utils"
-import { BaseComponent, PropsType, Tree } from "../vdom"
+import { BaseComponent, KeepAliveValue, PropsType, Tree } from "../vdom"
 import { config } from "./create-router"
 import { BeforeEnter } from "./type"
 import { formatUrl } from "./utils"
@@ -10,7 +10,7 @@ type RouteProps = PropsType<{
   beforeEnter?: BeforeEnter
   meta?:        AnyObj
   redirect?:    string
-  keepAlive?:   boolean
+  keepAlive?:   KeepAliveValue
 } & {
   component: BaseComponent | (() => Promise<BaseComponent>)
 } | {

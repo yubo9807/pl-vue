@@ -11,10 +11,11 @@ export type Tree = {
   children: Children
 }
 
+export type KeepAliveValue = boolean | RefImpl<boolean>
 export type PropsType<T extends AnyObj> = T & {
   ref?:       RefImpl<unknown>
   children?:  T['children'] | Children
-  keepAlive?: boolean
+  keepAlive?: KeepAliveValue
 }
 
 export type BaseComponent = (props?: PropsType<{ [k: string]: any }>) => any

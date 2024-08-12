@@ -10,7 +10,7 @@ import { triggerUnmounted } from "./hooks/unmounted";
 import { Static, StaticOption } from "./create-html";
 import type { Attrs, Children, Tree, Component, BaseComponent } from "./type";
 import { contextMap } from './context';
-import { effectScope } from '../reactivity';
+import { effectScope, isRef } from '../reactivity';
 import { keepAliveMap } from './keep-alive';
 
 export interface StructureOption extends StaticOption {
@@ -67,6 +67,16 @@ export class Structure extends Static {
   }
 
   /**
+   * 组件缓存属性判断
+   * @param attrs 
+   * @returns 
+   */
+  #hasKeepAlive(attrs: Attrs) {
+    const { keepAlive } = attrs;
+    return isRef(keepAlive) ? keepAlive.value : keepAlive;
+  }
+
+  /**
    * 组件生成节点
    * @param tag 
    * @param attrs 
@@ -74,7 +84,7 @@ export class Structure extends Static {
    * @returns 
    */
   createComponent(tag: Component, attrs: Attrs, children: Children) {
-    if (attrs.keepAlive) {
+    if (this.#hasKeepAlive(attrs)) {
       if (keepAliveMap.has(tag)) return keepAliveMap.get(tag);
     } else {
       keepAliveMap.delete(tag);
@@ -323,7 +333,7 @@ export class Structure extends Static {
           const replaceNode = () => backupNode.parentElement.replaceChild(node, backupNode);
 
           if (isComponent(backupComp)) {
-            if (backupTree.attrs.keepAlive) {
+            if (this.#hasKeepAlive(backupTree.attrs)) {
               replaceNode();
             } else {
               this.#beforeUnload(backupComp);  // 组件卸载之前
@@ -368,7 +378,7 @@ export class Structure extends Static {
 
           const nodeRemove = () => (backup.node as HTMLElement).remove();
           if (isComponent(backupComp)) {
-            if (backupTree.attrs.keepAlive) {
+            if (this.#hasKeepAlive(backupTree.attrs)) {
               nodeRemove();
             } else {
               this.#beforeUnload(backupComp);  // 组件卸载之前
