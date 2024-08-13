@@ -9,21 +9,24 @@ import { triggerBeforeUnmount } from "./hooks/before-unmount";
 import { triggerUnmounted } from "./hooks/unmounted";
 import { Static, StaticOption } from "./create-html";
 import type { Attrs, Children, Tree, Component, BaseComponent } from "./type";
+import type { effectScope } from '../reactivity';
 import { contextMap } from './context';
-import { effectScope, isRef } from '../reactivity';
 import { keepAliveMap } from './keep-alive';
 
 export interface StructureOption extends StaticOption {
-  binding: Function
+  binding:     Function
+  effectScope: typeof effectScope
 }
 
 export class Structure extends Static {
 
-  #binding: Function  // 响应式函数
+  #binding:     Function  // 响应式函数
+  #effectScope: typeof effectScope
 
   constructor(option: StructureOption) {
     super();
-    this.#binding = option.binding
+    this.#binding     = option.binding;
+    this.#effectScope = option.effectScope;
   }
 
   /**
@@ -73,7 +76,7 @@ export class Structure extends Static {
    */
   #hasKeepAlive(attrs: Attrs) {
     const { keepAlive } = attrs;
-    return isRef(keepAlive) ? keepAlive.value : keepAlive;
+    return isStrictObject(keepAlive) ? keepAlive.enable : keepAlive;
   }
 
   /**
@@ -102,7 +105,7 @@ export class Structure extends Static {
     // 组件
     const props = objectAssign(attrs, { children });
     // const tree = (tag as BaseComponent)(props);
-    const effect = effectScope();
+    const effect = this.#effectScope();
     const tree = effect.run(() => (tag as BaseComponent)(props));
     if (tag.prototype) {
       tag.prototype.$effect = effect;

@@ -2,7 +2,7 @@ import { BaseComponent, ClassComponent, Component, GetClassCompPropsType, GetCom
 import { h } from "./h";
 import { Structure } from "./create-element";
 import { Static } from "./create-html";
-import { binding } from '../reactivity';
+import { binding, effectScope } from '../reactivity';
 
 /**
  * 渲染为 DOM 节点
@@ -10,7 +10,7 @@ import { binding } from '../reactivity';
  * @returns 
  */
 export function render(tree: Tree) {
-  const app = new Structure({ binding });
+  const app = new Structure({ binding, effectScope });
   return app.render(tree);
 }
 
