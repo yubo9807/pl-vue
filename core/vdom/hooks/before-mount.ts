@@ -1,28 +1,18 @@
-import { customForEach } from "../../utils";
-import { hookLock } from "./utils";
+import { Component } from "../type";
+import { Mount } from "./common";
 
-const collect = [];
-
-let isBeforeMount = false;
-
+const mount = new Mount();
 /**
  * 注册一个 onBeforeMount 钩子
  * @param fn 
  */
 export function onBeforeMount(fn: Function) {
-  if (hookLock) return;
-  if (isBeforeMount) {
-    fn();
-    return;
-  }
-  collect.push(fn);
+  mount.append(fn);
 }
 
 /**
  * 执行所有 onBeforeMount 钩子
  */
-export function triggerBeforeMount() {
-  customForEach(collect, fn => fn());
-  collect.length = 0;
-  isBeforeMount = true;
+export function triggerBeforeMount(comp: Component) {
+  mount.run(comp);
 }

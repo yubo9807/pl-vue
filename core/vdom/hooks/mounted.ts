@@ -1,28 +1,21 @@
-import { customForEach, nextTick } from "../../utils";
-import { hookLock } from "./utils";
+import { nextTick } from "~/core/utils";
+import { Component } from "../type";
+import { Mount } from "./common";
 
-const collect = [];
-
-let isMounted = false;
-
+const mount = new Mount();
 /**
  * 注册一个 onMounted 钩子
  * @param fn 
  */
 export function onMounted(fn: Function) {
-  if (hookLock) return;
-  if (isMounted) {
-    nextTick(fn);
-    return;
-  }
-  collect.push(fn);
+  mount.append(fn);
 }
 
 /**
  * 执行所有 onMounted 钩子
  */
-export function triggerMounted() {
-  customForEach(collect, fn => fn());
-  collect.length = 0;
-  isMounted = true;
+export function triggerMounted(comp: Component) {
+  nextTick(() => {
+    mount.run(comp);
+  })
 }

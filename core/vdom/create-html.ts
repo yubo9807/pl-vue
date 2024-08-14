@@ -2,7 +2,6 @@ import { customForEach, isArray, isFunction, isStrictObject, isString, objectAss
 import { isAssignmentValueToNode, isClassComponent, isComponent, isReactiveChangeAttr, joinClass, noRenderValue } from "./utils";
 import { isFragment } from "./h";
 import { Children, Tree } from "./type";
-import { setLock } from "./hooks/utils";
 
 export type StaticOption = {
 }
@@ -25,10 +24,7 @@ export class Static {
    * @returns 
    */
   renderToString(tree: Tree): string {
-    setLock(true);
-    const html = this.createHTML(tree);
-    setLock(false);
-    return html;
+    return this.createHTML(tree);
   }
 
   /**

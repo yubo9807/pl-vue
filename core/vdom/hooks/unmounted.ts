@@ -3,7 +3,6 @@ import { getSubComponent } from "../../vdom/component-tree";
 import { currentComp } from "../../vdom/instance";
 import { Component } from "../../vdom/type";
 import { keepAliveMap } from "../keep-alive";
-import { hookLock } from "./utils";
 
 const map = new CustomWeakMap();
 
@@ -14,7 +13,6 @@ const map = new CustomWeakMap();
  * @returns 
  */
 export function onUnmounted(fn: Function) {
-  if (hookLock) return;
   const arr = map.get(currentComp) || [];
   const isExist = arr.some(func => func === fn);
   if (isExist) return;
@@ -31,7 +29,7 @@ export function triggerUnmounted(comp: Component) {
   const keys = getSubComponent(comp).map(val => val.comp);
   keys.unshift(comp);
   const funcs = [];
-  customForEach(keys, key => {
+  customForEach(keys.reverse(), key => {
     keepAliveMap.delete(key);
     if (key.prototype) {
       key.prototype.$effect?.stop();

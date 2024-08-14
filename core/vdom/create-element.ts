@@ -3,7 +3,6 @@ import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isCl
 import { isFragment } from "./h";
 import { appendComponentTree, collectComponentTree, removeComponentTree } from './component-tree';
 import { collectExportsData, recordCurrentComp } from "./instance";
-import { triggerBeforeMount } from "./hooks/before-mount";
 import { triggerMounted } from "./hooks/mounted";
 import { triggerBeforeUnmount } from "./hooks/before-unmount";
 import { triggerUnmounted } from "./hooks/unmounted";
@@ -12,6 +11,7 @@ import type { Attrs, Children, Tree, Component, BaseComponent } from "./type";
 import type { effectScope } from '../reactivity';
 import { contextMap } from './context';
 import { keepAliveMap } from './keep-alive';
+import { triggerBeforeMount } from './hooks/before-mount';
 
 export interface StructureOption extends StaticOption {
   binding:     Function
@@ -35,13 +35,7 @@ export class Structure extends Static {
    * @returns 
    */
   render(tree: Tree): HTMLElement {
-    const dom = this.createElement(tree);
-
-    // 执行钩子函数
-    triggerBeforeMount();
-    nextTick(triggerMounted);
-
-    return dom;
+    return this.createElement(tree);
   }
 
   /**
@@ -115,7 +109,9 @@ export class Structure extends Static {
       return createTextNode(tree);
     }
     collectComponentTree(tag, tree);  // 收集组件
+    triggerBeforeMount(tag);
     const node = this.createElement(tree);
+    triggerMounted(tag);
     keepAliveMap.set(tag, node as HTMLElement);
     return node;
   }

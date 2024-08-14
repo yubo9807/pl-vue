@@ -2,7 +2,6 @@ import { CustomWeakMap, customForEach } from "../../utils";
 import { getSubComponent } from "../../vdom/component-tree";
 import { currentComp } from "../../vdom/instance";
 import { Component } from "../../vdom/type";
-import { hookLock } from "./utils";
 
 const map = new CustomWeakMap();
 
@@ -13,7 +12,6 @@ const map = new CustomWeakMap();
  * @returns 
  */
 export function onBeforeUnmount(fn: Function) {
-  if (hookLock) return;
   const arr = map.get(currentComp) || [];
   const isExist = arr.some(func => func === fn);
   if (isExist) return;
