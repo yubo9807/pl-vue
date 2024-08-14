@@ -62,9 +62,9 @@ function watchBasic<T>(source: () => T, cb: WatchCallback<T>, option: WatchOptio
   return result;
 }
 
-export function watch<T>(source: () => T, cb: WatchCallback<T>, option: WatchOption): WatchReturn
-export function watch<T>(source: RefImpl<T>, cb: WatchCallback<T>, option: WatchOption): WatchReturn
-export function watch<T extends object>(source: T, cb: WatchCallback<T>, option: WatchOption): WatchReturn
+export function watch<T>(source: () => T, cb: WatchCallback<T>, option?: WatchOption): WatchReturn
+export function watch<T>(source: RefImpl<T>, cb: WatchCallback<T>, option?: WatchOption): WatchReturn
+export function watch<T extends object>(source: T, cb: WatchCallback<T>, option?: WatchOption): WatchReturn
 /**
  * 侦听器
  * @param source  响应式数据
@@ -72,7 +72,7 @@ export function watch<T extends object>(source: T, cb: WatchCallback<T>, option:
  * @param option  配置参数
  * @returns unwatch() 取消监听
  */
-export function watch<T>(source, cb: WatchCallback<T>, option: WatchOption): WatchReturn {
+export function watch<T>(source, cb: WatchCallback<T>, option?: WatchOption): WatchReturn {
   const newSource = isFunction(source) ? source
     : isRef(source) ? () => source.value
     : () => source;
