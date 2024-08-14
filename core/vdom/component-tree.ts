@@ -1,6 +1,6 @@
 import { deepClone, objectAssign, isObject, customForEach, CustomWeakMap, isEquals, isFunction } from '../utils';
 import { currentComp } from './instance';
-import { Attrs, Children, Component } from './type';
+import { Attrs, Children, Component, Tree } from './type';
 import { isAssignmentValueToNode, isComponent } from './utils';
 
 type CompTree = {
@@ -25,11 +25,9 @@ function filterElement(children: Children, collect: CompTree[] = []) {
     }
     if (!isObject(tree)) return;
     if (isComponent(tree.tag)) {
-      collect.push({ comp: tree.tag, props: objectAssign(tree.attrs, { children }) });
+      collect.push({ comp: tree.tag, props: objectAssign(tree.attrs, { children: tree.children }) });
       customForEach(tree.children, val => {
-        if (isComponent(val)) {
-          collect.push({ comp: val, props: {} });
-        }
+        isComponent(val) && collect.push({ comp: val, props: {} });
       })
     } else if (isAssignmentValueToNode(tree.tag)) {
       filterElement(tree.children, collect);
@@ -65,9 +63,13 @@ export function getSubComponent(comp: Component, collect: CompTree[] = []) {
  * @param tree 
  * @returns 
  */
-export function collectComponentTree(comp: Component, tree: CompTree) {
+export function collectComponentTree(comp: Component, tree: Tree) {
   if (!isObject(tree)) return;
-  compTreeMap.set(comp, filterElement(tree.children));
+  const collect = compTreeMap.get(comp) || [];
+  isComponent(tree.tag)
+    ? collect.push({ comp: tree.tag, props: {} })
+    : collect.push(...filterElement(tree.children));
+  compTreeMap.set(comp, collect);
 }
 
 /**
