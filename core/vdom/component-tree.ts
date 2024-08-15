@@ -44,16 +44,12 @@ function filterElement(children: Children, collect: CompTree[] = []) {
  */
 export function getSubComponent(comp: Component, collect: CompTree[] = []) {
   const arr = compTreeMap.get(comp) || [];
-  function append(tree: CompTree) {
+  customForEach(arr, tree => {
     const some = collect.some(val => isEquals(val, tree));
     if (some) return;
     collect.push(tree);
-  }
-  customForEach(arr, append);
-  customForEach(arr, val => {
-    const arr = getSubComponent(val.comp);
-    customForEach(arr, append);
-  })
+    getSubComponent(tree.comp, collect);
+  });
   return collect;
 }
 
