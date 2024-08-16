@@ -1,4 +1,4 @@
-import { nextTick } from "~/core/utils";
+import { nextTick } from "../../utils";
 import { Component } from "../type";
 import { Mount } from "./common";
 
