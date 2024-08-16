@@ -4,6 +4,7 @@ import { Component, PropsType, h, Fragment, BaseComponent, Children } from "../v
 import { beforeEach, config, currentApp, currentRoute, variable } from "./create-router";
 import { queryRoute } from "./route";
 import { BeforeEnter, PagePropsType } from "./type";
+import { replace } from "./use-router";
 import { formatUrl } from "./utils";
 
 let backupRoute = void 0;  // 旧的 route 信息
@@ -55,6 +56,11 @@ function BrowserRouter(props: BrowserRouterProps) {
       attrs.meta = query.meta;
       attrs.keepAlive = query.keepAlive;
       currentRoute.meta = query.meta;
+    }
+
+    if (query.redirect) {
+      replace(query.redirect);
+      return;
     }
 
     function protect(func: BeforeEnter) {
@@ -213,11 +219,17 @@ function StaticRouter(props: StaticRouterProps) {
  * @returns 
  */
 export function Router(props: BrowserRouterProps & StaticRouterProps) {
-  customForEach(props.children, val => {
+  customForEach(props.children, route => {
+    const { attrs } = route;
+    const { path, component } = attrs;
+
+    // 路由前缀
     if (props.prefix) {
-      val.attrs.path = formatUrl(props.prefix + val.attrs.path);
+      attrs.path = formatUrl(props.prefix + path);
     }
-    val.children = [val.attrs.component];
+
+    // 绑定组件
+    route.children = component ? [component] : [];
   })
   return isBrowser()
     ? <BrowserRouter {...props} />

@@ -1,25 +1,28 @@
 import { AnyObj, customFind } from "../utils"
-import { BaseComponent, KeepAliveValue, PropsType, Tree } from "../vdom"
+import { BaseComponent, KeepAliveValue, Tree } from "../vdom"
 import { config } from "./create-router"
 import { BeforeEnter } from "./type"
 import { formatUrl } from "./utils"
 
-type RouteProps = PropsType<{
-  path:         string
-  exact?:       boolean
-  beforeEnter?: BeforeEnter
+type RoutePropsBase = {
+  path:   string
+  exact?: boolean
+}
+type RoutePorps = RoutePropsBase & {
+  component:    BaseComponent | (() => Promise<BaseComponent>)
   meta?:        AnyObj
-  redirect?:    string
   keepAlive?:   KeepAliveValue
-} & {
-  component: BaseComponent | (() => Promise<BaseComponent>)
-} | {
+  beforeEnter?: BeforeEnter
+}
+type RoutePorpsRedirect = RoutePropsBase & {
   redirect:  string
-}>
-export function Route(props: RouteProps) {}
+}
+export function Route(props: RoutePorps): void
+export function Route(props: RoutePorpsRedirect): void
+export function Route(props) {}
 
 export type RouteItem = Tree & {
-  attrs: RouteProps
+  attrs: RoutePorps
 }
 
 /**
@@ -41,14 +44,12 @@ export function queryRoute(routes: RouteItem[], pathname: string) {
   if (!query) return;
   const { path, component, beforeEnter, meta, redirect, keepAlive } = query.attrs;
 
-  // 重定向
-  if (redirect) return queryRoute(routes, redirect);
-
   return {
     path: formatUrl(path),
     component,
     meta,
     beforeEnter,
     keepAlive,
+    redirect,
   };
 }
