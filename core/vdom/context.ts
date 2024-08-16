@@ -35,11 +35,8 @@ export function createContext<T extends AnyObj>(initial = {} as T) {
     set.forEach(comp => {
       // 检查是否为 provide 添加数据时组件的子组件。保证单项数据流
       const child = getSubComponent(comp);
-      const index = child.findIndex(c => c.comp === currentComp);
-      if (index < 0) {
-        remove(comp);  // 将添加的数据移除
-        return;
-      }
+      const bool = child.some(c => c.comp === currentComp);
+      if (!bool) return;
 
       const data = contextMap.get(comp);
       if (!data) {
