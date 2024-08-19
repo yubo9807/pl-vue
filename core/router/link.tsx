@@ -14,7 +14,7 @@ type LinkProps = PropsType<{
   [K in keyof HTMLAnchorElement]?: any
 }
 export function Link(props: LinkProps) {
-  const { to, type, className, children, onClick, ...args } = props;
+  const { to, type, className, children, onClick, ref, keepAlive, ...args } = props;
 
   const route = useRoute();
 

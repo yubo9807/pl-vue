@@ -160,6 +160,11 @@ function StaticRouter(props: StaticRouterProps) {
     return Comp ? <Comp /> : <></>;
   }
 
+  // 重定向
+  if (query.redirect) {
+    query = routeChange(query.redirect);
+  }
+
   query = query as ReturnType<typeof queryRoute>;
   let Comp = query.component;
   currentRoute.path = query.path;
