@@ -8,4 +8,6 @@ import keepAlive from './pages/keep-alive';
 import store from './pages/store';
 import router from './pages/router';
 
+import unmount from './pages/unmount';
+
 export default reactivity;

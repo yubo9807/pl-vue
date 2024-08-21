@@ -35,7 +35,26 @@ function Comp() {
     console.log('onUnmounted', getEl());  //--> onUnmounted  null
   });
 
-  return <span id="demo">hello</span>
+  return <span id="demo">
+    hello
+    <Sun />
+  </span>
+}
+
+export function Sun() {
+  onBeforeMount(() => {
+    console.log('------ sun onBeforeMount');
+  })
+  onMounted(() => {
+    console.log('------ sun onMounted');
+  })
+  onBeforeUnmount(() => {
+    console.log('------ sun onBeforeUnmount');
+  })
+  onUnmounted(() => {
+    console.log('------ sun onUnmounted');
+  })
+  return <h1>sun</h1>
 }
 
 export default App
