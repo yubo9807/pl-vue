@@ -1,6 +1,6 @@
-import { isFunction, len } from "../utils";
+import { cloneFunction, createId, isFunction, len } from "../utils";
 import { Attrs, Children, Tag } from "./type";
-import { isComponent } from "./utils";
+import { getCompId, isComponent } from "./utils";
 
 export function h(tag: Tag, attrs: Attrs, ...children: Children) {
   const tree = {
@@ -10,7 +10,12 @@ export function h(tag: Tag, attrs: Attrs, ...children: Children) {
   }
 
   // 对组件做一些处理
-  if (isComponent(tree.tag)) {
+  if (isComponent(tag)) {
+    tag.prototype ||= {};
+    tag.prototype.$id ||= createId();
+    tree.tag = cloneFunction(tag);
+    tree.tag.prototype.$id = getCompId(tag);
+
     // 高阶组件 props 传递
     if (len(tree.children) === 0 && tree.attrs.children) {
       tree.children = tree.attrs.children;

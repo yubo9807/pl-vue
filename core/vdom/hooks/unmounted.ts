@@ -2,7 +2,6 @@ import { CustomWeakMap, customForEach } from "../../utils";
 import { getSubComponent } from "../../vdom/component-tree";
 import { currentComp } from "../../vdom/instance";
 import { Component } from "../../vdom/type";
-import { keepAliveMap } from "../keep-alive";
 
 const map = new CustomWeakMap();
 
@@ -24,16 +23,14 @@ export function onUnmounted(fn: Function) {
 /**
  * 执行对应的 onUnmounted 钩子
  * @param comp 组件名
+ * @param itemFunc 卸载每个组件时其他操作
  */
-export function triggerUnmounted(comp: Component) {
+export function triggerUnmounted(comp: Component, itemFunc: (comp: Component) => void) {
   const keys = getSubComponent(comp).map(val => val.comp);
   keys.unshift(comp);
   const funcs = [];
   customForEach(keys.reverse(), key => {
-    keepAliveMap.delete(key);
-    if (key.prototype) {
-      key.prototype.$effect?.stop();
-    }
+    itemFunc(key);
     const arr = map.get(key) || [];
     funcs.push(...arr);
     map.delete(key);

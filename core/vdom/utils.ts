@@ -47,6 +47,15 @@ export function isClassComponent(comp: Component) {
 }
 
 /**
+ * 获取组件 id
+ * @param comp 
+ * @returns 
+ */
+export function getCompId(comp: Component) {
+  return comp.prototype.$id;
+}
+
+/**
  * 不进行渲染的值
  * @param value 
  * @returns 

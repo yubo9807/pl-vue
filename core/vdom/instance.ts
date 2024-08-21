@@ -4,7 +4,7 @@ import { Attrs, Component } from "./type";
 
 export let currentComp: Component = null;
 /**
- * 收集实例数据
+ * 记录当前组件
  * @param comp 
  * @param attrs 
  * @param children 

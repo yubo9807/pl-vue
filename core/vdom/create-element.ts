@@ -1,4 +1,4 @@
-import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, nextTick, len, isEquals, isStrictObject, binarySearch, customFindIndex, CustomWeakMap } from '../utils';
+import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, len, isEquals, isStrictObject, binarySearch, customFindIndex } from '../utils';
 import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
 import { appendComponentTree, collectComponentTree, removeComponentTree } from './component-tree';
@@ -10,7 +10,7 @@ import { Static, StaticOption } from "./create-html";
 import type { Attrs, Children, Tree, Component, BaseComponent } from "./type";
 import type { effectScope } from '../reactivity';
 import { contextMap } from './context';
-import { keepAliveMap } from './keep-alive';
+import { KeepAlive } from './keep-alive';
 import { triggerBeforeMount } from './hooks/before-mount';
 
 export interface StructureOption extends StaticOption {
@@ -58,11 +58,12 @@ export class Structure extends Static {
     }
 
     // 组件
-    if (isComponent(tag)) {  
+    if (isComponent(tag)) {
       return this.createComponent(tag, attrs, children);
     }
   }
 
+  #keepAlive = new KeepAlive();
   /**
    * 组件缓存属性判断
    * @param attrs 
@@ -82,14 +83,16 @@ export class Structure extends Static {
    */
   createComponent(tag: Component, attrs: Attrs, children: Children) {
     if (this.#hasKeepAlive(attrs)) {
-      if (keepAliveMap.has(tag)) return keepAliveMap.get(tag);
+      const comp = this.#keepAlive.get(tag);
+      if (comp) return comp;
     } else {
-      keepAliveMap.delete(tag);
+      this.#keepAlive.del(tag);
     }
 
     recordCurrentComp(tag);
 
     // 类组件
+    const origin = tag;
     if (isClassComponent(tag)) {
       // @ts-ignore
       const t = new tag({ ...attrs, children });
@@ -101,9 +104,7 @@ export class Structure extends Static {
     // const tree = (tag as BaseComponent)(props);
     const effect = this.#effectScope();
     const tree = effect.run(() => (tag as BaseComponent)(props));
-    if (tag.prototype) {
-      tag.prototype.$effect = effect;
-    }
+    origin.prototype.$effect = effect;
     collectExportsData(tag, attrs);
     if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
       return createTextNode(tree);
@@ -112,7 +113,9 @@ export class Structure extends Static {
     triggerBeforeMount(tag);
     const node = this.createElement(tree);
     triggerMounted(tag);
-    keepAliveMap.set(tag, node as HTMLElement);
+    if (this.#hasKeepAlive(attrs)) {
+      this.#keepAlive.set(origin, node);
+    }
     return node;
   }
 
@@ -409,7 +412,10 @@ export class Structure extends Static {
    */
   #afterUnload(comp: Component) {
     contextMap.delete(comp);
-    triggerUnmounted(comp);
+    triggerUnmounted(comp, val => {
+      this.#keepAlive.del(val);
+      val.prototype.$effect.stop();
+    });
     removeComponentTree(comp);
   }
 
