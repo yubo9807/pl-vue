@@ -24,6 +24,14 @@ function isType(o) {
     return Object.prototype.toString.call(o).slice(8, -1);
 }
 /**
+ * 函数是否是为类声明
+ * @param func
+ * @returns
+ */
+function isClass(func) {
+    return func.toString().slice(0, 5) === 'class';
+}
+/**
  * 是否属于自己的属性
  * @param target
  * @param key
@@ -135,11 +143,7 @@ function deepClone(origin, extend = {}) {
     const noCloneTypes = ['Null', 'Regexp', 'Date', 'WeakSet', 'WeakMap'];
     const specialClone = Object.assign({
         Function(func) {
-            const newFunc = function (...args) {
-                return func.apply(this, args);
-            };
-            newFunc.prototype = _deepClone(func.prototype);
-            return newFunc;
+            return cloneFunction(func);
         },
         Set(set) {
             const collect = new Set();
@@ -185,6 +189,29 @@ function deepClone(origin, extend = {}) {
         return target;
     }
     return _deepClone(origin);
+}
+/**
+ * 拷贝函数（包含类）
+ * @param fn
+ * @returns
+ */
+function cloneFunction(fn) {
+    if (isClass(fn)) {
+        // 类
+        return class extends fn {
+            constructor(...args) {
+                super(...args);
+            }
+        };
+    }
+    // 普通函数
+    const newFn = function (...args) {
+        return fn.apply(this, args);
+    };
+    const { prototype } = fn;
+    if (prototype)
+        newFn.prototype = prototype;
+    return newFn;
 }
 // #region
 
