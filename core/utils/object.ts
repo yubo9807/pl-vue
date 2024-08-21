@@ -1,6 +1,6 @@
 import { CustomWeakMap } from "./class";
-import { isArray, isBrowser, isType } from "./judge";
-import { AnyObj } from "./type";
+import { isArray, isBrowser, isClass, isType } from "./judge";
+import { AnyObj, WideClass } from "./type";
 
 /**
  * 深度克隆
@@ -13,11 +13,7 @@ export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {
 	
 	const specialClone = Object.assign({
 		Function(func: Function) {
-			const newFunc = function(...args) {
-				return func.apply(this, args);
-			}
-			newFunc.prototype = _deepClone(func.prototype);
-			return newFunc;
+			return cloneFunction(func);
 		},
 		Set(set: Set<any>) {
 			const collect = new Set();
@@ -70,6 +66,30 @@ export function deepClone<T>(origin: T, extend: Record<string, (val) => any> = {
 	}
 
 	return _deepClone(origin);
+}
+
+/**
+ * 拷贝函数（包含类）
+ * @param fn 
+ * @returns 
+ */
+export function cloneFunction<F extends Function>(fn: F) {
+	if (isClass(fn)) {
+		// 类
+		return class extends fn {
+			constructor(...args) {
+				super(...args);
+			}
+		}
+	}
+
+	// 普通函数
+	const newFn = function (...args) {
+    return fn.apply(this, args);
+  }
+	const { prototype } = fn;
+  if (prototype) newFn.prototype = prototype;
+  return newFn;
 }
 
 
