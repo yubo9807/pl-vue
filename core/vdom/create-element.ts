@@ -1,4 +1,4 @@
-import { AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, len, isEquals, isStrictObject, binarySearch, customFindIndex, cloneFunction } from '../utils';
+import { AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, len, isEquals, isStrictObject, binarySearch, customFindIndex, cloneFunction, objectAssign } from '../utils';
 import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
 import { appendComponentTree, collectComponentTree, removeComponentTree } from './component-tree';
@@ -84,9 +84,8 @@ export class Structure extends Static {
    */
   createComponent(tree) {
     const { tag, attrs, children } = tree;
-    attrs.children = children;
 
-    if (compSoleSet.has(tag)) {
+    if (compSoleSet.has(tag) || tag.prototype.$clone) {
       tree.tag = cloneFunction(tag);
     }
 
@@ -102,18 +101,19 @@ export class Structure extends Static {
     }
 
     recordCurrentComp(originComp);
+    const props = { ...attrs, children }
 
     // 类组件
     let comp = originComp as BaseComponent;
     if (isClassComponent(comp)) {
       // @ts-ignore
-      const t = new comp(attrs);
+      const t = new comp(props);
       comp = t.render.bind(t);
     }
 
     // 组件
     const effect = this.#effectScope();       // 侦听器执行域
-    const newTree = effect.run(() => comp(attrs));
+    const newTree = effect.run(() => comp(props));
     originComp.prototype.$effect = effect;
 
     collectExportsData(comp, attrs);          // 组件导出数据

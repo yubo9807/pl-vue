@@ -240,6 +240,7 @@ export function Router(props: BrowserRouterProps & StaticRouterProps) {
     ? <BrowserRouter {...props} />
     : <StaticRouter {...props} />
 }
+Router.prototype.$clone = true;
 
 
 /**

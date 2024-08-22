@@ -7,6 +7,7 @@ function App() {
       <Link to='/'>home</Link>
       <Link to='/about'>about</Link>
       <Link to='/child'>child</Link>
+      <Link to='/child2'>child2</Link>
       <Link to='/redirect'>redirect</Link>
     </nav>
     <Router notFound={NotFound}>
@@ -16,6 +17,7 @@ function App() {
         next();
       }} />
       <Route path="/child" component={Child} exact={false} />
+      <Route path="/child2" component={Child2} exact={false} />
       <Route path="/redirect" redirect="/about" />
     </Router>
   </>
@@ -51,6 +53,20 @@ function Child(props: PagePropsType) {
     </Router>
   </div>
 }
+function Child2(props: PagePropsType) {
+  return <div>
+    Child
+    <nav>
+      <Link to='/child2/aaa'>aaa</Link>
+      <Link to='/child2/bbb'>bbb</Link>
+    </nav>
+    <Router prefix={props.path}>
+      <Route path="" redirect={`${props.path}/aaa`} />
+      <Route path='/aaa' component={Ccc} />
+      <Route path='/bbb' component={Ddd} />
+    </Router>
+  </div>
+}
 
 function Aaa() {
   return <div>Aaa</div>
@@ -58,6 +74,14 @@ function Aaa() {
 
 function Bbb() {
   return <div>Bbb</div>
+}
+
+function Ccc() {
+  return <div>Ccc</div>
+}
+
+function Ddd() {
+  return <div>Ddd</div>
 }
 
 export default App;
