@@ -3,6 +3,11 @@ import { customForEach, CustomWeakMap } from "../../utils";
 import { currentComp } from "../instance";
 import { Component } from "../type";
 
+/**
+ * 需要保证唯一性的组件（引用地址不能相同）
+ */
+export const compSoleSet = new WeakSet<Component>();
+
 export class Mount {
   #map: WeakMap<Component, Function[]> = new CustomWeakMap();
   constructor() {}

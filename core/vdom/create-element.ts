@@ -1,4 +1,4 @@
-import { objectAssign, AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, len, isEquals, isStrictObject, binarySearch, customFindIndex } from '../utils';
+import { AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, len, isEquals, isStrictObject, binarySearch, customFindIndex, cloneFunction } from '../utils';
 import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
 import { appendComponentTree, collectComponentTree, removeComponentTree } from './component-tree';
@@ -12,6 +12,7 @@ import type { effectScope } from '../reactivity';
 import { contextMap } from './context';
 import { KeepAlive } from './keep-alive';
 import { triggerBeforeMount } from './hooks/before-mount';
+import { compSoleSet } from './hooks/common';
 
 export interface StructureOption extends StaticOption {
   binding:     Function
@@ -59,7 +60,7 @@ export class Structure extends Static {
 
     // 组件
     if (isComponent(tag)) {
-      return this.createComponent(tag, attrs, children);
+      return this.createComponent(tree);
     }
   }
 
@@ -81,41 +82,56 @@ export class Structure extends Static {
    * @param children 
    * @returns 
    */
-  createComponent(tag: Component, attrs: Attrs, children: Children) {
-    if (this.#hasKeepAlive(attrs)) {
-      const comp = this.#keepAlive.get(tag);
-      if (comp) return comp;
-    } else {
-      this.#keepAlive.del(tag);
+  createComponent(tree) {
+    const { tag, attrs, children } = tree;
+    attrs.children = children;
+
+    if (compSoleSet.has(tag)) {
+      tree.tag = cloneFunction(tag);
     }
 
-    recordCurrentComp(tag);
+    // 原始组件对象
+    const originComp = tree.tag;
+
+    // 缓存组件
+    if (this.#hasKeepAlive(attrs)) {
+      const node = this.#keepAlive.get(originComp);
+      if (node) return node;
+    } else {
+      this.#keepAlive.del(originComp);
+    }
+
+    recordCurrentComp(originComp);
 
     // 类组件
-    const origin = tag;
-    if (isClassComponent(tag)) {
+    let comp = originComp as BaseComponent;
+    if (isClassComponent(comp)) {
       // @ts-ignore
-      const t = new tag({ ...attrs, children });
-      tag = t.render.bind(t);
+      const t = new comp(attrs);
+      comp = t.render.bind(t);
     }
 
     // 组件
-    const props = objectAssign(attrs, { children });
-    // const tree = (tag as BaseComponent)(props);
-    const effect = this.#effectScope();
-    const tree = effect.run(() => (tag as BaseComponent)(props));
-    origin.prototype.$effect = effect;
-    collectExportsData(tag, attrs);
-    if (isAssignmentValueToNode(tree)) {  // 可能直接返回字符串数字
-      return createTextNode(tree);
+    const effect = this.#effectScope();       // 侦听器执行域
+    const newTree = effect.run(() => comp(attrs));
+    originComp.prototype.$effect = effect;
+
+    collectExportsData(comp, attrs);          // 组件导出数据
+
+    if (isAssignmentValueToNode(newTree)) {
+      return createTextNode(newTree);
     }
-    collectComponentTree(tag, tree);  // 收集组件
-    triggerBeforeMount(tag);
-    const node = this.createElement(tree);
-    triggerMounted(tag);
+
+    collectComponentTree(comp, newTree);      // 收集组件树
+
+    triggerBeforeMount(comp);                 // 挂载前钩子
+    const node = this.createElement(newTree);
+    triggerMounted(comp);                     // 挂载后钩子
+
     if (this.#hasKeepAlive(attrs)) {
-      this.#keepAlive.set(origin, node);
+      this.#keepAlive.set(originComp, node);  // 设置缓存组件
     }
+
     return node;
   }
 
@@ -235,7 +251,7 @@ export class Structure extends Static {
 
     // 组件
     if (isComponent(value.tag)) {
-      return this.createComponent(value.tag, value.attrs, value.children);
+      return this.createComponent(value);
     }
   }
 

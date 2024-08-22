@@ -2,6 +2,7 @@ import { CustomWeakMap, customForEach } from "../../utils";
 import { getSubComponent } from "../../vdom/component-tree";
 import { currentComp } from "../../vdom/instance";
 import { Component } from "../../vdom/type";
+import { compSoleSet } from "./common";
 
 const map = new CustomWeakMap();
 
@@ -16,6 +17,7 @@ export function onUnmounted(fn: Function) {
   const isExist = arr.some(func => func === fn);
   if (isExist) return;
 
+  compSoleSet.add(currentComp);
   arr.push(fn);
   map.set(currentComp, arr);
 }
