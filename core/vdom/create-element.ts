@@ -84,9 +84,12 @@ export class Structure extends Static {
    */
   createComponent(tree) {
     const { tag, attrs, children } = tree;
+    tag.prototype.$effect ??= this.#effectScope();  // 添加侦听器执行域
 
-    if (compSoleSet.has(tag) || tag.prototype.$clone) {
-      tree.tag = cloneFunction(tag);
+    const { $clone, $effect } = tag.prototype;
+
+    if ($clone || compSoleSet.has(tag)) {
+      tree.tag = cloneFunction(tag, true);
     }
 
     // 原始组件对象
@@ -112,9 +115,7 @@ export class Structure extends Static {
     }
 
     // 组件
-    const effect = this.#effectScope();       // 侦听器执行域
-    const newTree = effect.run(() => comp(props));
-    originComp.prototype.$effect = effect;
+    const newTree = $effect ? $effect.run(() => comp(props)) : comp(props);
 
     collectExportsData(comp, attrs);          // 组件导出数据
 
@@ -430,7 +431,8 @@ export class Structure extends Static {
     contextMap.delete(comp);
     triggerUnmounted(comp, val => {
       this.#keepAlive.del(val);
-      val.prototype.$effect.stop();
+      const { $effect } = val.prototype;
+      $effect && $effect.stop();
     });
     removeComponentTree(comp);
   }
