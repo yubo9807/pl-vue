@@ -143,7 +143,7 @@ function deepClone(origin, extend = {}) {
     const noCloneTypes = ['Null', 'Regexp', 'Date', 'WeakSet', 'WeakMap'];
     const specialClone = Object.assign({
         Function(func) {
-            return cloneFunction(func);
+            return cloneFunction(func, true);
         },
         Set(set) {
             const collect = new Set();
@@ -195,7 +195,7 @@ function deepClone(origin, extend = {}) {
  * @param fn
  * @returns
  */
-function cloneFunction(fn) {
+function cloneFunction(fn, deep = false) {
     if (isClass(fn)) {
         // 类
         return class extends fn {
@@ -209,8 +209,9 @@ function cloneFunction(fn) {
         return fn.apply(this, args);
     };
     const { prototype } = fn;
-    if (prototype)
-        newFn.prototype = prototype;
+    if (prototype) {
+        newFn.prototype = deep ? deepClone(prototype) : prototype;
+    }
     return newFn;
 }
 // #region
