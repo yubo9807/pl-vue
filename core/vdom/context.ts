@@ -1,4 +1,4 @@
-import { AnyObj, CustomWeakMap } from "../utils";
+import { AnyObj, CustomWeakMap, throwError } from "../utils";
 import { getSubComponent } from "./component-tree";
 import { currentComp } from "./instance";
 import { Component } from "./type";
@@ -77,5 +77,5 @@ export function createContext<T extends AnyObj>(initial = {} as T) {
 }
 
 function thorwError(name: string) {
-  throw new Error(`${name} unable to get the current component`);
+  throwError(`${name} unable to get the current component`);
 }

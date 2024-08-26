@@ -14,6 +14,14 @@ export function printWarn(...msg: any[]) {
 }
 
 /**
+ * 错误信息
+ * @param msg 
+ */
+export function throwError(msg: string) {
+  throw new Error(msg);
+}
+
+/**
  * 获取字符串或数组的长度
  * @param o 
  * @returns 

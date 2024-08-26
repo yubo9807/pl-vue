@@ -1,5 +1,5 @@
-import { customForEach, isArray, isFunction, isStrictObject, isString, objectAssign, printWarn } from "../utils";
-import { isAssignmentValueToNode, isClassComponent, isComponent, isReactiveChangeAttr, joinClass, noRenderValue } from "./utils";
+import { customForEach, isArray, isClass, isFunction, isStrictObject, isString, objectAssign, printWarn } from "../utils";
+import { isAssignmentValueToNode, isComponent, isReactiveChangeAttr, joinClass, noRenderValue } from "./utils";
 import { isFragment } from "./h";
 import { Children, Tree } from "./type";
 
@@ -43,7 +43,7 @@ export class Static {
 
     // 组件
     if (isComponent(tag)) {
-      if (isClassComponent(tag)) {
+      if (isClass(tag)) {
         // @ts-ignore
         const t = new tag({ ...attrs, children });
         return this.createHTML(t.render.bind(t));

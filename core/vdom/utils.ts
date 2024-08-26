@@ -1,4 +1,4 @@
-import { customForEach, isClass, isFunction, isObject, isStrictObject, isString } from "../utils";
+import { customForEach, isFunction, isStrictObject, isString } from "../utils";
 import { isFragment } from "./h";
 import { Component } from "./type";
 
@@ -35,15 +35,6 @@ export function isRealNode(o) {
  */
 export function isComponent(tag): tag is Component {
   return isFunction(tag) && !isFragment(tag);
-}
-
-/**
- * 是否为一个类声明组件
- * @param o 
- * @returns 
- */
-export function isClassComponent(comp: Component) {
-  return isClass(comp) && comp.prototype && comp.prototype.render;
 }
 
 /**

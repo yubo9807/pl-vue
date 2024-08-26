@@ -1,5 +1,5 @@
-import { AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, len, isEquals, isStrictObject, binarySearch, customFindIndex, cloneFunction, objectAssign } from '../utils';
-import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isClassComponent, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
+import { AnyObj, isFunction, isObject, isString, customForEach, isArray, printWarn, len, isEquals, isStrictObject, binarySearch, customFindIndex, cloneFunction, objectAssign, isClass, throwError } from '../utils';
+import { isAssignmentValueToNode, isComponent, createTextNode, appendChild, isRealNode, noRenderValue, joinClass, isReactiveChangeAttr } from "./utils"
 import { isFragment } from "./h";
 import { appendComponentTree, collectComponentTree, removeComponentTree } from './component-tree';
 import { collectExportsData, recordCurrentComp } from "./instance";
@@ -108,9 +108,12 @@ export class Structure extends Static {
 
     // 类组件
     let comp = originComp as BaseComponent;
-    if (isClassComponent(comp)) {
+    if (isClass(comp)) {
       // @ts-ignore
       const t = new comp(props);
+      if (!isFunction(t.render)) {
+        throwError(`Class component must have 'render' method`);
+      }
       comp = t.render.bind(t);
     }
 
